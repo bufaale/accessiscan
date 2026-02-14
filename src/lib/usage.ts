@@ -19,11 +19,17 @@ export async function getMonthlyScanCount(userId: string): Promise<number> {
 export async function checkScanLimit(
   userId: string,
   subscriptionPlan: string,
+  scanType: "quick" | "deep" = "quick",
 ): Promise<{ allowed: boolean; used: number; limit: number; canDeepScan: boolean }> {
   const plan = pricingPlans.find((p) => p.id === subscriptionPlan) ?? pricingPlans[0];
   const limit = plan.limits.scansPerMonth;
   const canDeepScan = plan.limits.canDeepScan;
   const used = await getMonthlyScanCount(userId);
+
+  // Check if deep scan is allowed
+  if (scanType === "deep" && !canDeepScan) {
+    return { allowed: false, used, limit, canDeepScan };
+  }
 
   // -1 means unlimited
   if (limit === -1) {

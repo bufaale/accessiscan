@@ -1,0 +1,145 @@
+import { NextRequest, NextResponse } from "next/server";
+import { createClient } from "@/lib/supabase/server";
+import { checkScanLimit } from "@/lib/usage";
+import { z } from "zod";
+
+const createScanSchema = z.object({
+  url: z.string(),
+  scan_type: z.enum(["quick", "deep"]).default("quick"),
+});
+
+// POST: Create a new scan
+export async function POST(req: NextRequest) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  const body = await req.json();
+  const validation = createScanSchema.safeParse(body);
+
+  if (!validation.success) {
+    return NextResponse.json({ error: "Invalid request data" }, { status: 400 });
+  }
+
+  const { url, scan_type } = validation.data;
+
+  // Validate URL
+  let parsedUrl: URL;
+  try {
+    // Auto-add https if missing
+    let fullUrl = url.trim();
+    if (!fullUrl.startsWith("http://") && !fullUrl.startsWith("https://")) {
+      fullUrl = `https://${fullUrl}`;
+    }
+    parsedUrl = new URL(fullUrl);
+    if (!["http:", "https:"].includes(parsedUrl.protocol)) {
+      throw new Error("Invalid protocol");
+    }
+  } catch {
+    return NextResponse.json({ error: "Please enter a valid URL (e.g., https://example.com)" }, { status: 400 });
+  }
+
+  // Get user profile for subscription plan
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("subscription_plan")
+    .eq("id", user.id)
+    .single();
+
+  const subscriptionPlan = profile?.subscription_plan ?? "free";
+
+  // Check usage limits
+  const usage = await checkScanLimit(user.id, subscriptionPlan, scan_type);
+
+  // Check if deep scan is allowed
+  if (scan_type === "deep" && !usage.canDeepScan) {
+    return NextResponse.json({
+      error: "Deep scans are not available on your current plan. Upgrade to Pro to unlock deep scans.",
+      usage,
+    }, { status: 403 });
+  }
+
+  if (!usage.allowed) {
+    return NextResponse.json({
+      error: "Monthly scan limit reached. Upgrade your plan for more scans.",
+      usage,
+    }, { status: 429 });
+  }
+
+  const domain = parsedUrl.hostname;
+
+  // Find or create site
+  let { data: site } = await supabase
+    .from("sites")
+    .select("id")
+    .eq("user_id", user.id)
+    .eq("domain", domain)
+    .single();
+
+  if (!site) {
+    const { data: newSite } = await supabase
+      .from("sites")
+      .insert({ user_id: user.id, domain, name: domain })
+      .select("id")
+      .single();
+    site = newSite;
+  }
+
+  // Create scan record (worker will pick it up)
+  const { data: scan, error } = await supabase
+    .from("scans")
+    .insert({
+      user_id: user.id,
+      site_id: site?.id,
+      url: parsedUrl.toString(),
+      domain,
+      scan_type,
+      status: "pending",
+      progress: 0,
+    })
+    .select("id")
+    .single();
+
+  if (error) {
+    return NextResponse.json({ error: "Failed to create scan" }, { status: 500 });
+  }
+
+  return NextResponse.json({ scanId: scan.id, usage: { used: usage.used + 1, limit: usage.limit } });
+}
+
+// GET: List user's scans
+export async function GET(req: NextRequest) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  const searchParams = req.nextUrl.searchParams;
+  const page = parseInt(searchParams.get("page") ?? "1");
+  const limit = Math.min(parseInt(searchParams.get("limit") ?? "10"), 50);
+  const offset = (page - 1) * limit;
+  const domain = searchParams.get("domain");
+
+  let query = supabase
+    .from("scans")
+    .select("*", { count: "exact" })
+    .eq("user_id", user.id)
+    .order("created_at", { ascending: false })
+    .range(offset, offset + limit - 1);
+
+  if (domain) {
+    query = query.eq("domain", domain);
+  }
+
+  const { data: scans, count, error } = await query;
+
+  if (error) {
+    return NextResponse.json({ error: "Failed to fetch scans" }, { status: 500 });
+  }
+
+  return NextResponse.json({
+    scans: scans ?? [],
+    total: count ?? 0,
+    page,
+    totalPages: Math.ceil((count ?? 0) / limit),
+  });
+}
