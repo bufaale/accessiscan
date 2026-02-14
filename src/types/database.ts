@@ -98,15 +98,4 @@ export interface Subscription {
   updated_at: string;
 }
 
-export type Database = {
-  public: {
-    Tables: {
-      profiles: { Row: Profile };
-      sites: { Row: Site };
-      scans: { Row: Scan };
-      scan_issues: { Row: ScanIssue };
-      scan_pages: { Row: ScanPage };
-      subscriptions: { Row: Subscription };
-    };
-  };
-};
+export type Database = any;
