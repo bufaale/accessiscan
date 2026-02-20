@@ -44,10 +44,27 @@ export interface Scan {
   minor_count: number;
   ai_summary: string | null;
   ai_recommendations: Recommendation[] | null;
+  visual_score: number | null;
+  visual_issues_count: number;
+  visual_ai_summary: string | null;
   raw_data: unknown;
   error_message: string | null;
   created_at: string;
   completed_at: string | null;
+}
+
+export interface ScanVisualIssue {
+  id: string;
+  scan_id: string;
+  category: string;
+  severity: "critical" | "serious" | "moderate" | "minor";
+  title: string;
+  description: string;
+  wcag_criteria: string | null;
+  location: string | null;
+  recommendation: string;
+  position: number;
+  created_at: string;
 }
 
 export interface Recommendation {

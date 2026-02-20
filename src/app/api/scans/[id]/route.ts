@@ -28,6 +28,13 @@ export async function GET(
     .eq("scan_id", id)
     .order("position", { ascending: true });
 
+  // Get visual issues
+  const { data: visualIssues } = await supabase
+    .from("scan_visual_issues")
+    .select("*")
+    .eq("scan_id", id)
+    .order("position", { ascending: true });
+
   // Get pages if deep scan
   let pages = null;
   if (scan.scan_type === "deep") {
@@ -42,6 +49,7 @@ export async function GET(
   return NextResponse.json({
     ...scan,
     scan_issues: issues ?? [],
+    scan_visual_issues: visualIssues ?? [],
     scan_pages: pages,
   });
 }

@@ -9,15 +9,29 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import {
   Search, FileText, Download, RefreshCw, Loader2, ArrowLeft,
-  CheckCircle, AlertTriangle, AlertCircle, Info,
+  CheckCircle, AlertTriangle, AlertCircle, Info, Eye,
   Globe, Shield, Copy, Check, Sparkles, ExternalLink, Code,
 } from "lucide-react";
-import type { Scan, ScanIssue, ScanPage } from "@/types/database";
+import type { Scan, ScanIssue, ScanPage, ScanVisualIssue } from "@/types/database";
 
 interface ScanWithDetails extends Scan {
   scan_issues: ScanIssue[];
+  scan_visual_issues: ScanVisualIssue[];
   scan_pages: ScanPage[] | null;
 }
+
+const categoryConfig: Record<string, { label: string; emoji: string; color: string }> = {
+  contrast: { label: "Contrast", emoji: "🎨", color: "text-orange-500" },
+  "text-readability": { label: "Readability", emoji: "📖", color: "text-blue-500" },
+  "touch-targets": { label: "Touch Targets", emoji: "👆", color: "text-purple-500" },
+  "color-only": { label: "Color Only", emoji: "🔴", color: "text-red-500" },
+  "visual-hierarchy": { label: "Hierarchy", emoji: "📐", color: "text-indigo-500" },
+  "image-text": { label: "Image Text", emoji: "🖼️", color: "text-pink-500" },
+  "form-labeling": { label: "Form Labels", emoji: "📝", color: "text-teal-500" },
+  spacing: { label: "Spacing", emoji: "↔️", color: "text-cyan-500" },
+  "focus-indicators": { label: "Focus", emoji: "🎯", color: "text-yellow-500" },
+  animation: { label: "Animation", emoji: "🎬", color: "text-green-500" },
+};
 
 const severityConfig: Record<ScanIssue["severity"], {
   label: string;
@@ -286,11 +300,11 @@ export default function ScanResultsPage({ params }: { params: Promise<{ id: stri
       </div>
 
       {/* Score Overview */}
-      <div className="grid gap-4 md:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-5">
         <Card className="flex items-center justify-center py-6">
           <div className="text-center">
             <ScoreGauge score={scan.compliance_score} size="lg" />
-            <p className="mt-2 text-sm font-medium">Compliance Score</p>
+            <p className="mt-2 text-sm font-medium">Code Analysis</p>
           </div>
         </Card>
         <Card>
@@ -312,6 +326,16 @@ export default function ScanResultsPage({ params }: { params: Promise<{ id: stri
             <Shield className="h-6 w-6 mb-2 text-purple-600" />
             <ScoreGauge score={scan.level_aaa_score} size="sm" />
             <p className="mt-2 text-sm font-medium">Level AAA</p>
+          </CardContent>
+        </Card>
+        <Card className={scan.visual_score !== null ? "border-violet-200 dark:border-violet-800" : ""}>
+          <CardContent className="flex flex-col items-center justify-center py-6">
+            <Eye className="h-6 w-6 mb-2 text-violet-600" />
+            <ScoreGauge score={scan.visual_score} size="sm" />
+            <p className="mt-2 text-sm font-medium">Visual AI</p>
+            {scan.visual_score === null && subscriptionPlan === "free" && (
+              <Badge variant="secondary" className="mt-1 text-[10px]">Pro</Badge>
+            )}
           </CardContent>
         </Card>
       </div>
@@ -361,6 +385,77 @@ export default function ScanResultsPage({ params }: { params: Promise<{ id: stri
               Get AI-powered executive summaries and fix suggestions
             </p>
             <Button onClick={() => router.push("/pricing")}>Upgrade Now</Button>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Visual AI Analysis */}
+      {scan.scan_visual_issues && scan.scan_visual_issues.length > 0 ? (
+        <Card className="border-violet-200 dark:border-violet-800 bg-violet-50/50 dark:bg-violet-950/20">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <Eye className="h-5 w-5 text-violet-600" /> Visual AI Analysis
+              <Badge className="bg-violet-600 text-white text-[10px]">NEW</Badge>
+            </CardTitle>
+            {scan.visual_ai_summary && (
+              <CardDescription className="text-sm leading-relaxed">
+                {scan.visual_ai_summary}
+              </CardDescription>
+            )}
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {scan.scan_visual_issues.map((issue) => {
+                const cat = categoryConfig[issue.category] || { label: issue.category, emoji: "🔍", color: "text-gray-500" };
+                const sev = severityConfig[issue.severity];
+                const SevIcon = sev.icon;
+                return (
+                  <div key={issue.id} className="flex items-start gap-3 p-3 rounded-lg bg-white dark:bg-gray-900 border">
+                    <SevIcon className={`h-5 w-5 mt-0.5 shrink-0 ${sev.color}`} />
+                    <div className="flex-1 space-y-1">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="font-medium text-sm">{issue.title}</span>
+                        <Badge className={sev.badgeClass}>{sev.label}</Badge>
+                        <Badge variant="outline" className="text-[10px]">
+                          {cat.emoji} {cat.label}
+                        </Badge>
+                      </div>
+                      <p className="text-sm text-muted-foreground">{issue.description}</p>
+                      {issue.wcag_criteria && (
+                        <p className="text-xs text-muted-foreground">
+                          <strong>WCAG:</strong> {issue.wcag_criteria}
+                        </p>
+                      )}
+                      {issue.location && (
+                        <p className="text-xs text-muted-foreground">
+                          <Globe className="h-3 w-3 inline mr-1" />
+                          {issue.location}
+                        </p>
+                      )}
+                      <div className="mt-2 p-2 bg-violet-50 dark:bg-violet-950/30 border border-violet-200 dark:border-violet-800 rounded text-sm">
+                        <div className="flex items-start gap-2">
+                          <Sparkles className="h-4 w-4 text-violet-600 shrink-0 mt-0.5" />
+                          <p className="text-violet-900 dark:text-violet-200">{issue.recommendation}</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </CardContent>
+        </Card>
+      ) : subscriptionPlan === "free" && (
+        <Card className="border-violet-200 dark:border-violet-800">
+          <CardContent className="py-6 text-center">
+            <Eye className="h-8 w-8 text-violet-600 mx-auto mb-2" />
+            <h3 className="font-semibold mb-1">Visual AI Accessibility Analysis</h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              Upgrade to Pro to detect visual accessibility issues that code scanners miss — contrast on images, small touch targets, color-only indicators, and more.
+            </p>
+            <Button onClick={() => router.push("/pricing")} className="bg-violet-600 hover:bg-violet-700">
+              <Eye className="mr-2 h-4 w-4" /> Unlock Visual AI
+            </Button>
           </CardContent>
         </Card>
       )}

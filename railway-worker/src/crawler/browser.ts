@@ -30,6 +30,14 @@ export async function getPageWithBrowser(url: string): Promise<{ page: Page; htm
   return { page, html, loadTime };
 }
 
+export async function captureScreenshot(page: Page): Promise<Buffer> {
+  return await page.screenshot({
+    fullPage: true,
+    type: "jpeg",
+    quality: 75,
+  }) as Buffer;
+}
+
 export async function closeBrowser(): Promise<void> {
   if (browser) {
     await browser.close();

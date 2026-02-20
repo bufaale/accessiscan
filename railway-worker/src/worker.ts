@@ -1,6 +1,7 @@
 import { createClient } from "@supabase/supabase-js";
-import { getPageWithBrowser, closeBrowser } from "./crawler/browser.js";
+import { getPageWithBrowser, captureScreenshot, closeBrowser } from "./crawler/browser.js";
 import { runAxe, type AxeResults, type AxeViolation } from "./scanner/axe-runner.js";
+import { analyzeVisualAccessibility, type VisualIssue } from "./ai/visual-analyzer.js";
 import { getWcagLevel, getSeverityOrder } from "./scanner/wcag-mapper.js";
 import { calculateScores, type ScanScores } from "./scanner/scorer.js";
 import { extractInternalLinks } from "./scanner/link-extractor.js";
@@ -81,9 +82,18 @@ async function processQuickScan(scan: PendingScan) {
   await updateScan(scan.id, { progress: 20 });
   console.log(`[${scan.id}] Page loaded in ${loadTime}ms`);
 
-  // 2. Run axe-core (20-60%)
+  // 2. Run axe-core + capture screenshot (20-60%)
   console.log(`[${scan.id}] Running axe-core analysis...`);
   const axeResults = await runAxe(page);
+
+  // Capture screenshot for visual AI analysis (before closing page)
+  let screenshot: Buffer | null = null;
+  try {
+    screenshot = await captureScreenshot(page);
+    console.log(`[${scan.id}] Screenshot captured (${Math.round(screenshot.length / 1024)}KB)`);
+  } catch (err: any) {
+    console.error(`[${scan.id}] Screenshot capture failed:`, err.message);
+  }
   await page.close();
   await updateScan(scan.id, { progress: 60 });
   console.log(
@@ -137,8 +147,24 @@ async function processQuickScan(scan: PendingScan) {
     await updateScan(scan.id, { progress: 95 });
   }
 
-  // 5. Save results (95-100%)
-  // Insert issues in batches of 50
+  // 5. Visual AI Analysis (paid only, after text AI)
+  let visualScore: number | null = null;
+  let visualIssuesCount = 0;
+  let visualAiSummary: string | null = null;
+  let visualIssues: VisualIssue[] = [];
+
+  if (profile?.subscription_plan && profile.subscription_plan !== "free" && screenshot) {
+    console.log(`[${scan.id}] Running Visual AI analysis...`);
+    const visualResult = await analyzeVisualAccessibility(screenshot, scan.url);
+    visualScore = visualResult.overall_visual_score;
+    visualIssuesCount = visualResult.issues.length;
+    visualAiSummary = visualResult.summary;
+    visualIssues = visualResult.issues;
+    console.log(`[${scan.id}] Visual AI complete: ${visualIssuesCount} visual issues, score ${visualScore}/100`);
+  }
+
+  // 6. Save results (95-100%)
+  // Insert code issues in batches of 50
   for (let i = 0; i < issues.length; i += 50) {
     const batch = issues.slice(i, i + 50).map((issue) => ({
       scan_id: scan.id,
@@ -146,6 +172,23 @@ async function processQuickScan(scan: PendingScan) {
     }));
     const { error } = await supabase.from("scan_issues").insert(batch);
     if (error) console.error(`[${scan.id}] Failed to insert issues batch:`, error.message);
+  }
+
+  // Insert visual issues
+  if (visualIssues.length > 0) {
+    const visualBatch = visualIssues.map((issue, idx) => ({
+      scan_id: scan.id,
+      category: issue.category,
+      severity: issue.severity,
+      title: issue.title,
+      description: issue.description,
+      wcag_criteria: issue.wcag_criteria,
+      location: issue.location,
+      recommendation: issue.recommendation,
+      position: idx,
+    }));
+    const { error } = await supabase.from("scan_visual_issues").insert(visualBatch);
+    if (error) console.error(`[${scan.id}] Failed to insert visual issues:`, error.message);
   }
 
   await updateScan(scan.id, {
@@ -163,6 +206,9 @@ async function processQuickScan(scan: PendingScan) {
     minor_count: scores.minorCount,
     ai_summary: aiSummary,
     ai_recommendations: aiRecommendations,
+    visual_score: visualScore,
+    visual_issues_count: visualIssuesCount,
+    visual_ai_summary: visualAiSummary,
     raw_data: {
       violations: axeResults.violations.length,
       passes: axeResults.passes.length,
@@ -171,7 +217,7 @@ async function processQuickScan(scan: PendingScan) {
     completed_at: new Date().toISOString(),
   });
 
-  console.log(`[${scan.id}] Quick scan complete! Score: ${scores.overall}/100`);
+  console.log(`[${scan.id}] Quick scan complete! Code: ${scores.overall}/100, Visual: ${visualScore ?? "N/A"}/100`);
 }
 
 async function processDeepScan(scan: PendingScan) {
@@ -180,8 +226,17 @@ async function processDeepScan(scan: PendingScan) {
   await updateScan(scan.id, { status: "crawling", progress: 5 });
   const { page: mainPage, html, loadTime } = await getPageWithBrowser(scan.url);
 
-  // 2. Run axe on main page + extract links (10-15%)
+  // 2. Run axe on main page + extract links + screenshot (10-15%)
   const mainAxe = await runAxe(mainPage);
+
+  // Capture screenshot of main page for visual AI
+  let screenshot: Buffer | null = null;
+  try {
+    screenshot = await captureScreenshot(mainPage);
+    console.log(`[${scan.id}] Main page screenshot captured (${Math.round(screenshot.length / 1024)}KB)`);
+  } catch (err: any) {
+    console.error(`[${scan.id}] Screenshot capture failed:`, err.message);
+  }
   await mainPage.close();
   await updateScan(scan.id, { progress: 15 });
 
@@ -319,13 +374,46 @@ async function processDeepScan(scan: PendingScan) {
     await updateScan(scan.id, { progress: 95 });
   }
 
-  // 6. Save results (95-100%)
+  // 6. Visual AI Analysis (paid only, after text AI)
+  let visualScore: number | null = null;
+  let visualIssuesCount = 0;
+  let visualAiSummary: string | null = null;
+  let visualIssues: VisualIssue[] = [];
+
+  if (profile?.subscription_plan && profile.subscription_plan !== "free" && screenshot) {
+    console.log(`[${scan.id}] Running Visual AI analysis on main page...`);
+    const visualResult = await analyzeVisualAccessibility(screenshot, scan.url);
+    visualScore = visualResult.overall_visual_score;
+    visualIssuesCount = visualResult.issues.length;
+    visualAiSummary = visualResult.summary;
+    visualIssues = visualResult.issues;
+    console.log(`[${scan.id}] Visual AI complete: ${visualIssuesCount} visual issues, score ${visualScore}/100`);
+  }
+
+  // 7. Save results (95-100%)
   for (let i = 0; i < deduped.length; i += 50) {
     const batch = deduped.slice(i, i + 50).map((issue) => ({
       scan_id: scan.id,
       ...issue,
     }));
     await supabase.from("scan_issues").insert(batch);
+  }
+
+  // Insert visual issues
+  if (visualIssues.length > 0) {
+    const visualBatch = visualIssues.map((issue, idx) => ({
+      scan_id: scan.id,
+      category: issue.category,
+      severity: issue.severity,
+      title: issue.title,
+      description: issue.description,
+      wcag_criteria: issue.wcag_criteria,
+      location: issue.location,
+      recommendation: issue.recommendation,
+      position: idx,
+    }));
+    const { error } = await supabase.from("scan_visual_issues").insert(visualBatch);
+    if (error) console.error(`[${scan.id}] Failed to insert visual issues:`, error.message);
   }
 
   await updateScan(scan.id, {
@@ -343,6 +431,9 @@ async function processDeepScan(scan: PendingScan) {
     minor_count: aggregateScores.minorCount,
     ai_summary: aiSummary,
     ai_recommendations: aiRecommendations,
+    visual_score: visualScore,
+    visual_issues_count: visualIssuesCount,
+    visual_ai_summary: visualAiSummary,
     raw_data: {
       pages: allResults.length,
       totalViolationRules: combinedViolations.length,
@@ -352,7 +443,7 @@ async function processDeepScan(scan: PendingScan) {
   });
 
   console.log(
-    `[${scan.id}] Deep scan complete! ${allResults.length} pages, score: ${aggregateScores.overall}/100`,
+    `[${scan.id}] Deep scan complete! ${allResults.length} pages, code: ${aggregateScores.overall}/100, visual: ${visualScore ?? "N/A"}/100`,
   );
 }
 

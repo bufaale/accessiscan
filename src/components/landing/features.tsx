@@ -5,6 +5,7 @@ import {
   FileText,
   TrendingUp,
   Shield,
+  Eye,
 } from "lucide-react";
 import {
   Card,
@@ -13,8 +14,16 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 
 const features = [
+  {
+    icon: Eye,
+    title: "Visual AI Analysis",
+    description:
+      "Industry-first: AI vision analyzes screenshots of your pages to detect contrast issues on images, small touch targets, and visual barriers that code scanners completely miss.",
+    highlight: true,
+  },
   {
     icon: CheckCircle,
     title: "WCAG 2.1 Compliance",
@@ -70,13 +79,24 @@ export function Features() {
           {features.map((feature) => (
             <Card
               key={feature.title}
-              className="transition-shadow hover:shadow-md"
+              className={`transition-shadow hover:shadow-md ${
+                feature.highlight
+                  ? "border-violet-300 dark:border-violet-700 bg-linear-to-br from-violet-50/50 to-purple-50/50 dark:from-violet-950/20 dark:to-purple-950/20 ring-1 ring-violet-200 dark:ring-violet-800 sm:col-span-2 lg:col-span-1"
+                  : ""
+              }`}
             >
               <CardHeader>
-                <div className="bg-primary/10 mb-2 flex h-10 w-10 items-center justify-center rounded-lg">
-                  <feature.icon className="text-primary h-5 w-5" />
+                <div className={`mb-2 flex h-10 w-10 items-center justify-center rounded-lg ${
+                  feature.highlight ? "bg-violet-100 dark:bg-violet-900/30" : "bg-primary/10"
+                }`}>
+                  <feature.icon className={`h-5 w-5 ${feature.highlight ? "text-violet-600" : "text-primary"}`} />
                 </div>
-                <CardTitle>{feature.title}</CardTitle>
+                <CardTitle className="flex items-center gap-2">
+                  {feature.title}
+                  {feature.highlight && (
+                    <Badge className="bg-violet-600 text-white text-[10px]">NEW</Badge>
+                  )}
+                </CardTitle>
                 <CardDescription>{feature.description}</CardDescription>
               </CardHeader>
               <CardContent />
