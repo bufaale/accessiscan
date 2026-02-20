@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ScanSearch, Globe, ArrowRight, Clock } from "lucide-react";
 import { StatsCards } from "@/components/dashboard/stats-cards";
+import { CrossPromoBanner } from "@/components/dashboard/cross-promo-banner";
 import type { Scan, Site } from "@/types/database";
 
 export default function DashboardPage() {
@@ -186,6 +187,9 @@ export default function DashboardPage() {
           </div>
         )}
       </div>
+
+      {/* Cross-Promotion */}
+      <CrossPromoBanner />
     </div>
   );
 }
