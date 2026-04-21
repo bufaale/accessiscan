@@ -31,12 +31,13 @@ const CADENCE_HOURS: Record<string, number> = {
 };
 
 function isAuthorized(req: NextRequest): boolean {
+  // CRON_SECRET is the single source of truth. Vercel cron invocations set
+  // Authorization: Bearer CRON_SECRET automatically when the secret is
+  // configured in the project env. The x-vercel-cron header is trivially
+  // forgeable by any internet caller, so we deliberately do not trust it.
   const expected = process.env.CRON_SECRET;
   if (!expected) return false;
-  const h = req.headers.get("authorization");
-  if (h === `Bearer ${expected}`) return true;
-  if (req.headers.get("x-vercel-cron") === "1") return true;
-  return false;
+  return req.headers.get("authorization") === `Bearer ${expected}`;
 }
 
 export async function GET(req: NextRequest) {

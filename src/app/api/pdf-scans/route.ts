@@ -59,6 +59,22 @@ export async function POST(req: NextRequest) {
 
   const buffer = Buffer.from(await file.arrayBuffer());
 
+  // Magic-byte check. A well-formed PDF starts with "%PDF-" (0x25 0x50 0x44
+  // 0x46 0x2D). Extension + browser-supplied MIME type are untrustworthy.
+  if (
+    buffer.length < 5 ||
+    buffer[0] !== 0x25 ||
+    buffer[1] !== 0x50 ||
+    buffer[2] !== 0x44 ||
+    buffer[3] !== 0x46 ||
+    buffer[4] !== 0x2d
+  ) {
+    return NextResponse.json(
+      { error: "Uploaded file is not a valid PDF (missing %PDF- signature)" },
+      { status: 415 },
+    );
+  }
+
   const admin = createAdminClient();
   const { data: pending, error: insertErr } = await admin
     .from("pdf_scans")

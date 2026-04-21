@@ -51,7 +51,9 @@ export async function PUT(req: Request) {
   const { data, error } = await supabase
     .from("issue_tracker_integrations")
     .upsert(payload, { onConflict: "user_id,provider" })
-    .select()
+    .select(
+      "id, provider, enabled, jira_site, jira_email, jira_project_key, linear_team_id, github_owner, github_repo, github_default_labels",
+    )
     .single();
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });

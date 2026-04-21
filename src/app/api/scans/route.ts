@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { checkScanLimit } from "@/lib/usage";
+import { urlInputSchema, validateResolvedIP } from "@/lib/security/url-validator";
 import { z } from "zod";
 
 const createScanSchema = z.object({
-  url: z.string(),
+  url: urlInputSchema,
   scan_type: z.enum(["quick", "deep"]).default("quick"),
 });
 
@@ -23,20 +24,16 @@ export async function POST(req: NextRequest) {
 
   const { url, scan_type } = validation.data;
 
-  // Validate URL
-  let parsedUrl: URL;
-  try {
-    // Auto-add https if missing
-    let fullUrl = url.trim();
-    if (!fullUrl.startsWith("http://") && !fullUrl.startsWith("https://")) {
-      fullUrl = `https://${fullUrl}`;
-    }
-    parsedUrl = new URL(fullUrl);
-    if (!["http:", "https:"].includes(parsedUrl.protocol)) {
-      throw new Error("Invalid protocol");
-    }
-  } catch {
-    return NextResponse.json({ error: "Please enter a valid URL (e.g., https://example.com)" }, { status: 400 });
+  // URL already passed urlInputSchema (protocol + blocked hostnames + private IPs
+  // for literal-IP inputs). Now do the DNS-resolution check to block DNS
+  // rebinding + privately-routed domains.
+  const parsedUrl = new URL(url);
+  const dnsOk = await validateResolvedIP(parsedUrl.hostname);
+  if (!dnsOk) {
+    return NextResponse.json(
+      { error: "URL could not be resolved or points to a private network" },
+      { status: 400 },
+    );
   }
 
   // Get user profile for subscription plan

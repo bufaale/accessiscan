@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
-import { urlInputSchema } from "@/lib/security/url-validator";
+import { urlInputSchema, validateResolvedIP } from "@/lib/security/url-validator";
 
 const createSchema = z.object({
   url: urlInputSchema,
@@ -56,6 +56,18 @@ export async function POST(req: Request) {
   if (!parsed.success) {
     return NextResponse.json(
       { error: parsed.error.issues[0]?.message ?? "Invalid input" },
+      { status: 400 },
+    );
+  }
+
+  // SSRF protection: DNS-resolve the URL and reject private / link-local IPs
+  // before storing the monitored-site row. urlInputSchema handles literal-IP +
+  // protocol blocking; this catches DNS rebinding.
+  const parsedUrl = new URL(parsed.data.url);
+  const dnsOk = await validateResolvedIP(parsedUrl.hostname);
+  if (!dnsOk) {
+    return NextResponse.json(
+      { error: "URL could not be resolved or points to a private network" },
       { status: 400 },
     );
   }
