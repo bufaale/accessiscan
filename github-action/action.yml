@@ -1,0 +1,95 @@
+name: "AccessiScan Accessibility Check"
+description: "Run axe-core WCAG 2.1 AA checks on any URL. Fails the build when critical or serious violations appear."
+author: "AccessiScan"
+branding:
+  icon: "check-circle"
+  color: "purple"
+inputs:
+  url:
+    description: "URL to scan (e.g., a Vercel preview, staging deploy, or http://localhost:3000)"
+    required: true
+  fail-on:
+    description: "Severity threshold that fails the build: critical | serious | moderate | minor | none"
+    required: false
+    default: "serious"
+  wcag-level:
+    description: "WCAG conformance level to enforce: wcag2a | wcag2aa | wcag21a | wcag21aa"
+    required: false
+    default: "wcag21aa"
+  comment-on-pr:
+    description: "Post a summary comment on the pull request"
+    required: false
+    default: "true"
+outputs:
+  total-violations:
+    description: "Total number of accessibility violations found"
+    value: ${{ steps.scan.outputs.total-violations }}
+  critical:
+    description: "Number of critical violations"
+    value: ${{ steps.scan.outputs.critical }}
+  serious:
+    description: "Number of serious violations"
+    value: ${{ steps.scan.outputs.serious }}
+  report-path:
+    description: "Path to the JSON report artifact"
+    value: ${{ steps.scan.outputs.report-path }}
+runs:
+  using: "composite"
+  steps:
+    - name: Install scanner dependencies
+      shell: bash
+      run: |
+        npm install --no-save --prefix "${{ github.action_path }}" \
+          puppeteer@22.15.0 \
+          @axe-core/puppeteer@4.10.0
+    - name: Run AccessiScan
+      id: scan
+      shell: bash
+      env:
+        INPUT_URL: ${{ inputs.url }}
+        INPUT_FAIL_ON: ${{ inputs.fail-on }}
+        INPUT_WCAG_LEVEL: ${{ inputs.wcag-level }}
+      run: node "${{ github.action_path }}/scan.js"
+    - name: Upload report artifact
+      if: always() && steps.scan.outputs.report-path != ''
+      uses: actions/upload-artifact@v4
+      with:
+        name: accessiscan-report
+        path: ${{ steps.scan.outputs.report-path }}
+    - name: Comment on pull request
+      if: inputs.comment-on-pr == 'true' && github.event_name == 'pull_request'
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const fs = require('fs');
+          const path = process.env.REPORT_PATH;
+          if (!path || !fs.existsSync(path)) return;
+          const report = JSON.parse(fs.readFileSync(path, 'utf8'));
+          const total = report.violations.length;
+          const counts = { critical: 0, serious: 0, moderate: 0, minor: 0 };
+          for (const v of report.violations) counts[v.impact] = (counts[v.impact] || 0) + 1;
+          const body = [
+            `## ♿ AccessiScan Report — \`${report.url}\``,
+            '',
+            `**${total}** accessibility violations found.`,
+            '',
+            `| Severity | Count |`,
+            `|---|---|`,
+            `| 🔴 Critical | ${counts.critical || 0} |`,
+            `| 🟠 Serious | ${counts.serious || 0} |`,
+            `| 🟡 Moderate | ${counts.moderate || 0} |`,
+            `| 🔵 Minor | ${counts.minor || 0} |`,
+            '',
+            total > 0
+              ? `_Want AI-powered fix code, VPAT reports, and deep-crawl scans? [Get AccessiScan →](https://app-04-ada-scanner.vercel.app)_`
+              : `✅ No WCAG ${process.env.INPUT_WCAG_LEVEL} violations detected by automated scan.`,
+          ].join('\n');
+          await github.rest.issues.createComment({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            issue_number: context.issue.number,
+            body,
+          });
+      env:
+        REPORT_PATH: ${{ steps.scan.outputs.report-path }}
+        INPUT_WCAG_LEVEL: ${{ inputs.wcag-level }}
