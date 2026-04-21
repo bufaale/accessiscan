@@ -11,6 +11,7 @@ import {
   Search, FileText, Download, RefreshCw, Loader2, ArrowLeft,
   CheckCircle, AlertTriangle, AlertCircle, Info, Eye,
   Globe, Shield, Copy, Check, Sparkles, ExternalLink, Code,
+  FileBadge,
 } from "lucide-react";
 import type { Scan, ScanIssue, ScanPage, ScanVisualIssue } from "@/types/database";
 
@@ -296,6 +297,31 @@ export default function ScanResultsPage({ params }: { params: Promise<{ id: stri
               <Download className="mr-2 h-4 w-4" /> PDF Report
             </a>
           </Button>
+          {subscriptionPlan !== "free" ? (
+            <>
+              <Button variant="outline" asChild>
+                <a href={`/api/scans/${scan.id}/vpat`} download>
+                  <FileBadge className="mr-2 h-4 w-4" /> VPAT 2.5
+                </a>
+              </Button>
+              <Button variant="outline" asChild>
+                <a href={`/api/scans/${scan.id}/vpat?standard=en-301-549`} download>
+                  <FileBadge className="mr-2 h-4 w-4" /> EN 301 549 (EU)
+                </a>
+              </Button>
+            </>
+          ) : (
+            <Button
+              variant="outline"
+              onClick={() => {
+                toast.info("VPAT 2.5 and EN 301 549 exports are on Pro and Agency plans.");
+                router.push("/pricing");
+              }}
+            >
+              <FileBadge className="mr-2 h-4 w-4" /> VPAT / EN 301 549
+              <Badge variant="secondary" className="ml-2 text-[10px]">Pro</Badge>
+            </Button>
+          )}
         </div>
       </div>
 

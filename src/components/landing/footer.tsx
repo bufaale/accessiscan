@@ -1,55 +1,73 @@
 import Link from "next/link";
-import { Separator } from "@/components/ui/separator";
-import { siteConfig } from "@/config/site";
+import { Shield } from "lucide-react";
 
-const footerLinks = {
-  product: {
+const COLUMNS = [
+  {
     title: "Product",
     links: [
-      { label: "Features", href: "#features" },
+      { label: "WCAG scanner", href: "#product" },
+      { label: "VPAT 2.5", href: "#government" },
+      { label: "GitHub Action", href: "#government" },
       { label: "Pricing", href: "#pricing" },
-      { label: "Docs", href: "#" },
     ],
   },
-  company: {
-    title: "Company",
+  {
+    title: "Compliance",
     links: [
-      { label: "About", href: "#" },
-      { label: "Blog", href: "#" },
-      { label: "Contact", href: "#" },
+      { label: "WCAG 2.1 AA", href: "#product" },
+      { label: "Section 508", href: "#government" },
+      { label: "DOJ Title II", href: "/" },
+      { label: "EN 301 549", href: "#government" },
     ],
   },
-  legal: {
+  {
+    title: "Resources",
+    links: [
+      { label: "Overlay detector (free)", href: "/overlay-detector" },
+      { label: "Why not overlays", href: "/why-not-overlays" },
+      { label: "Sample VPAT", href: "#government" },
+      { label: "Changelog", href: "#" },
+    ],
+  },
+  {
     title: "Legal",
     links: [
-      { label: "Privacy", href: "/privacy" },
-      { label: "Terms", href: "/terms" },
+      { label: "Privacy Policy", href: "/privacy" },
+      { label: "Terms of Service", href: "/terms" },
       { label: "Refund Policy", href: "/refund" },
     ],
   },
-  social: {
-    title: "Social",
-    links: [
-      { label: "GitHub", href: siteConfig.links.github },
-      { label: "Twitter", href: siteConfig.links.twitter },
-    ],
-  },
-};
+];
 
 export function Footer() {
   return (
-    <footer className="border-t">
-      <div className="mx-auto max-w-6xl px-6 py-16">
-        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
-          {Object.values(footerLinks).map((section) => (
-            <div key={section.title}>
-              <h3 className="text-sm font-semibold">{section.title}</h3>
+    <footer className="bg-[#0b1f3a] text-white">
+      <div className="mx-auto max-w-[1440px] px-6 pb-12 pt-16">
+        <div className="grid gap-10 md:grid-cols-[1.5fr_1fr_1fr_1fr_1fr]">
+          <div className="max-w-sm">
+            <Link href="/" className="flex items-center gap-2 font-display text-lg font-bold">
+              <span className="flex h-7 w-7 items-center justify-center rounded-sm bg-[#06b6d4]">
+                <Shield className="h-4 w-4 text-white" strokeWidth={2.5} />
+              </span>
+              AccessiScan
+            </Link>
+            <p className="mt-4 text-sm leading-relaxed text-white/60">
+              Real WCAG 2.1 AA compliance — not an overlay band-aid. Built for public
+              entities racing the DOJ Title II deadline.
+            </p>
+          </div>
+
+          {COLUMNS.map((col) => (
+            <div key={col.title}>
+              <h3 className="text-[11px] font-semibold uppercase tracking-[0.14em] text-white/55">
+                {col.title}
+              </h3>
               <ul className="mt-4 space-y-3">
-                {section.links.map((link) => (
+                {col.links.map((link) => (
                   <li key={link.label}>
                     <Link
                       href={link.href}
-                      className="text-muted-foreground hover:text-foreground text-sm transition-colors"
+                      className="text-sm text-white/80 transition-colors hover:text-white"
                     >
                       {link.label}
                     </Link>
@@ -59,11 +77,15 @@ export function Footer() {
             </div>
           ))}
         </div>
-        <Separator className="my-8" />
-        <p className="text-muted-foreground text-center text-sm">
-          &copy; {new Date().getFullYear()} {siteConfig.name}. All rights
-          reserved.
-        </p>
+
+        <div className="mt-12 flex flex-col items-start justify-between gap-3 border-t border-white/10 pt-8 md:flex-row md:items-center">
+          <p className="text-xs text-white/50">
+            &copy; {new Date().getFullYear()} AccessiScan, Inc. All rights reserved.
+          </p>
+          <p className="text-xs text-white/40">
+            AccessiScan does not warrant legal compliance. Consult qualified counsel.
+          </p>
+        </div>
       </div>
     </footer>
   );
