@@ -44,3 +44,11 @@ yarn-error.log*
 next-env.d.ts
 
 .vercel
+
+# stitch mcp design artifacts — generated, not product code
+stitch-variants/
+.stitch/
+
+# claude-mem auto-generated subdir context files (root CLAUDE.md stays)
+src/**/CLAUDE.md
+tests/**/CLAUDE.md
