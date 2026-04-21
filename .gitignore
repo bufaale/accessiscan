@@ -50,5 +50,5 @@ stitch-variants/
 .stitch/
 
 # claude-mem auto-generated subdir context files (root CLAUDE.md stays)
-src/**/CLAUDE.md
-tests/**/CLAUDE.md
+CLAUDE.md
+!/CLAUDE.md
