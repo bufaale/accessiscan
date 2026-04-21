@@ -23,10 +23,10 @@ const COLUMNS = [
   {
     title: "Resources",
     links: [
+      { label: "Blog", href: "/blog" },
       { label: "Overlay detector (free)", href: "/overlay-detector" },
       { label: "Why not overlays", href: "/why-not-overlays" },
       { label: "Sample VPAT", href: "#government" },
-      { label: "Changelog", href: "#" },
     ],
   },
   {
