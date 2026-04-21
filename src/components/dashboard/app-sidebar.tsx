@@ -10,6 +10,7 @@ import {
   User,
   CreditCard,
   Shield,
+  Activity,
 } from "lucide-react";
 import {
   Sidebar,
@@ -30,6 +31,7 @@ const mainNav = [
   { title: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { title: "New Scan", href: "/dashboard/scans/new", icon: ScanSearch },
   { title: "Scan History", href: "/dashboard/scans", icon: History },
+  { title: "Monitored sites", href: "/dashboard/monitored", icon: Activity },
 ];
 
 const settingsNav = [
