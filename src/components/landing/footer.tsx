@@ -1,5 +1,26 @@
 import Link from "next/link";
-import { Shield } from "lucide-react";
+import { Shield, ArrowUpRight } from "lucide-react";
+
+const CROSS_PROMO = [
+  {
+    name: "CallSpark",
+    tagline: "Bilingual AI voice agent · warm transfer",
+    price: "From $69/mo",
+    href: "https://app-02-voice-agent.vercel.app",
+  },
+  {
+    name: "AIComply",
+    tagline: "EU AI Act · Annex IV + FRIA generator",
+    price: "From $79/mo",
+    href: "https://app-16-aicomply.vercel.app",
+  },
+  {
+    name: "See all 15 tools",
+    tagline: "Pipo Labs · SaaS suite for operators",
+    price: "piposlab.com",
+    href: "https://piposlab.com",
+  },
+];
 
 const COLUMNS = [
   {
@@ -77,6 +98,40 @@ export function Footer() {
             </div>
           ))}
         </div>
+
+        <section aria-labelledby="cross-promo" className="mt-12 border-t border-white/10 pt-8">
+          <p
+            id="cross-promo"
+            className="text-[11px] font-semibold uppercase tracking-[0.14em] text-white/55"
+          >
+            More from Pipo Labs
+          </p>
+          <div className="mt-4 grid gap-3 sm:grid-cols-3">
+            {CROSS_PROMO.map((app) => (
+              <a
+                key={app.name}
+                href={app.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group flex flex-col rounded-lg border border-white/10 bg-white/5 p-4 transition-colors hover:border-[#06b6d4]/40 hover:bg-white/10"
+              >
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-semibold text-white/90">
+                    {app.name}
+                  </span>
+                  <ArrowUpRight
+                    className="h-4 w-4 text-white/50 transition-all group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-[#06b6d4]"
+                    aria-hidden
+                  />
+                </div>
+                <p className="mt-1 text-sm text-white/60">{app.tagline}</p>
+                <p className="mt-auto pt-3 font-mono text-xs text-white/40">
+                  {app.price}
+                </p>
+              </a>
+            ))}
+          </div>
+        </section>
 
         <div className="mt-12 flex flex-col items-start justify-between gap-3 border-t border-white/10 pt-8 md:flex-row md:items-center">
           <p className="text-xs text-white/50">
