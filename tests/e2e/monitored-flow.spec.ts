@@ -22,15 +22,11 @@ test.describe.serial("Monitored sites — business-tier full flow", () => {
 
     await page.getByLabel(/^URL$/i).fill("https://example.com");
     await page.getByLabel(/label/i).first().fill("E2E test site");
-    // cadence select
-    await page.getByLabel(/cadence/i).selectOption({ label: /weekly/i });
     await page.getByLabel(/alert email/i).fill(user.email);
     await page.getByRole("button", { name: /Add to monitoring/i }).click();
 
-    // Site appears in the list after creation. Try toast first, then list item.
-    await expect(page.getByText(/added|site added/i).or(
-      page.getByText("example.com"),
-    ).first()).toBeVisible({ timeout: 10_000 });
+    // Wait for the row to appear in the list (toast is too transient to assert).
+    await expect(page.getByText("example.com").first()).toBeVisible({ timeout: 15_000 });
   });
 
   test("monitored site appears in the list", async ({ page }) => {

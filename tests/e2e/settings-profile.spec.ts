@@ -18,10 +18,11 @@ test.describe("Settings — profile", () => {
   });
 
   test("profile page renders with name + email fields", async ({ page }) => {
-    await expect(page.getByRole("heading", { name: "Profile Settings" })).toBeVisible();
+    // The page uses <h1> without explicit aria-level — use the text match.
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText(/Profile Settings/i);
     await expect(page.getByRole("textbox", { name: "Full Name" })).toBeVisible();
-    // Email is read-only but visible somewhere on the page.
-    await expect(page.getByText(user.email)).toBeVisible();
+    // Email is inside a disabled <Input value={email}/>, not a text node.
+    await expect(page.getByLabel("Email")).toHaveValue(user.email);
   });
 
   test("user can update full name and persist", async ({ page }) => {
