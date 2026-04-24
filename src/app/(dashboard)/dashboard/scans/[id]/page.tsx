@@ -3,6 +3,7 @@
 import { useEffect, useState, use } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { createBrowserClient } from "@supabase/ssr";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -206,19 +207,19 @@ export default function ScanResultsPage({ params }: { params: Promise<{ id: stri
         const data = await res.json();
         setScan(data);
 
-        // Fetch subscription plan
-        const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-        const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-        const profileRes = await fetch(`${supabaseUrl}/rest/v1/profiles?select=subscription_plan`, {
-          headers: {
-            apikey: supabaseKey,
-            Authorization: `Bearer ${supabaseKey}`,
-          },
-        });
-        if (profileRes.ok) {
-          const profiles = await profileRes.json();
-          if (profiles.length > 0) {
-            setSubscriptionPlan(profiles[0].subscription_plan);
+        const supabase = createBrowserClient(
+          process.env.NEXT_PUBLIC_SUPABASE_URL!,
+          process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+        );
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          const { data: profile } = await supabase
+            .from("profiles")
+            .select("subscription_plan")
+            .eq("id", user.id)
+            .single();
+          if (profile?.subscription_plan) {
+            setSubscriptionPlan(profile.subscription_plan);
           }
         }
       } catch {
@@ -321,7 +322,7 @@ export default function ScanResultsPage({ params }: { params: Promise<{ id: stri
               variant="outline"
               onClick={() => {
                 toast.info("VPAT 2.5 and EN 301 549 exports are on Pro and Agency plans.");
-                router.push("/pricing");
+                router.push("/settings/billing");
               }}
             >
               <FileBadge className="mr-2 h-4 w-4" /> VPAT / EN 301 549
@@ -416,7 +417,7 @@ export default function ScanResultsPage({ params }: { params: Promise<{ id: stri
             <p className="text-sm text-muted-foreground mb-4">
               Get AI-powered executive summaries and fix suggestions
             </p>
-            <Button onClick={() => router.push("/pricing")}>Upgrade Now</Button>
+            <Button onClick={() => router.push("/settings/billing")}>Upgrade Now</Button>
           </CardContent>
         </Card>
       )}
@@ -485,7 +486,7 @@ export default function ScanResultsPage({ params }: { params: Promise<{ id: stri
             <p className="text-sm text-muted-foreground mb-4">
               Upgrade to Pro to detect visual accessibility issues that code scanners miss — contrast on images, small touch targets, color-only indicators, and more.
             </p>
-            <Button onClick={() => router.push("/pricing")} className="bg-violet-600 hover:bg-violet-700">
+            <Button onClick={() => router.push("/settings/billing")} className="bg-violet-600 hover:bg-violet-700">
               <Eye className="mr-2 h-4 w-4" /> Unlock Visual AI
             </Button>
           </CardContent>

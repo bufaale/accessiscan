@@ -158,7 +158,7 @@ export default function MonitoredSitesPage() {
                 email, and up to 10 monitored properties.
               </p>
               <Button className="mt-3" size="sm" asChild>
-                <Link href="/pricing">See Business plan</Link>
+                <Link href="/settings/billing">See Business plan</Link>
               </Button>
             </div>
           </CardContent>

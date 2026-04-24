@@ -113,7 +113,7 @@ export default function PdfScansPage() {
                 PDF accessibility scanning is on the Business and Agency plans
               </p>
               <Button className="mt-3" size="sm" asChild>
-                <Link href="/pricing">See plans</Link>
+                <Link href="/settings/billing">See plans</Link>
               </Button>
             </div>
           </CardContent>
