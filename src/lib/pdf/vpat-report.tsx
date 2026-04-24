@@ -40,8 +40,11 @@ const s = StyleSheet.create({
   tableHeader: { flexDirection: "row", backgroundColor: colors.primary, padding: 6 },
   tableHeaderCell: { color: colors.white, fontSize: 8.5, fontFamily: "Helvetica-Bold" },
 
-  tableRow: { flexDirection: "row", borderBottom: `1 solid ${colors.border}`, padding: 6 },
-  tableRowAlt: { flexDirection: "row", borderBottom: `1 solid ${colors.border}`, padding: 6, backgroundColor: "#fafafa" },
+  // alignItems:"flex-start" keeps the conformance badge pinned to the top of
+  // the row regardless of how tall the remarks column gets — previously the
+  // badge floated mid-row on long remarks and looked mis-aligned.
+  tableRow: { flexDirection: "row", borderBottom: `1 solid ${colors.border}`, padding: 6, alignItems: "flex-start" },
+  tableRowAlt: { flexDirection: "row", borderBottom: `1 solid ${colors.border}`, padding: 6, backgroundColor: "#fafafa", alignItems: "flex-start" },
 
   colCriterion: { width: "22%", paddingRight: 6 },
   colConformance: { width: "18%", paddingRight: 6 },
@@ -95,7 +98,7 @@ function CriterionRow({ result, index }: { result: CriterionResult; index: numbe
         </View>
       </View>
       <View style={s.colRemarks}>
-        <Text style={s.remarksText}>{result.remarks}</Text>
+        <Text style={s.remarksText}>{result.remarks || "—"}</Text>
       </View>
     </View>
   );
@@ -223,7 +226,7 @@ export function VPATReport({
         </View>
 
         <Text style={s.sectionTitle}>WCAG 2.1 Level A Report</Text>
-        <View style={s.tableHeader}>
+        <View style={s.tableHeader} fixed>
           <View style={s.colCriterion}><Text style={s.tableHeaderCell}>Criterion</Text></View>
           <View style={s.colConformance}><Text style={s.tableHeaderCell}>Conformance</Text></View>
           <View style={s.colRemarks}><Text style={s.tableHeaderCell}>Remarks and Explanations</Text></View>
@@ -241,7 +244,7 @@ export function VPATReport({
       {/* Level AA table */}
       <Page size="A4" style={s.page}>
         <Text style={s.sectionTitle}>WCAG 2.1 Level AA Report</Text>
-        <View style={s.tableHeader}>
+        <View style={s.tableHeader} fixed>
           <View style={s.colCriterion}><Text style={s.tableHeaderCell}>Criterion</Text></View>
           <View style={s.colConformance}><Text style={s.tableHeaderCell}>Conformance</Text></View>
           <View style={s.colRemarks}><Text style={s.tableHeaderCell}>Remarks and Explanations</Text></View>
