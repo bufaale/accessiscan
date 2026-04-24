@@ -161,6 +161,8 @@ async function processQuickScan(scan: PendingScan) {
     visualAiSummary = visualResult.summary;
     visualIssues = visualResult.issues;
     console.log(`[${scan.id}] Visual AI complete: ${visualIssuesCount} visual issues, score ${visualScore}/100`);
+  } else {
+    console.log(`[${scan.id}] Visual AI skipped (plan=${profile?.subscription_plan ?? "null"}, screenshot=${screenshot ? "captured" : "null"})`);
   }
 
   // 6. Save results (95-100%)

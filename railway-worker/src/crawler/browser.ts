@@ -31,8 +31,12 @@ export async function getPageWithBrowser(url: string): Promise<{ page: Page; htm
 }
 
 export async function captureScreenshot(page: Page): Promise<Buffer> {
+  // Viewport-only (not fullPage): Claude Vision has a 5MB per-image limit and
+  // full-page captures of long sites easily exceed it, causing silent failures.
+  // The Visual AI prompt analyzes what a user can see, so above-the-fold is
+  // what matters.
   return await page.screenshot({
-    fullPage: true,
+    fullPage: false,
     type: "jpeg",
     quality: 75,
   }) as Buffer;
