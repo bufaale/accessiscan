@@ -12,6 +12,8 @@
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^3.0.44",
+    "@octokit/auth-app": "^8.2.0",
+    "@octokit/rest": "^22.0.1",
     "@react-pdf/renderer": "^4.3.2",
     "@stripe/stripe-js": "^8.7.0",
     "@supabase/ssr": "^0.8.0",
