@@ -13,6 +13,7 @@ test.afterAll(async () => {
 });
 
 test("generate a VPAT PDF and save to disk for visual inspection", async ({ page }) => {
+  test.skip(!!process.env.CI, "vpat-pdf-inspect is a local-only manual inspection helper — saves PDF to .shared/ outside the repo");
   test.setTimeout(180_000);
   await loginViaUI(page, proUser.email);
 
