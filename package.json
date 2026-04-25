@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^3.0.44",
+    "@anthropic-ai/sdk": "^0.91.1",
     "@octokit/auth-app": "^8.2.0",
     "@octokit/rest": "^22.0.1",
     "@react-pdf/renderer": "^4.3.2",

@@ -15,6 +15,7 @@ import {
   Globe, Shield, Copy, Check, Sparkles, ExternalLink, Code,
   FileBadge, ClipboardCheck,
 } from "lucide-react";
+import { GenerateFixPRButton } from "@/components/auto-fix/generate-pr-button";
 import type { Scan, ScanIssue, ScanPage, ScanVisualIssue } from "@/types/database";
 
 interface ScanWithDetails extends Scan {
@@ -195,6 +196,7 @@ export default function ScanResultsPage({ params }: { params: Promise<{ id: stri
   const [scan, setScan] = useState<ScanWithDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [subscriptionPlan, setSubscriptionPlan] = useState("free");
+  const [hasGithubInstall, setHasGithubInstall] = useState(false);
   const [selectedWcagLevel, setSelectedWcagLevel] = useState<"all" | "A" | "AA" | "AAA">("all");
   const [selectedSeverity, setSelectedSeverity] = useState<"all" | ScanIssue["severity"]>("all");
   const [selectedPage, setSelectedPage] = useState<string | null>(null);
@@ -221,6 +223,15 @@ export default function ScanResultsPage({ params }: { params: Promise<{ id: stri
           if (profile?.subscription_plan) {
             setSubscriptionPlan(profile.subscription_plan);
           }
+          // Check whether the user has at least one active GitHub App install,
+          // so the auto-fix button can show the right CTA (Connect vs Generate).
+          const { data: install } = await supabase
+            .from("github_installations")
+            .select("id")
+            .is("revoked_at", null)
+            .limit(1)
+            .maybeSingle();
+          setHasGithubInstall(!!install);
         }
       } catch {
         toast.error("Scan not found");
@@ -329,6 +340,13 @@ export default function ScanResultsPage({ params }: { params: Promise<{ id: stri
               <Badge variant="secondary" className="ml-2 text-[10px]">Pro</Badge>
             </Button>
           )}
+          <GenerateFixPRButton
+            scanId={scan.id}
+            issueIds={scan.scan_issues.map((i) => i.id)}
+            issueRules={scan.scan_issues.map((i) => i.rule_id)}
+            isBusinessTier={subscriptionPlan === "business"}
+            hasGithubInstall={hasGithubInstall}
+          />
         </div>
       </div>
 
