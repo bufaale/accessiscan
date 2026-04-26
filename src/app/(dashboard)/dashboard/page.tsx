@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ScanSearch, Globe, ArrowRight, Clock } from "lucide-react";
 import { StatsCards } from "@/components/dashboard/stats-cards";
+import { DashboardError } from "@/components/dashboard/dashboard-error";
 import { CrossPromoBanner } from "@/components/dashboard/cross-promo-banner";
 import type { Scan, Site } from "@/types/database";
 
@@ -15,6 +16,8 @@ export default function DashboardPage() {
   const [sites, setSites] = useState<Site[]>([]);
   const [recentScans, setRecentScans] = useState<Scan[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [retrying, setRetrying] = useState(false);
   const [stats, setStats] = useState({
     sitesTracked: 0,
     totalScans: 0,
@@ -22,36 +25,48 @@ export default function DashboardPage() {
     criticalIssues: 0,
   });
 
-  useEffect(() => {
-    async function load() {
-      try {
-        // Fetch recent scans
-        const res = await fetch("/api/scans?limit=5");
-        if (res.ok) {
-          const data = await res.json();
-          setRecentScans(data.scans);
-        }
+  async function load(isRetry = false) {
+    if (isRetry) setRetrying(true);
+    else setLoading(true);
+    setError(null);
+    try {
+      const [scansRes, sitesRes, statsRes] = await Promise.all([
+        fetch("/api/scans?limit=5"),
+        fetch("/api/sites"),
+        fetch("/api/stats"),
+      ]);
 
-        // Fetch sites
-        const sitesRes = await fetch("/api/sites");
-        if (sitesRes.ok) {
-          const sitesData = await sitesRes.json();
-          setSites(sitesData.sites ?? []);
-        }
-
-        // Fetch stats
-        const statsRes = await fetch("/api/stats");
-        if (statsRes.ok) {
-          const statsData = await statsRes.json();
-          setStats(statsData);
-        }
-      } catch {
-        // Silently fail - dashboard still renders
-      } finally {
-        setLoading(false);
+      if (scansRes.ok) {
+        const data = await scansRes.json();
+        setRecentScans(data.scans);
+      } else if (scansRes.status >= 500) {
+        throw new Error(`scans API returned ${scansRes.status}`);
       }
+
+      if (sitesRes.ok) {
+        const sitesData = await sitesRes.json();
+        setSites(sitesData.sites ?? []);
+      } else if (sitesRes.status >= 500) {
+        throw new Error(`sites API returned ${sitesRes.status}`);
+      }
+
+      if (statsRes.ok) {
+        const statsData = await statsRes.json();
+        setStats(statsData);
+      } else if (statsRes.status >= 500) {
+        throw new Error(`stats API returned ${statsRes.status}`);
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Network error");
+    } finally {
+      setLoading(false);
+      setRetrying(false);
     }
-    load();
+  }
+
+  useEffect(() => {
+    void load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   function getScoreColor(score: number | null) {
@@ -99,6 +114,14 @@ export default function DashboardPage() {
           New Scan
         </Button>
       </div>
+
+      {error && (
+        <DashboardError
+          message={error}
+          retrying={retrying}
+          onRetry={() => void load(true)}
+        />
+      )}
 
       {/* Stats Cards */}
       <StatsCards
