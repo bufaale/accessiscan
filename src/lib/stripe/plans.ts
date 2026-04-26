@@ -9,13 +9,17 @@ export interface PricingPlan {
   features: string[];
   limits: { scansPerMonth: number; canDeepScan: boolean };
   recommended: boolean;
+  /** When true, CTA links to contact form instead of Stripe Checkout. */
+  contactSales?: boolean;
+  /** Override default CTA copy. */
+  ctaLabel?: string;
 }
 
 export const pricingPlans: PricingPlan[] = [
   {
     id: "free",
     name: "Free",
-    description: "Try ADA Scanner with limited scans",
+    description: "Try AccessiScan with limited scans",
     monthlyPrice: 0,
     yearlyPrice: 0,
     stripePriceIdMonthly: "",
@@ -78,13 +82,14 @@ export const pricingPlans: PricingPlan[] = [
   {
     id: "business",
     name: "Business",
-    description: "Mid-market procurement: continuous monitoring + EU + ticket push",
-    monthlyPrice: 199,
-    yearlyPrice: 1990,
+    description: "Mid-market procurement: continuous monitoring + Auto-Fix PRs + EU pack",
+    monthlyPrice: 299,
+    yearlyPrice: 2990,
     stripePriceIdMonthly: (process.env.NEXT_PUBLIC_STRIPE_BUSINESS_MONTHLY_PRICE_ID || "").trim(),
     stripePriceIdYearly: (process.env.NEXT_PUBLIC_STRIPE_BUSINESS_YEARLY_PRICE_ID || "").trim(),
     features: [
       "Everything in Agency",
+      "Auto-Fix PRs against your GitHub repo (Phase 1: 6 axe rules)",
       "Continuous monitoring (weekly auto-scans)",
       "Regression alerts via email + Slack",
       "Up to 10 monitored properties",
@@ -95,6 +100,30 @@ export const pricingPlans: PricingPlan[] = [
     ],
     limits: { scansPerMonth: -1, canDeepScan: true },
     recommended: false,
+  },
+  {
+    id: "team",
+    name: "Team",
+    description: "Org-wide WCAG governance: SSO, audit log, custom policies, dedicated success",
+    monthlyPrice: 599,
+    yearlyPrice: 5990,
+    stripePriceIdMonthly: "",
+    stripePriceIdYearly: "",
+    features: [
+      "Everything in Business",
+      "SSO (SAML / Okta / Google Workspace)",
+      "Org-wide accessibility policy enforcement",
+      "Audit log + compliance event streaming",
+      "Up to 50 monitored properties",
+      "Auto-Fix PRs across all repos in org",
+      "Dedicated customer success manager",
+      "Custom training for engineering team",
+      "Priority SLA (4-hour response, 24/7)",
+    ],
+    limits: { scansPerMonth: -1, canDeepScan: true },
+    recommended: false,
+    contactSales: true,
+    ctaLabel: "Contact sales",
   },
 ];
 

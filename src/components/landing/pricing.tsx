@@ -172,6 +172,15 @@ export function Pricing() {
                         {isLoggedIn ? "Go to dashboard" : "Start free"}
                       </Link>
                     </Button>
+                  ) : plan.contactSales ? (
+                    <Button
+                      asChild
+                      className="h-11 w-full rounded-md bg-[#0b1f3a] text-sm font-semibold text-white shadow-none hover:bg-[#071428]"
+                    >
+                      <Link href="mailto:alex@piposlab.com?subject=AccessiScan%20Team%20tier%20inquiry">
+                        {plan.ctaLabel ?? "Contact sales"}
+                      </Link>
+                    </Button>
                   ) : (
                     <SubscribeButton
                       priceId={priceId}
