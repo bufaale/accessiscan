@@ -1,26 +1,6 @@
 import Link from "next/link";
 import { Shield, ArrowUpRight } from "lucide-react";
-
-const CROSS_PROMO = [
-  {
-    name: "CallSpark",
-    tagline: "Bilingual AI voice agent · warm transfer",
-    price: "From $69/mo",
-    href: "https://app-02-voice-agent.vercel.app",
-  },
-  {
-    name: "AIComply",
-    tagline: "EU AI Act · Annex IV + FRIA generator",
-    price: "From $79/mo",
-    href: "https://app-16-aicomply.vercel.app",
-  },
-  {
-    name: "See all 15 tools",
-    tagline: "Pipo Labs · SaaS suite for operators",
-    price: "piposlab.com",
-    href: "https://piposlab.com",
-  },
-];
+import { CROSS_PROMO_OTHER_APPS as CROSS_PROMO } from "@/config/cross-promo";
 
 const COLUMNS = [
   {
