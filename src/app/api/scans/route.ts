@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { checkScanLimit } from "@/lib/usage";
 import { urlInputSchema, validateResolvedIP } from "@/lib/security/url-validator";
+import { logAuditEvent, extractAuditContext } from "@/lib/audit/log";
 import { z } from "zod";
 
 const createScanSchema = z.object({
@@ -100,6 +101,15 @@ export async function POST(req: NextRequest) {
   if (error) {
     return NextResponse.json({ error: "Failed to create scan" }, { status: 500 });
   }
+
+  void logAuditEvent({
+    userId: user.id,
+    eventType: "scan.created",
+    resource: `scan:${scan.id}`,
+    summary: `Created ${scan_type} scan for ${parsedUrl.toString()}`,
+    meta: { scan_id: scan.id, url: parsedUrl.toString(), scan_type, domain },
+    ...extractAuditContext(req.headers),
+  });
 
   return NextResponse.json({ scanId: scan.id, usage: { used: usage.used + 1, limit: usage.limit } });
 }

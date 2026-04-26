@@ -23,6 +23,7 @@ import { z } from "zod";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { openAutoFixPR } from "@/lib/github/app-client";
 import { generatePatch, isSafeRule, type PatchInput } from "@/lib/github/generate-patch";
+import { logAuditEvent, extractAuditContext } from "@/lib/audit/log";
 
 export const maxDuration = 90;
 
@@ -202,6 +203,23 @@ export async function POST(req: NextRequest) {
     fixes_count: fixesApplied.filter((f) => !f.needs_review).length,
     fixes_applied: fixesApplied,
     warnings: fixesApplied.filter((f) => f.needs_review).map((f) => f.reason),
+  });
+
+  void logAuditEvent({
+    userId: user.id,
+    eventType: "auto_fix.pr_opened",
+    resource: `pr:${repo_full_name}#${pr.pr_number}`,
+    summary: `Opened Auto-Fix PR #${pr.pr_number} on ${repo_full_name} for scan ${scan_id}`,
+    meta: {
+      scan_id,
+      repo_full_name,
+      pr_url: pr.pr_url,
+      pr_number: pr.pr_number,
+      branch: pr.branch,
+      fixes_count: fixesApplied.filter((f) => !f.needs_review).length,
+      warnings_count: fixesApplied.filter((f) => f.needs_review).length,
+    },
+    ...extractAuditContext(req.headers),
   });
 
   return NextResponse.json({

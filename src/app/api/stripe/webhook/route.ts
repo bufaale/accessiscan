@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { getStripe } from "@/lib/stripe/server";
 import { createAdminClient } from "@/lib/supabase/server";
 import { getPlanByPriceId } from "@/lib/stripe/plans";
+import { logAuditEvent } from "@/lib/audit/log";
 import type Stripe from "stripe";
 
 function getPlanIdFromSubscription(subscription: Stripe.Subscription): string {
@@ -65,6 +66,16 @@ export async function POST(req: Request) {
             stripe_customer_id: customerId,
           }).eq("id", userId);
           if (profileError) console.error("Profile update error:", profileError);
+
+          void logAuditEvent({
+            userId,
+            eventType: "subscription.created",
+            actorType: "webhook",
+            actorId: "stripe",
+            resource: `subscription:${subscription.id}`,
+            summary: `Subscribed to ${planId} plan`,
+            meta: { plan: planId, stripe_subscription_id: subscription.id, price_id: firstItem.price.id },
+          });
         }
       }
       break;
@@ -107,6 +118,16 @@ export async function POST(req: Request) {
           subscription_status: "canceled",
           subscription_plan: "free",
         }).eq("id", userId);
+
+        void logAuditEvent({
+          userId,
+          eventType: "subscription.canceled",
+          actorType: "webhook",
+          actorId: "stripe",
+          resource: `subscription:${subscription.id}`,
+          summary: "Subscription canceled — downgraded to free",
+          meta: { stripe_subscription_id: subscription.id },
+        });
       }
       break;
     }
