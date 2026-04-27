@@ -1,7 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Separator } from "@/components/ui/separator";
-import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -32,7 +31,6 @@ export async function DashboardHeader() {
       <SidebarTrigger />
       <Separator orientation="vertical" className="h-6" />
       <div className="flex-1" />
-      <ThemeToggle />
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" className="relative h-8 w-8 rounded-full">
@@ -51,6 +49,9 @@ export async function DashboardHeader() {
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
             <Link href="/settings/billing">Billing</Link>
+          </DropdownMenuItem>
+          <DropdownMenuItem asChild>
+            <Link href="/settings/github">GitHub Auto-Fix</Link>
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem asChild>

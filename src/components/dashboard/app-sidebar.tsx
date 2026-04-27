@@ -12,6 +12,7 @@ import {
   Shield,
   Activity,
   FileText,
+  Github,
 } from "lucide-react";
 import {
   Sidebar,
@@ -39,6 +40,7 @@ const mainNav = [
 const settingsNav = [
   { title: "Profile", href: "/settings", icon: User },
   { title: "Billing", href: "/settings/billing", icon: CreditCard },
+  { title: "GitHub Auto-Fix", href: "/settings/github", icon: Github },
 ];
 
 export function AppSidebar() {
