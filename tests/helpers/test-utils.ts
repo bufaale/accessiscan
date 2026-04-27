@@ -193,3 +193,52 @@ export async function waitForScanCompleted(page: Page, scanId: string, timeoutMs
   const row = page.locator(`[data-scan-id="${scanId}"]`);
   await expect(row).toContainText(/completed/i, { timeout: timeoutMs });
 }
+
+/**
+ * Seed a completed scan row directly into Supabase (bypasses the worker).
+ * Used by data-flow tests that need realistic dashboard/scan-list data without
+ * waiting for a real scan to crawl + analyze.
+ */
+export async function seedScan(
+  userId: string,
+  overrides: Partial<{
+    url: string;
+    status: "pending" | "crawling" | "analyzing" | "completed" | "failed";
+    scan_type: "quick" | "deep";
+    compliance_score: number | null;
+    critical_count: number;
+    serious_count: number;
+    moderate_count: number;
+    minor_count: number;
+  }> = {},
+): Promise<{ id: string; url: string }> {
+  const url = overrides.url ?? `https://example-${Date.now()}.test`;
+  const domain = new URL(url).hostname;
+  const payload = {
+    user_id: userId,
+    url,
+    domain,
+    status: overrides.status ?? "completed",
+    scan_type: overrides.scan_type ?? "quick",
+    compliance_score: overrides.compliance_score ?? 87,
+    progress: 100,
+    critical_count: overrides.critical_count ?? 2,
+    serious_count: overrides.serious_count ?? 5,
+    moderate_count: overrides.moderate_count ?? 8,
+    minor_count: overrides.minor_count ?? 3,
+  };
+  const res = await fetch(`${supabaseUrl()}/rest/v1/scans`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${supabaseServiceKey()}`,
+      apikey: supabaseAnonKey(),
+      "Content-Type": "application/json",
+      Prefer: "return=representation",
+    },
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) throw new Error(`Failed to seed scan: ${await res.text()}`);
+  const rows = await res.json();
+  const row = Array.isArray(rows) ? rows[0] : rows;
+  return { id: row.id, url: row.url };
+}
