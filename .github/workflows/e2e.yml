@@ -15,7 +15,10 @@ jobs:
   e2e:
     name: Playwright E2E
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    # 45 min so the deep tests (real-scan-deep, auto-fix-deep, auto-fix-ui-flow,
+    # pdf-scans-deep) have room — they each create live PRs / scans against
+    # bufaale/accessiscan-e2e-fixtures and Supabase prod.
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
 
@@ -35,6 +38,9 @@ jobs:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          # GH_TOKEN_E2E enables auto-fix-deep + auto-fix-ui-flow specs;
+          # without it those specs skip silently.
+          GH_TOKEN_E2E: ${{ secrets.GH_TOKEN_E2E }}
         run: npx playwright test --reporter=html,list
 
       - name: Upload Playwright artifacts on failure
@@ -46,3 +52,21 @@ jobs:
             playwright-report/
             test-results/
           retention-days: 14
+
+      - name: Open issue on nightly failure
+        # Only on the scheduled run, only on failure. Avoids spamming on
+        # every PR. Existing open issue with the same title gets a comment
+        # bump instead of a duplicate (gh CLI default behaviour).
+        if: failure() && github.event_name == 'schedule'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          DATE=$(date -u +%Y-%m-%d)
+          TITLE="[nightly] E2E suite failed on $DATE"
+          BODY="The nightly E2E job failed against \`${{ secrets.TEST_BASE_URL }}\`.
+
+          Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+          Artifacts (screenshots + traces) attached to the run for 14 days."
+          gh issue create --title "$TITLE" --body "$BODY" --label "nightly-fail" --repo "${{ github.repository }}" || \
+            echo "Issue creation skipped (may already exist or label missing)."
