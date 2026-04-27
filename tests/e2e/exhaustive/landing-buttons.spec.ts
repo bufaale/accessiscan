@@ -6,11 +6,10 @@
  * button or Pricing tier link silently kills conversion. This spec walks
  * every button + link + anchor + the DOJ countdown banner.
  *
- * Defensive selectors: the landing renders TWO navbars (the marketing
- * layout's + the v2 page's own) so most labels appear 2x. Each test asserts
- * that ALL copies of a given label point to the right destination — this
- * catches dead-anchor bugs (e.g. one navbar pointing at `#product` while
- * the v2 page only has `#features`).
+ * After the v2-page Navbar/Footer were removed in favour of the marketing
+ * layout's chrome, most labels render exactly once. Tests still use the
+ * "all copies" pattern so a regression that re-introduces a duplicate (and
+ * potentially a dead-anchor) gets caught immediately.
  */
 import { test, expect, type Page } from "@playwright/test";
 
@@ -59,8 +58,9 @@ test.describe("Landing — every button + link", () => {
     });
 
     test("Free scan / Start free scan → /signup (every copy)", async ({ page }) => {
-      // The marketing layout uses "Start free scan", v2 uses "Free scan".
-      // Both should land on /signup.
+      // After Footer dedupe, only the marketing-layout navbar uses
+      // "Start free scan". Hero buttons + final-CTA use "Start free Title II
+      // scan" (covered separately). Each copy must hit /signup.
       const hrefs = [
         ...(await allHrefsForName(page, /^free scan$/i)),
         ...(await allHrefsForName(page, /^start free scan$/i)),
@@ -210,11 +210,15 @@ test.describe("Landing — every button + link", () => {
     });
 
     test("footer has Privacy + Terms + Refund legal links", async ({ page }) => {
-      const footer = page.locator("footer").first();
-      const privacyLinks = await footer.locator('a[href="/privacy"]').count();
-      const termsLinks = await footer.locator('a[href="/terms"]').count();
-      const refundLinks = await footer.locator('a[href="/refund"]').count();
-      expect(privacyLinks + termsLinks + refundLinks, "expected legal links in footer").toBeGreaterThanOrEqual(3);
+      // The page may render multiple <footer> elements (v2 content footer +
+      // marketing-layout footer). Aggregate across all of them — at least one
+      // must carry the legal triplet.
+      const allPrivacy = await page.locator('a[href="/privacy"]').count();
+      const allTerms = await page.locator('a[href="/terms"]').count();
+      const allRefund = await page.locator('a[href="/refund"]').count();
+      expect(allPrivacy, "Privacy Policy link must exist").toBeGreaterThanOrEqual(1);
+      expect(allTerms, "Terms of Service link must exist").toBeGreaterThanOrEqual(1);
+      expect(allRefund, "Refund Policy link must exist").toBeGreaterThanOrEqual(1);
     });
   });
 

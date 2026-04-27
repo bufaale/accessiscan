@@ -697,11 +697,14 @@ function Footer() {
 
 // ---------- Page composition ----------
 
+// The marketing layout (src/app/(marketing)/layout.tsx) already wraps this
+// page with its own <Navbar> and <Footer>, so v2's own Navbar/Footer were
+// rendering as a duplicate set with placeholder anchors. Render only the
+// content sections here; the layout owns global chrome.
 export default function V2LandingPage() {
   return (
     <div data-screen-label="AccessiScan Landing v2" style={{ background: "#fff", color: "#0b1f3a" }}>
       <DojBannerLive />
-      <Navbar />
       <Hero />
       <StatsStrip />
       <Comparison />
@@ -710,7 +713,6 @@ export default function V2LandingPage() {
       <Pricing />
       <Faq />
       <FinalCta />
-      <Footer />
     </div>
   );
 }
