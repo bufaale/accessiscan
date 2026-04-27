@@ -397,7 +397,7 @@ function ArtVpat() {
         <div key={id} style={{ display: "grid", gridTemplateColumns: "52px 1fr auto", padding: "7px 12px", borderTop: i ? "1px solid #f1f5f9" : 0, gap: 10, alignItems: "center" }}>
           <span style={{ fontFamily: FONT_MONO, fontWeight: 700, color: "#0b1f3a", fontSize: 10.5 }}>{id}</span>
           <span style={{ color: "#475569" }}>{name}</span>
-          <span style={{ fontSize: 10, fontWeight: 600, color: status === "Supports" ? "#06b6d4" : "#94a3b8", textTransform: "uppercase", letterSpacing: "0.08em" }}>{status}</span>
+          <span style={{ fontSize: 10, fontWeight: 600, color: status === "Supports" ? "#0e7490" : "#64748b", textTransform: "uppercase", letterSpacing: "0.08em" }}>{status}</span>
         </div>
       ))}
     </div>

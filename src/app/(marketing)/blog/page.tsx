@@ -23,7 +23,7 @@ export default function BlogIndex() {
     <main className="min-h-screen bg-white text-slate-900">
       <section className="bg-[#0b1f3a] text-white">
         <div className="mx-auto max-w-[1100px] px-6 py-20">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#0e7490]">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#06b6d4]">
             AccessiScan · blog
           </p>
           <h1 className="mt-3 font-display text-4xl font-bold tracking-tight sm:text-5xl">
