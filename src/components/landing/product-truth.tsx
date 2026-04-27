@@ -24,7 +24,7 @@ export function ProductTruth() {
     <section id="product" className="bg-[#0b1f3a] text-white">
       <div className="mx-auto max-w-[1440px] px-6 py-24">
         <div className="max-w-3xl">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#06b6d4]">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#0e7490]">
             The case against overlays
           </p>
           <h2 className="mt-3 font-display text-4xl font-semibold leading-tight tracking-tight sm:text-5xl">
@@ -39,7 +39,7 @@ export function ProductTruth() {
         <div className="mt-16 grid gap-10 border-t border-white/10 pt-12 md:grid-cols-3">
           {REASONS.map((r) => (
             <div key={r.number} className="flex flex-col">
-              <span className="font-display text-sm font-bold uppercase tracking-[0.18em] text-[#06b6d4]">
+              <span className="font-display text-sm font-bold uppercase tracking-[0.18em] text-[#0e7490]">
                 {r.number}
               </span>
               <h3 className="mt-4 font-display text-xl font-semibold leading-snug text-white">

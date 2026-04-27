@@ -77,7 +77,7 @@ export function Pricing() {
     <section id="pricing" className="bg-white">
       <div className="mx-auto max-w-[1440px] px-6 py-24">
         <div className="max-w-3xl">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#06b6d4]">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#0e7490]">
             Pricing
           </p>
           <h2 className="mt-3 font-display text-4xl font-semibold leading-tight tracking-tight text-[#0b1f3a] sm:text-5xl">
@@ -152,7 +152,7 @@ export function Pricing() {
                   {plan.features.map((feature) => (
                     <li key={feature} className="flex items-start gap-2.5">
                       <Check
-                        className="mt-0.5 h-4 w-4 shrink-0 text-[#06b6d4]"
+                        className="mt-0.5 h-4 w-4 shrink-0 text-[#0e7490]"
                         strokeWidth={2.5}
                       />
                       <span className="text-sm leading-snug text-slate-600">

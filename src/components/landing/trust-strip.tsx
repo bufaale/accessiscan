@@ -32,14 +32,14 @@ export function TrustStrip() {
                 {s.label}
               </p>
               {s.pop !== "—" && (
-                <p className="font-mono text-[10px] text-slate-400">
+                <p className="font-mono text-[10px] text-slate-500">
                   pop. {s.pop}
                 </p>
               )}
             </li>
           ))}
         </ul>
-        <p className="mt-8 text-center text-[10px] text-slate-400">
+        <p className="mt-8 text-center text-[10px] text-slate-500">
           Designed for DOJ Title II public entities &middot; sample buyer profile
         </p>
       </div>

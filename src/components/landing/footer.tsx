@@ -102,7 +102,7 @@ export function Footer() {
                     {app.name}
                   </span>
                   <ArrowUpRight
-                    className="h-4 w-4 text-white/50 transition-all group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-[#06b6d4]"
+                    className="h-4 w-4 text-white/50 transition-all group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-[#0e7490]"
                     aria-hidden
                   />
                 </div>

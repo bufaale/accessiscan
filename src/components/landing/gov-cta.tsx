@@ -28,7 +28,7 @@ export function GovCTA() {
     <section id="government" className="bg-slate-50">
       <div className="mx-auto max-w-[1440px] px-6 py-24">
         <div className="max-w-3xl">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#06b6d4]">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#0e7490]">
             For government &amp; enterprise procurement
           </p>
           <h2 className="mt-3 font-display text-4xl font-semibold leading-tight tracking-tight text-[#0b1f3a] sm:text-5xl">

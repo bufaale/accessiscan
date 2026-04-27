@@ -45,13 +45,13 @@ export default async function BlogPostPage({
       <div className="mx-auto max-w-[780px] px-6 py-16">
         <Link
           href="/blog"
-          className="text-sm text-[#06b6d4] hover:underline"
+          className="text-sm text-[#0e7490] hover:underline"
         >
           ← All posts
         </Link>
 
         <header className="mt-6 border-b border-slate-200 pb-8">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#06b6d4]">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#0e7490]">
             AccessiScan · {post.date} · {post.readMinutes} min read
           </p>
           <h1 className="mt-3 font-display text-4xl font-bold leading-tight tracking-tight text-[#0b1f3a] sm:text-5xl">

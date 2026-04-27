@@ -502,7 +502,7 @@ function PrMockup() {
    <p
 `}
           <span style={{ background: "rgba(248,81,73,0.15)", color: "#ffa198" }}>
-            {`-    className="text-slate-400 text-sm"  // 2.8:1 contrast`}
+            {`-    className="text-slate-500 text-sm"  // 2.8:1 contrast`}
           </span>
           {`
 `}

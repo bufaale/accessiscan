@@ -18,9 +18,9 @@ const ROWS: Row[] = [
 ];
 
 function Cell({ value }: { value: "yes" | "no" | "partial" }) {
-  if (value === "yes") return <Check className="h-4 w-4 text-[#06b6d4]" strokeWidth={2.5} />;
+  if (value === "yes") return <Check className="h-4 w-4 text-[#0e7490]" strokeWidth={2.5} />;
   if (value === "partial")
-    return <MinusCircle className="h-4 w-4 text-slate-400" strokeWidth={2} />;
+    return <MinusCircle className="h-4 w-4 text-slate-500" strokeWidth={2} />;
   return <X className="h-4 w-4 text-slate-300" strokeWidth={2} />;
 }
 
@@ -29,7 +29,7 @@ export function Comparison() {
     <section id="comparison" className="bg-white">
       <div className="mx-auto max-w-[1440px] px-6 py-24">
         <div className="max-w-3xl">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#06b6d4]">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#0e7490]">
             Competitive landscape
           </p>
           <h2 className="mt-3 font-display text-4xl font-semibold leading-tight tracking-tight text-[#0b1f3a] sm:text-5xl">
@@ -85,10 +85,10 @@ export function Comparison() {
 
         <div className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-2 text-xs text-slate-500">
           <span className="inline-flex items-center gap-1.5">
-            <Check className="h-3 w-3 text-[#06b6d4]" strokeWidth={3} /> Fully supported
+            <Check className="h-3 w-3 text-[#0e7490]" strokeWidth={3} /> Fully supported
           </span>
           <span className="inline-flex items-center gap-1.5">
-            <MinusCircle className="h-3 w-3 text-slate-400" /> Partial or add-on
+            <MinusCircle className="h-3 w-3 text-slate-500" /> Partial or add-on
           </span>
           <span className="inline-flex items-center gap-1.5">
             <X className="h-3 w-3 text-slate-300" /> Not available

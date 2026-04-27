@@ -62,10 +62,10 @@ const CATEGORY_LABEL: Record<string, string> = {
 };
 
 const STATUS_ICON: Record<Status, React.ReactNode> = {
-  pending: <Clock className="h-4 w-4 text-slate-400" />,
+  pending: <Clock className="h-4 w-4 text-slate-500" />,
   passed: <CheckCircle2 className="h-4 w-4 text-emerald-600" />,
   failed: <XCircle className="h-4 w-4 text-red-600" />,
-  not_applicable: <MinusCircle className="h-4 w-4 text-slate-400" />,
+  not_applicable: <MinusCircle className="h-4 w-4 text-slate-500" />,
 };
 
 export default function ScanIgtsPage({

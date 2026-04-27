@@ -13,7 +13,7 @@ export function Stats() {
           <div key={stat.label} className="flex flex-col items-start px-0 md:px-6 py-4">
             <span
               className={`font-display text-4xl font-bold tracking-tight sm:text-5xl lg:text-[56px] ${
-                stat.accent ? "text-[#06b6d4]" : "text-[#0b1f3a]"
+                stat.accent ? "text-[#0e7490]" : "text-[#0b1f3a]"
               }`}
             >
               {stat.value}

@@ -53,7 +53,7 @@ export default function OverlayDetectorPage() {
 
       <section className="mx-auto max-w-[1100px] px-6 py-20">
         <div className="max-w-3xl">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#06b6d4]">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#0e7490]">
             Why overlays are a liability
           </p>
           <h2 className="mt-3 font-display text-3xl font-semibold leading-tight tracking-tight sm:text-4xl">
@@ -108,7 +108,7 @@ export default function OverlayDetectorPage() {
         <div className="mx-auto max-w-[1100px] px-6 py-20">
           <div className="grid gap-10 lg:grid-cols-[1.2fr_1fr] lg:items-center">
             <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#06b6d4]">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#0e7490]">
                 The real solution
               </p>
               <h2 className="mt-3 font-display text-3xl font-semibold leading-tight tracking-tight sm:text-4xl">
@@ -136,7 +136,7 @@ export default function OverlayDetectorPage() {
               </div>
             </div>
             <div className="rounded-md border border-slate-200 bg-white p-6">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[#06b6d4]">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[#0e7490]">
                 What AccessiScan ships that overlays don&apos;t
               </p>
               <ul className="mt-5 space-y-3 text-sm text-slate-700">

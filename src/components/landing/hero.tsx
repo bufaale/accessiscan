@@ -20,7 +20,7 @@ export function Hero() {
         <div>
           <div className="inline-flex items-center gap-2 rounded-sm border border-[#06b6d4]/40 bg-[#06b6d4]/10 px-3 py-1.5 backdrop-blur-sm">
             <span className="h-1.5 w-1.5 rounded-full bg-[#06b6d4]" />
-            <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#06b6d4]">
+            <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#0e7490]">
               ADA Title II · WCAG 2.1 AA · VPAT 2.5
             </span>
           </div>
@@ -39,7 +39,7 @@ export function Hero() {
           <figure className="mt-8 max-w-xl rounded-md border border-white/10 bg-white/5 p-6 backdrop-blur-sm">
             <div className="flex items-start gap-4">
               <span
-                className="font-display text-5xl font-bold leading-none text-[#06b6d4]"
+                className="font-display text-5xl font-bold leading-none text-[#0e7490]"
                 aria-hidden
               >
                 “
@@ -47,7 +47,7 @@ export function Hero() {
               <div className="flex-1 pt-1">
                 <blockquote className="text-xl leading-snug text-white">
                   The FTC fined accessiBe{" "}
-                  <span className="text-[#06b6d4]">$1M</span> for deceptive
+                  <span className="text-[#0e7490]">$1M</span> for deceptive
                   &ldquo;fully compliant&rdquo; claims.
                 </blockquote>
                 <figcaption className="mt-3 text-[11px] uppercase tracking-[0.14em] text-white/50">
@@ -94,7 +94,7 @@ export function Hero() {
 function TrustItem({ children }: { children: React.ReactNode }) {
   return (
     <span className="inline-flex items-center gap-1.5">
-      <CheckCircle2 className="h-3.5 w-3.5 text-[#06b6d4]" />
+      <CheckCircle2 className="h-3.5 w-3.5 text-[#0e7490]" />
       {children}
     </span>
   );
@@ -204,7 +204,7 @@ function CriterionChip({
     <div
       className={`absolute z-20 flex items-center gap-2 rounded-sm border border-[#06b6d4]/40 bg-[#0b1f3a] px-2.5 py-1.5 shadow-lg backdrop-blur-sm ${className}`}
     >
-      <span className="font-mono text-[11px] font-bold text-[#06b6d4]">{id}</span>
+      <span className="font-mono text-[11px] font-bold text-[#0e7490]">{id}</span>
       <span className="text-[10px] uppercase tracking-[0.1em] text-white/70">
         {label}
       </span>
