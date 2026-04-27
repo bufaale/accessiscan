@@ -13,14 +13,15 @@ import {
 } from "@/components/ui/sheet";
 
 // Anchors must match the IDs rendered by the v2 landing page (Hero/Comparison/
-// CTA/Pricing sections). #product → #features, #government → #cta. Otherwise
-// users land on a page where the navbar links scroll to nothing.
+// CTA/Pricing/Faq sections). #product → #features, #government → #cta.
+// Otherwise users land on a page where the navbar links scroll to nothing.
 const navLinks = [
   { href: "#features", label: "Product" },
   { href: "#comparison", label: "Comparison" },
   { href: "#cta", label: "Government" },
   { href: "/overlay-detector", label: "Overlay detector" },
   { href: "#pricing", label: "Pricing" },
+  { href: "#faq", label: "FAQ" },
 ];
 
 export function Navbar() {
