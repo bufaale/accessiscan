@@ -30,13 +30,18 @@ test.describe("Bug #7 — dashboard renders 'Crawling' badge for in-progress sca
   // Pure logic test — the bug was a `case "scanning"` in a switch where the DB
   // enum value is `"crawling"`. We assert the dashboard source contains the
   // correct case statement.
-  test("dashboard switch matches DB enum value 'crawling'", async () => {
+  test("dashboard status map uses 'crawling' key (matching DB enum), not 'scanning'", async () => {
+    // The original implementation used a switch case; it was refactored
+    // to an object lookup (`crawling: { color, label }`). Both shapes are
+    // accepted as long as the canonical key is present and the obsolete
+    // 'scanning' typo never reappears.
     const fs = await import("node:fs/promises");
     const path = await import("node:path");
     const file = path.resolve(process.cwd(), "src/app/(dashboard)/dashboard/page.tsx");
     const src = await fs.readFile(file, "utf8");
-    expect(src).toContain('case "crawling"');
+    expect(src).toMatch(/crawling\s*:\s*\{|case\s+"crawling"/);
     expect(src).not.toContain('case "scanning"');
+    expect(src).not.toMatch(/\bscanning\s*:\s*\{/);
   });
 });
 

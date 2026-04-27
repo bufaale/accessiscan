@@ -583,7 +583,7 @@ function Pricing() {
       per: "/mo",
       desc: "For developers and contractors filing VPATs.",
       features: ["3 sites · unlimited pages", "VPAT 2.5 export", "Auto-Fix PR (GitHub)", "CI/CD action", "Continuous monitoring"],
-      cta: "Start 14-day trial",
+      cta: "Start free — upgrade anytime",
       popular: true,
     },
     {
@@ -592,7 +592,7 @@ function Pricing() {
       per: "/mo",
       desc: "For agencies and multi-site operators.",
       features: ["25 sites · multi-tenant", "Client-branded VPAT exports", "Section 508 + EN 301 549 reports", "Priority support · SSO", "Volume discounts on overage"],
-      cta: "Start 14-day trial",
+      cta: "Start free — upgrade anytime",
       popular: false,
     },
   ];
