@@ -267,13 +267,18 @@ test.describe("Pro-tier full journey: login → dashboard → seeded scan → re
       const scanRow = page.locator(`[data-scan-id="${seeded.id}"]`).first();
       await scanRow.click();
       await page.waitForURL(new RegExp(`/dashboard/scans/${seeded.id}`), {
-        timeout: 10_000,
+        timeout: 15_000,
       });
       await page.waitForLoadState("networkidle");
-      // The async fetch + setLoading takes a moment after networkidle
-      await page.waitForTimeout(1500);
+      // The result page does an async fetch + profile + github_install
+      // checks. Under parallel-test load this can take a few seconds.
+      // Wait for the URL to actually appear in the DOM rather than a fixed
+      // timeout — more robust than a sleep.
+      await page
+        .getByText(seeded.url, { exact: false })
+        .first()
+        .waitFor({ timeout: 20_000 });
 
-      // Result page shows score + URL
       const resultBody = await page.locator("body").innerText();
       expect(resultBody).toContain(seeded.url);
       expect(resultBody).toMatch(/\b91\b/);
