@@ -1,0 +1,191 @@
+{
+  "$schema": "Auditor Phase 1 output — inventory of everything to verify",
+  "app": "AccessiScan",
+  "directory": "app-04-ada-scanner",
+  "branch_audited": "claude-design-landing",
+  "audit_run_at": "2026-04-26T22:50:00-03:00",
+  "production_domain": "accessiscan.piposlab.com",
+  "preview_domain": "app-04-ada-scanner.vercel.app",
+
+  "landing_promises": [
+    {"line": "hero h1", "promise": "Real WCAG 2.1 AA compliance — not an overlay band-aid"},
+    {"line": "hero p", "promise": "ships actual fix code, a VPAT 2.5 export, and a CI/CD action — from $19/mo"},
+    {"line": "hero badge", "promise": "ADA Title II · WCAG 2.1 AA · VPAT 2.5"},
+    {"line": "hero pull-quote", "promise": "FTC fined accessiBe $1M for deceptive 'fully compliant' claims"},
+    {"line": "hero CTA primary", "promise": "Start free Title II scan", "destination": "/signup"},
+    {"line": "hero CTA secondary", "promise": "See how we compare", "destination": "#comparison"},
+    {"line": "hero trust strip", "promise": "No credit card required"},
+    {"line": "hero trust strip", "promise": "Free tier · 2 scans/mo"},
+    {"line": "hero trust strip", "promise": "Not an overlay"},
+    {"line": "stripe-plans Free", "promise": "WCAG 2.1 Level A/AA checks"},
+    {"line": "stripe-plans Pro", "promise": "WCAG 2.1 & 2.2 A/AA checks"},
+    {"line": "stripe-plans Pro", "promise": "AI-powered fix suggestions"},
+    {"line": "stripe-plans Pro", "promise": "VPAT 2.5 generation"},
+    {"line": "stripe-plans Pro", "promise": "EN 301 549 (EU) report export"},
+    {"line": "stripe-plans Pro", "promise": "GitHub Action for CI/CD"},
+    {"line": "stripe-plans Pro", "promise": "Multi-site tracking"},
+    {"line": "stripe-plans Pro", "promise": "PDF report export"},
+    {"line": "stripe-plans Agency", "promise": "Unlimited scans"},
+    {"line": "stripe-plans Agency", "promise": "White-label PDF + VPAT reports"},
+    {"line": "stripe-plans Agency", "promise": "API access"},
+    {"line": "stripe-plans Business", "promise": "Auto-Fix PRs against your GitHub repo (Phase 1: 6 axe rules)"},
+    {"line": "stripe-plans Business", "promise": "Continuous monitoring (weekly auto-scans)"},
+    {"line": "stripe-plans Business", "promise": "Regression alerts via email + Slack"},
+    {"line": "stripe-plans Business", "promise": "Up to 10 monitored properties"},
+    {"line": "stripe-plans Business", "promise": "Jira / Linear / GitHub Issue push"}
+  ],
+
+  "routes": {
+    "public_marketing": [
+      {"path": "/", "file": "src/app/(marketing)/page.tsx", "purpose": "Landing"},
+      {"path": "/blog", "file": "src/app/(marketing)/blog/page.tsx", "purpose": "Blog index"},
+      {"path": "/blog/[slug]", "file": "src/app/(marketing)/blog/[slug]/page.tsx", "purpose": "Blog post"},
+      {"path": "/terms", "file": "src/app/(marketing)/terms/page.tsx", "purpose": "Terms of Service"},
+      {"path": "/privacy", "file": "src/app/(marketing)/privacy/page.tsx", "purpose": "Privacy Policy"},
+      {"path": "/refund", "file": "src/app/(marketing)/refund/page.tsx", "purpose": "Refund Policy"},
+      {"path": "/why-not-overlays", "file": "src/app/(marketing)/why-not-overlays/page.tsx", "purpose": "Editorial: anti-overlay"},
+      {"path": "/overlay-detector", "file": "src/app/(marketing)/overlay-detector/page.tsx", "purpose": "Free tool: detect overlays"},
+      {"path": "/free/wcag-scanner", "file": "src/app/(marketing)/free/wcag-scanner/page.tsx", "purpose": "Free tool: WCAG quick scan"}
+    ],
+    "auth": [
+      {"path": "/login", "file": "src/app/(auth)/login/page.tsx"},
+      {"path": "/signup", "file": "src/app/(auth)/signup/page.tsx"},
+      {"path": "/forgot-password", "file": "src/app/(auth)/forgot-password/page.tsx"}
+    ],
+    "protected_dashboard": [
+      {"path": "/dashboard", "file": "src/app/(dashboard)/dashboard/page.tsx", "purpose": "KPIs + recent activity"},
+      {"path": "/dashboard/scans", "file": "src/app/(dashboard)/dashboard/scans/page.tsx", "purpose": "Scan history"},
+      {"path": "/dashboard/scans/new", "file": "src/app/(dashboard)/dashboard/scans/new/page.tsx", "purpose": "Trigger new scan"},
+      {"path": "/dashboard/scans/[id]", "file": "src/app/(dashboard)/dashboard/scans/[id]/page.tsx", "purpose": "Scan results + violations"},
+      {"path": "/dashboard/scans/[id]/igts", "file": "src/app/(dashboard)/dashboard/scans/[id]/igts/page.tsx", "purpose": "Intelligent guided tests"},
+      {"path": "/dashboard/sites/[domain]", "file": "src/app/(dashboard)/dashboard/sites/[domain]/page.tsx", "purpose": "Site detail"},
+      {"path": "/dashboard/monitored", "file": "src/app/(dashboard)/dashboard/monitored/page.tsx", "purpose": "Continuous monitoring config"},
+      {"path": "/dashboard/pdf-scans", "file": "src/app/(dashboard)/dashboard/pdf-scans/page.tsx", "purpose": "PDF document accessibility"},
+      {"path": "/admin", "file": "src/app/(dashboard)/admin/page.tsx", "purpose": "Admin panel (role: admin only)"}
+    ],
+    "protected_settings": [
+      {"path": "/settings", "file": "src/app/(dashboard)/settings/page.tsx", "purpose": "Profile"},
+      {"path": "/settings/billing", "file": "src/app/(dashboard)/settings/billing/page.tsx", "purpose": "Stripe portal entry"},
+      {"path": "/settings/github", "file": "src/app/(dashboard)/settings/github/page.tsx", "purpose": "GitHub App connection"}
+    ],
+    "v2_preview_to_skip_in_audit": [
+      "/v2", "/dashboard-v2-preview", "/scan-result-v2-preview", "/billing-v2-preview",
+      "/new-scan-v2-preview", "/pricing-v2-preview", "/login-v2-preview", "/signup-v2-preview",
+      "/forgot-password-v2-preview", "/scan-history-v2-preview", "/profile-v2-preview", "/monitored-sites-v2-preview"
+    ]
+  },
+
+  "api_endpoints": {
+    "auth": ["POST /api/auth/signout"],
+    "stripe": [
+      "POST /api/stripe/checkout",
+      "POST /api/stripe/portal",
+      "POST /api/stripe/webhook"
+    ],
+    "scans": [
+      "GET POST /api/scans",
+      "GET DELETE /api/scans/[id]",
+      "GET /api/scans/[id]/pdf",
+      "GET /api/scans/[id]/vpat",
+      "POST /api/scans/[id]/issues/[issueId]/push",
+      "GET /api/scans/[id]/igts",
+      "GET /api/scans/[id]/igts/[templateId]"
+    ],
+    "sites": ["GET POST /api/sites"],
+    "monitored": [
+      "GET POST /api/monitored",
+      "GET PATCH DELETE /api/monitored/[id]"
+    ],
+    "pdf_scans": [
+      "GET POST /api/pdf-scans",
+      "GET /api/pdf-scans/[id]"
+    ],
+    "github": [
+      "GET /api/github-app/callback",
+      "POST /api/github-action/auto-fix"
+    ],
+    "trackers": ["GET POST /api/trackers"],
+    "account": ["DELETE /api/account/delete"],
+    "free_tools": [
+      "POST /api/free/wcag-scan",
+      "POST /api/overlay-check"
+    ],
+    "cron": ["GET /api/cron/continuous-scans"],
+    "ops": ["GET /api/stats", "GET /api/health", "POST /api/report-error"]
+  },
+
+  "stripe_tiers": [
+    {"id": "free", "monthly": 0, "yearly": 0, "scans_per_month": 2, "deep_scan": false, "stripe_price_id_envvar": null},
+    {"id": "pro", "monthly": 19, "yearly": 190, "scans_per_month": 30, "deep_scan": true, "stripe_price_id_envvar": "NEXT_PUBLIC_STRIPE_PRO_MONTHLY_PRICE_ID"},
+    {"id": "agency", "monthly": 49, "yearly": 490, "scans_per_month": -1, "deep_scan": true, "stripe_price_id_envvar": "NEXT_PUBLIC_STRIPE_AGENCY_MONTHLY_PRICE_ID"},
+    {"id": "business", "monthly": 299, "yearly": 2990, "scans_per_month": -1, "deep_scan": true, "stripe_price_id_envvar": "NEXT_PUBLIC_STRIPE_BUSINESS_MONTHLY_PRICE_ID"},
+    {"id": "team", "monthly": 599, "yearly": 5990, "scans_per_month": -1, "deep_scan": true, "stripe_price_id_envvar": null, "contact_sales": true}
+  ],
+
+  "supabase_tables": [
+    {"migration": "00001", "tables": "users, profiles (initial schema)"},
+    {"migration": "00002", "purpose": "admin RLS policies"},
+    {"migration": "00003", "tables": "scans, scan_violations, sites"},
+    {"migration": "00004", "tables": "issue_tracker_integrations (Jira/Linear/GitHub)"},
+    {"migration": "00005", "tables": "scan_visual_issues"},
+    {"migration": "00006", "tables": "monitored_sites, monitor_scan_runs (continuous monitoring)"},
+    {"migration": "00007", "tables": "intelligent_guided_tests"},
+    {"migration": "00008", "tables": "pdf_scans"},
+    {"migration": "00009", "tables": "stripe_events_processed (idempotency)"},
+    {"migration": "00010", "purpose": "scans visual_ai columns"},
+    {"migration": "00011", "purpose": "scans visual_issues_count"},
+    {"migration": "00012", "tables": "github_integrations (Auto-Fix PR feature)"},
+    {"migration": "00013", "tables": "audit_events"}
+  ],
+
+  "interactive_components_to_audit": [
+    {"route": "/", "type": "anchor", "target": "#comparison", "label": "See how we compare"},
+    {"route": "/", "type": "cta", "target": "/signup", "label": "Start free Title II scan"},
+    {"route": "/signup", "type": "form", "fields": ["email", "password", "fullName"], "submit": "Supabase auth"},
+    {"route": "/login", "type": "form", "fields": ["email", "password"], "submit": "Supabase auth"},
+    {"route": "/forgot-password", "type": "form", "fields": ["email"], "submit": "Supabase reset email"},
+    {"route": "/dashboard/scans/new", "type": "form", "fields": ["url", "scanType (quick|deep)"], "submit": "POST /api/scans"},
+    {"route": "/dashboard/scans/[id]", "type": "actions", "buttons": ["Export PDF", "Export VPAT", "Push to issue tracker", "Open Auto-Fix PR (Business+)"]},
+    {"route": "/dashboard/monitored", "type": "form", "fields": ["url", "frequency"], "submit": "POST /api/monitored"},
+    {"route": "/dashboard/pdf-scans", "type": "form-upload", "fields": ["pdf file"], "submit": "POST /api/pdf-scans"},
+    {"route": "/settings", "type": "form", "fields": ["fullName", "email"], "submit": "PATCH profile"},
+    {"route": "/settings/billing", "type": "actions", "buttons": ["Upgrade to Pro", "Upgrade to Agency", "Upgrade to Business", "Manage subscription"]},
+    {"route": "/settings/github", "type": "actions", "buttons": ["Install GitHub App", "Disconnect"]},
+    {"route": "/free/wcag-scanner", "type": "form", "fields": ["url"], "submit": "POST /api/free/wcag-scan"},
+    {"route": "/overlay-detector", "type": "form", "fields": ["url"], "submit": "POST /api/overlay-check"}
+  ],
+
+  "external_links_to_verify": [
+    {"location": "footer", "should_point_to": "https://github.com/bufaale/accessiscan"},
+    {"location": "footer", "should_point_to": "https://x.com/piposlab"},
+    {"location": "PDF report footer", "should_point_to": "https://accessiscan.piposlab.com"},
+    {"location": "siteConfig.url", "should_be": "https://accessiscan.piposlab.com"}
+  ],
+
+  "metadata_to_verify": {
+    "rule": "Tab title and meta description must include 'AccessiScan' brand on every public route. NEVER 'ADA Scanner', NEVER 'SaaS AI Boilerplate'.",
+    "routes_to_check": ["/", "/login", "/signup", "/forgot-password", "/pricing", "/blog", "/terms", "/privacy", "/refund"]
+  },
+
+  "existing_test_coverage_to_preserve": {
+    "specs": [
+      "auth.spec.ts", "landing.spec.ts", "navigation.spec.ts", "vpat.spec.ts",
+      "scan.spec.ts", "billing.spec.ts", "link-audit.spec.ts", "admin.spec.ts",
+      "monitored-flow.spec.ts", "settings-profile.spec.ts", "vpat-pdf-inspect.spec.ts",
+      "tier-gating.spec.ts", "bug-fixes-2026-04-25.spec.ts", "quick-wins-2026-04-25.spec.ts",
+      "free-wcag-scanner.spec.ts", "audit-infra.spec.ts", "bug-8-dashboard-error.spec.ts",
+      "pricing-update-2026-04-26.spec.ts", "audit-wiring.spec.ts", "cross-promo-urls.spec.ts"
+    ],
+    "note": "Phase 3 specs in tests/e2e/exhaustive/ ADD coverage; do not duplicate above"
+  },
+
+  "exhaustive_specs_to_generate": [
+    "branding.spec.ts — every public route's tab title + meta + footer say 'AccessiScan' (not 'ADA Scanner', not template names)",
+    "links.spec.ts — every internal link on every public route resolves 200; every external link points to correct domain",
+    "forms.spec.ts — every form has happy path + each Zod validation error case + loading/success states",
+    "stripe-tiers.spec.ts — full lifecycle for free/pro/agency/business: signup → checkout → portal → upgrade → cancel; team tier verifies contact-sales CTA",
+    "auth-gating.spec.ts — every protected route: signed-out → /login redirect; free → upgrade CTA visible; paid → access. Plus admin gating",
+    "empty-states.spec.ts — /dashboard, /dashboard/scans, /dashboard/monitored, /dashboard/pdf-scans, /settings/github with 0 data show CTA, no crash",
+    "error-states.spec.ts — POST /api/scans 500 → user-facing error UI; webhook fail → no double charge; expired Stripe session → graceful redirect"
+  ]
+}
