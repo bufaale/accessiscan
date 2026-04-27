@@ -57,3 +57,6 @@ CLAUDE.md
 # Claude Code worktrees + WIP
 .claude/worktrees/
 .claude/wip-backup/
+
+# Lighthouse CI artifacts
+.lighthouseci/

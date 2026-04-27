@@ -21,6 +21,10 @@ const C = {
   navy950: "#071428",
   navy800: "#122c4f",
   cyan500: "#06b6d4",
+  // cyan700 is the AA-safe text color (5.66:1 on white). cyan500 fails AA
+  // for body copy at 2.42:1 — use it only for backgrounds, borders, and
+  // decorative dots/icons.
+  cyan700: "#0e7490",
   cyan400: "#22d3ee",
   cyan50: "#ecfeff",
   red600: "#dc2626",
@@ -167,7 +171,7 @@ function Eyebrow({ children, color = "slate" }: { children: ReactNode; color?: E
         fontWeight: 600,
         letterSpacing: "0.14em",
         textTransform: "uppercase",
-        color: color === "cyan" ? C.cyan500 : color === "white55" ? "rgba(255,255,255,0.55)" : C.slate500,
+        color: color === "cyan" ? C.cyan700 : color === "white55" ? "rgba(255,255,255,0.55)" : C.slate600,
       }}
     >
       {children}
@@ -1173,7 +1177,8 @@ function tabStyle(active: boolean): CSSProperties {
     padding: "6px 14px",
     borderRadius: 6,
     background: active ? "#fff" : "transparent",
-    color: active ? C.navy900 : C.slate500,
+    // slate500 on slate100 = 4.34:1 (under AA). slate600 = 6.32:1 (AA pass).
+    color: active ? C.navy900 : C.slate600,
     fontFamily: F_SANS,
     fontWeight: 600,
     fontSize: 13,

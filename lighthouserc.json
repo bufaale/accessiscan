@@ -1,0 +1,39 @@
+{
+  "ci": {
+    "collect": {
+      "url": [
+        "https://app-04-ada-scanner.vercel.app/",
+        "https://app-04-ada-scanner.vercel.app/pricing",
+        "https://app-04-ada-scanner.vercel.app/login",
+        "https://app-04-ada-scanner.vercel.app/signup",
+        "https://app-04-ada-scanner.vercel.app/forgot-password",
+        "https://app-04-ada-scanner.vercel.app/why-not-overlays",
+        "https://app-04-ada-scanner.vercel.app/overlay-detector"
+      ],
+      "numberOfRuns": 3,
+      "settings": {
+        "preset": "desktop",
+        "throttlingMethod": "simulate"
+      }
+    },
+    "assert": {
+      "preset": "lighthouse:recommended",
+      "assertions": {
+        "categories:performance": ["error", { "minScore": 0.75 }],
+        "categories:accessibility": ["error", { "minScore": 0.95 }],
+        "categories:best-practices": ["error", { "minScore": 0.9 }],
+        "categories:seo": ["error", { "minScore": 0.95 }],
+        "csp-xss": "off",
+        "uses-rel-preconnect": "off",
+        "unused-javascript": "off",
+        "uses-responsive-images": "off",
+        "valid-source-maps": "off",
+        "errors-in-console": "off",
+        "is-on-https": "off"
+      }
+    },
+    "upload": {
+      "target": "temporary-public-storage"
+    }
+  }
+}

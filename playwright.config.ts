@@ -17,7 +17,12 @@ export default defineConfig({
   fullyParallel: false,
   retries: 1,
   timeout: 60_000,
-  expect: { timeout: 10_000 },
+  expect: {
+    timeout: 10_000,
+    // Visual regression tolerance — tight enough to catch real design
+    // regressions, loose enough to survive sub-pixel font hinting in CI.
+    toHaveScreenshot: { maxDiffPixelRatio: 0.01, threshold: 0.2 },
+  },
   use: {
     baseURL: BASE_URL,
     headless: true,
