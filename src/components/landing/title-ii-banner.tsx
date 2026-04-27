@@ -98,5 +98,5 @@ function TimeBlock({ label, value }: { label: string; value: number }) {
 }
 
 function Separator() {
-  return <span className="text-white/40 text-base leading-none" aria-hidden>·</span>;
+  return <span className="text-white/60 text-base leading-none" aria-hidden>·</span>;
 }

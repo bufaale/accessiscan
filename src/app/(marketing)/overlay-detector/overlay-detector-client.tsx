@@ -46,7 +46,7 @@ export function OverlayDetectorClient() {
           value={url}
           onChange={(e) => setUrl(e.target.value)}
           placeholder="https://example.com"
-          className="h-12 flex-1 rounded-md border border-white/15 bg-white/10 px-4 text-sm text-white placeholder:text-white/40 focus:border-[#06b6d4] focus:outline-none focus:ring-1 focus:ring-[#06b6d4]"
+          className="h-12 flex-1 rounded-md border border-white/15 bg-white/10 px-4 text-sm text-white placeholder:text-white/60 focus:border-[#06b6d4] focus:outline-none focus:ring-1 focus:ring-[#06b6d4]"
           required
           autoComplete="url"
         />

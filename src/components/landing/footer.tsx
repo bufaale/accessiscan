@@ -107,7 +107,7 @@ export function Footer() {
                   />
                 </div>
                 <p className="mt-1 text-sm text-white/60">{app.tagline}</p>
-                <p className="mt-auto pt-3 font-mono text-xs text-white/40">
+                <p className="mt-auto pt-3 font-mono text-xs text-white/60">
                   {app.price}
                 </p>
               </a>
@@ -116,10 +116,10 @@ export function Footer() {
         </section>
 
         <div className="mt-12 flex flex-col items-start justify-between gap-3 border-t border-white/10 pt-8 md:flex-row md:items-center">
-          <p className="text-xs text-white/50">
+          <p className="text-xs text-white/60">
             &copy; {new Date().getFullYear()} AccessiScan, Inc. All rights reserved.
           </p>
-          <p className="text-xs text-white/40">
+          <p className="text-xs text-white/60">
             AccessiScan does not warrant legal compliance. Consult qualified counsel.
           </p>
         </div>
