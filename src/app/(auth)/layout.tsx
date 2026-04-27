@@ -1,23 +1,10 @@
-import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
-
+// Pass-through layout — login/signup use the v2 AuthShell which renders a
+// full-page split-panel layout. forgot-password supplies its own centered
+// container in its page.tsx (the v2 redesign for forgot-password is pending).
 export default function AuthLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  return (
-    <div className="flex min-h-screen items-center justify-center bg-muted/40 p-4">
-      <div className="w-full max-w-md space-y-4">
-        <Link
-          href="/"
-          className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Back to home
-        </Link>
-        {children}
-      </div>
-    </div>
-  );
+  return <>{children}</>;
 }
