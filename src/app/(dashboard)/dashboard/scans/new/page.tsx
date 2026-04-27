@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, Suspense, type CSSProperties } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
 import { createBrowserClient } from "@supabase/ssr";
 import { toast } from "sonner";
 import type { Scan } from "@/types/database";
@@ -13,12 +14,34 @@ const NAVY = "#0b1f3a";
 const NAVY_HOVER = "#071428";
 const CYAN = "#06b6d4";
 const RED = "#dc2626";
+const GREEN = "#16a34a";
 const SLATE_50 = "#f8fafc";
 const SLATE_100 = "#f1f5f9";
 const SLATE_200 = "#e2e8f0";
 const SLATE_300 = "#cbd5e1";
 const SLATE_400 = "#94a3b8";
 const SLATE_500 = "#64748b";
+
+type WcagLevel = "2.1-A" | "2.1-AA" | "2.2-AA" | "AAA";
+const WCAG_LEVELS: { value: WcagLevel; label: string; hint: string }[] = [
+  { value: "2.1-A", label: "2.1 A", hint: "Minimum" },
+  { value: "2.1-AA", label: "2.1 AA", hint: "DOJ Title II · default" },
+  { value: "2.2-AA", label: "2.2 AA", hint: "Latest standard" },
+  { value: "AAA", label: "AAA", hint: "Aspirational" },
+];
+
+interface RecentScan {
+  id: string;
+  url: string;
+  domain: string;
+  status: Scan["status"];
+  compliance_score: number | null;
+  created_at: string;
+}
+
+interface GithubInstall {
+  github_account_login: string;
+}
 
 const statusMessages: Record<Scan["status"], string> = {
   pending: "Waiting to start...",
@@ -49,15 +72,23 @@ function NewScanContent() {
   const searchParams = useSearchParams();
   const [url, setUrl] = useState(searchParams.get("url") ?? "");
   const [scanType, setScanType] = useState<"quick" | "deep">("quick");
+  const [wcagLevel, setWcagLevel] = useState<WcagLevel>("2.1-AA");
+  const [autoFixEnabled, setAutoFixEnabled] = useState(false);
   const [loading, setLoading] = useState(false);
   const [scanId, setScanId] = useState<string | null>(null);
   const [status, setStatus] = useState<Scan["status"] | null>(null);
   const [progress, setProgress] = useState(0);
+  const [subscriptionPlan, setSubscriptionPlan] = useState<string>("free");
   const [canDeepScan, setCanDeepScan] = useState(false);
+  const [githubInstall, setGithubInstall] = useState<GithubInstall | null>(null);
+  const [recentScans, setRecentScans] = useState<RecentScan[]>([]);
 
-  // Fetch user's plan to determine if deep scan is available
+  const isBusinessTier = subscriptionPlan === "business";
+  const hasGithubInstall = !!githubInstall;
+
+  // Fetch user's plan + GitHub install state in one effect
   useEffect(() => {
-    async function fetchPlan() {
+    async function fetchProfileAndInstall() {
       const supabase = createBrowserClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
         process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -74,9 +105,39 @@ function NewScanContent() {
         .single();
 
       const plan = profile?.subscription_plan ?? "free";
+      setSubscriptionPlan(plan);
       setCanDeepScan(plan !== "free");
+
+      const { data: install } = await supabase
+        .from("github_installations")
+        .select("github_account_login")
+        .is("revoked_at", null)
+        .limit(1)
+        .maybeSingle();
+      if (install) {
+        setGithubInstall({ github_account_login: install.github_account_login });
+        // Default toggle ON when Business + connected
+        if (plan === "business") setAutoFixEnabled(true);
+      }
     }
-    fetchPlan();
+    fetchProfileAndInstall();
+  }, []);
+
+  // Fetch recent scans for "Recently scanned" section
+  useEffect(() => {
+    async function fetchRecent() {
+      try {
+        const res = await fetch("/api/scans?limit=5");
+        if (!res.ok) return;
+        const data = await res.json();
+        if (Array.isArray(data?.scans)) {
+          setRecentScans(data.scans as RecentScan[]);
+        }
+      } catch {
+        /* ignore */
+      }
+    }
+    fetchRecent();
   }, []);
 
   const handleScanUpdate = useCallback(
@@ -164,7 +225,15 @@ function NewScanContent() {
       const res = await fetch("/api/scans", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url: fullUrl, scan_type: scanType }),
+        body: JSON.stringify({
+          url: fullUrl,
+          scan_type: scanType,
+          // wcag_level + generate_auto_fix are forward-compat fields. The
+          // current /api/scans Zod schema ignores extras, so sending these
+          // does not break the existing happy path.
+          wcag_level: wcagLevel,
+          generate_auto_fix: autoFixEnabled && isBusinessTier && hasGithubInstall,
+        }),
       });
       if (res.status === 403) {
         const data = await res.json();
@@ -195,7 +264,7 @@ function NewScanContent() {
       setLoading(false);
       setStatus(null);
     }
-  }, [url, scanType]);
+  }, [url, scanType, wcagLevel, autoFixEnabled, isBusinessTier, hasGithubInstall]);
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 18, padding: "24px 28px 48px", color: NAVY }}>
@@ -244,6 +313,20 @@ function NewScanContent() {
           </div>
         </div>
 
+        <WcagLevelSelector
+          value={wcagLevel}
+          disabled={loading}
+          onChange={setWcagLevel}
+        />
+
+        <AutoFixSection
+          enabled={autoFixEnabled}
+          disabled={loading}
+          isBusinessTier={isBusinessTier}
+          install={githubInstall}
+          onToggle={() => setAutoFixEnabled((v) => !v)}
+        />
+
         <button
           type="button"
           onClick={handleSubmit}
@@ -287,6 +370,429 @@ function NewScanContent() {
           </ul>
         </div>
       )}
+
+      {!status && recentScans.length > 0 && (
+        <RecentlyScanned scans={recentScans} />
+      )}
+    </div>
+  );
+}
+
+function WcagLevelSelector({
+  value,
+  disabled,
+  onChange,
+}: {
+  value: WcagLevel;
+  disabled: boolean;
+  onChange: (next: WcagLevel) => void;
+}) {
+  return (
+    <div style={{ marginTop: 18 }} data-testid="wcag-level-selector">
+      <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: 8 }}>
+        <span style={{ fontFamily: FONT_INTER, fontSize: 13, fontWeight: 600, color: NAVY }}>WCAG level</span>
+        <span style={{ fontFamily: FONT_INTER, fontSize: 11.5, color: SLATE_500 }}>
+          VPAT 2.5 maps A & AA. AAA is rarely required.
+        </span>
+      </div>
+      <div
+        role="radiogroup"
+        aria-label="WCAG level"
+        style={{
+          display: "grid",
+          gridTemplateColumns: `repeat(${WCAG_LEVELS.length}, 1fr)`,
+          background: SLATE_50,
+          border: `1px solid ${SLATE_200}`,
+          borderRadius: 6,
+          padding: 3,
+          gap: 2,
+        }}
+      >
+        {WCAG_LEVELS.map((opt) => {
+          const active = opt.value === value;
+          const containerStyle: CSSProperties = {
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "flex-start",
+            gap: 2,
+            padding: "8px 10px",
+            borderRadius: 4,
+            background: active ? "#fff" : "transparent",
+            border: 0,
+            boxShadow: active ? "0 1px 2px rgba(15,23,42,.06), 0 0 0 1px #cbd5e1" : "none",
+            cursor: disabled ? "not-allowed" : "pointer",
+            opacity: disabled ? 0.6 : 1,
+            textAlign: "left",
+            fontFamily: FONT_INTER,
+            transition: "background .15s",
+          };
+          return (
+            <button
+              key={opt.value}
+              type="button"
+              role="radio"
+              aria-checked={active ? "true" : "false"}
+              disabled={disabled}
+              onClick={() => onChange(opt.value)}
+              style={containerStyle}
+            >
+              <span style={{ fontSize: 12.5, fontWeight: 600, color: active ? NAVY : "#475569" }}>
+                {opt.label}
+              </span>
+              <span style={{ fontSize: 11, color: active ? SLATE_500 : SLATE_400 }}>{opt.hint}</span>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function AutoFixSection({
+  enabled,
+  disabled,
+  isBusinessTier,
+  install,
+  onToggle,
+}: {
+  enabled: boolean;
+  disabled: boolean;
+  isBusinessTier: boolean;
+  install: GithubInstall | null;
+  onToggle: () => void;
+}) {
+  const hasInstall = !!install;
+  // Toggle is interactive only for Business tier WITH an install
+  const toggleDisabled = disabled || !isBusinessTier || !hasInstall;
+
+  let badge: { label: string; bg: string; color: string; border?: string };
+  let hint: React.ReactNode;
+  let cta: React.ReactNode = null;
+
+  if (!isBusinessTier) {
+    badge = { label: "BUSINESS TIER", bg: SLATE_100, color: SLATE_500 };
+    hint = (
+      <>
+        Auto-Fix PRs are available on the Business plan.{" "}
+        <Link
+          href="/settings/billing"
+          style={{ color: CYAN, textDecoration: "none", fontWeight: 600 }}
+        >
+          Upgrade →
+        </Link>
+      </>
+    );
+  } else if (!hasInstall) {
+    badge = { label: "NOT CONNECTED", bg: SLATE_100, color: SLATE_500 };
+    hint = <>Connect the AccessiScan GitHub App to enable Auto-Fix PRs.</>;
+    cta = (
+      <Link
+        href="/settings/github"
+        style={{
+          fontFamily: FONT_INTER,
+          fontSize: 12,
+          fontWeight: 600,
+          color: NAVY,
+          textDecoration: "none",
+          marginTop: 6,
+          display: "inline-block",
+        }}
+      >
+        Connect GitHub →
+      </Link>
+    );
+  } else {
+    badge = {
+      label: "CONNECTED",
+      bg: "#ecfeff",
+      color: NAVY,
+      border: "1px solid rgba(6,182,212,0.35)",
+    };
+    hint = (
+      <>
+        Opens a PR against{" "}
+        <span
+          style={{
+            fontFamily: FONT_MONO,
+            color: NAVY,
+            fontWeight: 600,
+          }}
+        >
+          {install.github_account_login}
+        </span>{" "}
+        with patches for safe rules.
+      </>
+    );
+  }
+
+  return (
+    <div
+      data-testid="auto-fix-section"
+      style={{
+        marginTop: 18,
+        padding: 14,
+        border: `1px solid ${SLATE_200}`,
+        borderRadius: 6,
+        background: SLATE_50,
+        fontFamily: FONT_INTER,
+      }}
+    >
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "flex-start",
+          gap: 12,
+        }}
+      >
+        <div style={{ minWidth: 0 }}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+              flexWrap: "wrap",
+            }}
+          >
+            <span style={{ fontSize: 13, fontWeight: 600, color: NAVY }}>
+              Generate Auto-Fix PR
+            </span>
+            <span
+              data-testid="auto-fix-badge"
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                padding: "3px 8px",
+                borderRadius: 4,
+                fontSize: 10,
+                fontWeight: 700,
+                letterSpacing: "0.10em",
+                background: badge.bg,
+                color: badge.color,
+                border: badge.border,
+              }}
+            >
+              {badge.label}
+            </span>
+          </div>
+          <div
+            style={{
+              fontSize: 12,
+              color: SLATE_500,
+              marginTop: 4,
+              lineHeight: 1.5,
+            }}
+          >
+            {hint}
+          </div>
+          {cta}
+        </div>
+        <Toggle
+          checked={enabled && !toggleDisabled}
+          disabled={toggleDisabled}
+          onChange={onToggle}
+          ariaLabel="Generate Auto-Fix PR"
+        />
+      </div>
+    </div>
+  );
+}
+
+function Toggle({
+  checked,
+  disabled,
+  onChange,
+  ariaLabel,
+}: {
+  checked: boolean;
+  disabled: boolean;
+  onChange: () => void;
+  ariaLabel: string;
+}) {
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={checked ? "true" : "false"}
+      aria-label={ariaLabel}
+      disabled={disabled}
+      onClick={() => !disabled && onChange()}
+      style={{
+        width: 38,
+        height: 22,
+        padding: 2,
+        border: 0,
+        borderRadius: 9999,
+        background: disabled ? SLATE_200 : checked ? CYAN : SLATE_300,
+        cursor: disabled ? "not-allowed" : "pointer",
+        opacity: disabled ? 0.6 : 1,
+        position: "relative",
+        transition: "background .15s",
+        flexShrink: 0,
+      }}
+    >
+      <span
+        style={{
+          display: "block",
+          width: 18,
+          height: 18,
+          borderRadius: "50%",
+          background: "#fff",
+          transform: `translateX(${checked ? 16 : 0}px)`,
+          transition: "transform .15s",
+          boxShadow: "0 1px 2px rgba(15,23,42,.18)",
+        }}
+      />
+    </button>
+  );
+}
+
+function RecentlyScanned({ scans }: { scans: RecentScan[] }) {
+  function scoreColor(score: number | null): string {
+    if (score === null) return SLATE_300;
+    if (score >= 90) return GREEN;
+    if (score >= 80) return NAVY;
+    return RED;
+  }
+  function timeAgo(iso: string): string {
+    const then = new Date(iso).getTime();
+    const now = Date.now();
+    const diff = Math.max(0, now - then);
+    const m = Math.floor(diff / 60_000);
+    if (m < 1) return "just now";
+    if (m < 60) return `${m} min ago`;
+    const h = Math.floor(m / 60);
+    if (h < 24) return `${h} hr${h === 1 ? "" : "s"} ago`;
+    const d = Math.floor(h / 24);
+    if (d < 7) return `${d} day${d === 1 ? "" : "s"} ago`;
+    return new Date(iso).toLocaleDateString(undefined, { month: "short", day: "numeric" });
+  }
+  function statusLabel(status: Scan["status"]): string {
+    switch (status) {
+      case "completed":
+        return "Completed";
+      case "failed":
+        return "Failed";
+      case "pending":
+        return "Pending";
+      case "crawling":
+        return "Crawling";
+      case "analyzing":
+        return "Analyzing";
+      default:
+        return status;
+    }
+  }
+
+  return (
+    <div
+      data-testid="recently-scanned"
+      style={{
+        background: "#fff",
+        border: `1px solid ${SLATE_200}`,
+        borderRadius: 8,
+        overflow: "hidden",
+        maxWidth: 640,
+        fontFamily: FONT_INTER,
+      }}
+    >
+      <div
+        style={{
+          padding: "14px 18px",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          borderBottom: `1px solid ${SLATE_100}`,
+        }}
+      >
+        <span style={{ fontFamily: FONT_DISPLAY, fontWeight: 600, fontSize: 15, color: NAVY }}>
+          Recently scanned
+        </span>
+        <Link
+          href="/dashboard/scans"
+          style={{
+            fontSize: 12,
+            color: SLATE_500,
+            textDecoration: "none",
+            fontWeight: 500,
+          }}
+        >
+          View all <span style={{ color: CYAN }}>→</span>
+        </Link>
+      </div>
+      <ul style={{ listStyle: "none", margin: 0, padding: 0 }}>
+        {scans.map((scan, i) => {
+          const color = scoreColor(scan.compliance_score);
+          const isLast = i === scans.length - 1;
+          return (
+            <li
+              key={scan.id}
+              data-scan-id={scan.id}
+              style={{
+                borderBottom: isLast ? "none" : `1px solid ${SLATE_100}`,
+              }}
+            >
+              <Link
+                href={`/dashboard/scans/${scan.id}`}
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "1fr auto auto auto",
+                  alignItems: "center",
+                  gap: 14,
+                  padding: "12px 18px",
+                  fontSize: 13,
+                  textDecoration: "none",
+                  color: NAVY,
+                }}
+              >
+                <span
+                  style={{
+                    minWidth: 0,
+                    color: NAVY,
+                    fontWeight: 500,
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                  }}
+                >
+                  {scan.domain || scan.url}
+                </span>
+                <span style={{ color: SLATE_400, fontSize: 12 }}>
+                  {timeAgo(scan.created_at)}
+                </span>
+                <span
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: 5,
+                    padding: "2px 8px",
+                    borderRadius: 9999,
+                    background: SLATE_100,
+                    color: SLATE_500,
+                    fontSize: 10.5,
+                    fontWeight: 600,
+                    letterSpacing: "0.04em",
+                  }}
+                >
+                  {statusLabel(scan.status)}
+                </span>
+                <span
+                  style={{
+                    fontFamily: FONT_MONO,
+                    fontSize: 12.5,
+                    fontWeight: 700,
+                    color,
+                    minWidth: 32,
+                    textAlign: "right",
+                  }}
+                >
+                  {scan.compliance_score ?? "—"}
+                </span>
+              </Link>
+            </li>
+          );
+        })}
+      </ul>
     </div>
   );
 }
