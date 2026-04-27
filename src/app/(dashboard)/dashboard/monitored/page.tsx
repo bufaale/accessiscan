@@ -1,30 +1,23 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
 import Link from "next/link";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
-import {
-  Activity,
-  PlusCircle,
-  Loader2,
-  Trash2,
-  TrendingDown,
-  Globe,
-  Lock,
-} from "lucide-react";
+
+const FONT_DISPLAY = "var(--font-display), sans-serif";
+const FONT_INTER = "var(--font-inter), sans-serif";
+const FONT_MONO = "var(--font-mono), monospace";
+const NAVY = "#0b1f3a";
+const CYAN = "#06b6d4";
+const RED = "#dc2626";
+const AMBER_50 = "#fffbeb";
+const AMBER_700 = "#b45309";
+const AMBER_900 = "#78350f";
+const SLATE_50 = "#f8fafc";
+const SLATE_100 = "#f1f5f9";
+const SLATE_200 = "#e2e8f0";
+const SLATE_300 = "#cbd5e1";
+const SLATE_500 = "#64748b";
 
 interface MonitoredSite {
   id: string;
@@ -41,12 +34,30 @@ interface MonitoredSite {
   created_at: string;
 }
 
+const inputStyle: CSSProperties = {
+  width: "100%",
+  height: 40,
+  padding: "0 14px",
+  border: `1px solid ${SLATE_200}`,
+  borderRadius: 6,
+  fontSize: 13.5,
+  fontFamily: FONT_INTER,
+  color: NAVY,
+  background: "#fff",
+  outline: "none",
+};
+
+const selectStyle: CSSProperties = {
+  ...inputStyle,
+  appearance: "auto",
+};
+
 export default function MonitoredSitesPage() {
   const [sites, setSites] = useState<MonitoredSite[]>([]);
   const [loading, setLoading] = useState(true);
   const [gated, setGated] = useState(false);
 
-  // Form
+  // Form state
   const [url, setUrl] = useState("");
   const [label, setLabel] = useState("");
   const [cadence, setCadence] = useState<MonitoredSite["cadence"]>("weekly");
@@ -124,183 +135,275 @@ export default function MonitoredSitesPage() {
     await load();
   }
 
-  if (loading) {
-    return (
-      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-        <Loader2 className="h-4 w-4 animate-spin" /> Loading
-      </div>
-    );
-  }
-
   return (
-    <div className="space-y-6">
+    <div style={{ display: "flex", flexDirection: "column", gap: 18, padding: "24px 28px 48px", color: NAVY }}>
       <div>
-        <h1 className="flex items-center gap-2 font-display text-2xl font-bold tracking-tight">
-          <Activity className="h-6 w-6" /> Continuous monitoring
+        <h1 style={{ fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 28, lineHeight: 1.1, letterSpacing: "-0.02em", color: NAVY, margin: 0 }}>
+          Continuous monitoring
         </h1>
-        <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
-          Business tier feature. We re-scan each registered URL on your chosen
-          cadence and email you when the compliance score drops or the critical
-          issue count increases vs the last baseline. Up to 10 sites.
+        <p style={{ fontSize: 13.5, color: SLATE_500, marginTop: 4, fontFamily: FONT_INTER, maxWidth: 720 }}>
+          Business tier feature. We re-scan each registered URL on your chosen cadence and email you when the compliance score drops or the critical issue count increases vs the last baseline. Up to 10 sites.
         </p>
       </div>
 
       {gated && (
-        <Card className="border-amber-200 bg-amber-50">
-          <CardContent className="flex items-start gap-3 pt-6">
-            <Lock className="mt-0.5 h-5 w-5 text-amber-700" />
-            <div className="flex-1">
-              <p className="text-sm font-semibold text-amber-900">
-                Continuous monitoring is on the Business plan
-              </p>
-              <p className="mt-1 text-sm text-amber-800">
-                Upgrade to unlock weekly/daily re-scans, regression alerts via
-                email, and up to 10 monitored properties.
-              </p>
-              <Button className="mt-3" size="sm" asChild>
-                <Link href="/settings/billing">See Business plan</Link>
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+        <div role="alert" style={{ background: AMBER_50, border: `1px solid #fcd34d`, borderRadius: 8, padding: 16, display: "flex", gap: 12, fontFamily: FONT_INTER }}>
+          <span style={{ width: 20, height: 20, borderRadius: 4, background: AMBER_700, color: "#fff", display: "inline-flex", alignItems: "center", justifyContent: "center", fontWeight: 700, flexShrink: 0 }} aria-hidden>!</span>
+          <div style={{ flex: 1 }}>
+            <p style={{ fontSize: 13, fontWeight: 600, color: AMBER_900, margin: 0 }}>
+              Continuous monitoring is on the Business plan
+            </p>
+            <p style={{ fontSize: 12.5, color: AMBER_900, marginTop: 4, marginBottom: 12 }}>
+              Upgrade to unlock weekly/daily re-scans, regression alerts via email, and up to 10 monitored properties.
+            </p>
+            <Link
+              href="/settings/billing"
+              style={{ display: "inline-flex", alignItems: "center", gap: 6, height: 32, padding: "0 12px", fontSize: 12.5, fontWeight: 600, fontFamily: FONT_INTER, borderRadius: 6, background: NAVY, color: "#fff", textDecoration: "none" }}
+            >
+              See Business plan →
+            </Link>
+          </div>
+        </div>
       )}
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Add a site</CardTitle>
-          <CardDescription>
-            We&apos;ll take the first snapshot on the next cron tick. Regression
-            alerts begin from the second snapshot onward.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleCreate} className="grid gap-4 md:grid-cols-2">
-            <div className="md:col-span-2">
-              <Label htmlFor="url">URL</Label>
-              <Input
-                id="url"
-                value={url}
-                onChange={(e) => setUrl(e.target.value)}
-                placeholder="https://example.com/checkout"
-                required
-              />
-            </div>
-            <div>
-              <Label htmlFor="label">Label (optional)</Label>
-              <Input
-                id="label"
-                value={label}
-                onChange={(e) => setLabel(e.target.value)}
-                placeholder="Marketing checkout"
-                maxLength={80}
-              />
-            </div>
-            <div>
-              <Label htmlFor="cadence">Cadence</Label>
-              <Select value={cadence} onValueChange={(v) => setCadence(v as MonitoredSite["cadence"])}>
-                <SelectTrigger id="cadence">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="daily">Daily</SelectItem>
-                  <SelectItem value="weekly">Weekly</SelectItem>
-                  <SelectItem value="monthly">Monthly</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label htmlFor="alert-email">Alert email (optional)</Label>
-              <Input
-                id="alert-email"
-                type="email"
-                value={alertEmail}
-                onChange={(e) => setAlertEmail(e.target.value)}
-                placeholder="Defaults to your account email"
-              />
-            </div>
-            <div>
-              <Label htmlFor="threshold">Regression threshold (score drop)</Label>
-              <Input
-                id="threshold"
-                type="number"
-                min={1}
-                max={50}
-                value={threshold}
-                onChange={(e) => setThreshold(Number(e.target.value))}
-              />
-            </div>
-            <div className="md:col-span-2">
-              <Button type="submit" disabled={creating}>
-                {creating ? (
-                  <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Adding</>
-                ) : (
-                  <><PlusCircle className="mr-2 h-4 w-4" />Add to monitoring</>
-                )}
-              </Button>
-            </div>
-          </form>
-        </CardContent>
-      </Card>
+      <div style={{ background: "#fff", border: `1px solid ${SLATE_200}`, borderRadius: 8, padding: 24 }}>
+        <div style={{ fontFamily: FONT_DISPLAY, fontWeight: 600, fontSize: 16, color: NAVY, marginBottom: 4 }}>
+          Add a site
+        </div>
+        <p style={{ fontSize: 12.5, color: SLATE_500, fontFamily: FONT_INTER, marginTop: 0, marginBottom: 18 }}>
+          We&apos;ll take the first snapshot on the next cron tick. Regression alerts begin from the second snapshot onward.
+        </p>
+
+        <form onSubmit={handleCreate} style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+          <Field label="URL" htmlFor="monitored-url" colSpan>
+            <input
+              id="monitored-url"
+              type="text"
+              value={url}
+              onChange={(e) => setUrl(e.target.value)}
+              placeholder="https://example.com/checkout"
+              required
+              style={inputStyle}
+            />
+          </Field>
+
+          <Field label="Label (optional)" htmlFor="monitored-label">
+            <input
+              id="monitored-label"
+              value={label}
+              onChange={(e) => setLabel(e.target.value)}
+              placeholder="Marketing checkout"
+              maxLength={80}
+              style={inputStyle}
+            />
+          </Field>
+
+          <Field label="Cadence" htmlFor="monitored-cadence">
+            <select
+              id="monitored-cadence"
+              value={cadence}
+              onChange={(e) => setCadence(e.target.value as MonitoredSite["cadence"])}
+              style={selectStyle}
+            >
+              <option value="daily">Daily</option>
+              <option value="weekly">Weekly</option>
+              <option value="monthly">Monthly</option>
+            </select>
+          </Field>
+
+          <Field label="Alert email (optional)" htmlFor="monitored-alert">
+            <input
+              id="monitored-alert"
+              type="email"
+              value={alertEmail}
+              onChange={(e) => setAlertEmail(e.target.value)}
+              placeholder="Defaults to your account email"
+              style={inputStyle}
+            />
+          </Field>
+
+          <Field label="Regression threshold (score drop)" htmlFor="monitored-threshold">
+            <input
+              id="monitored-threshold"
+              type="number"
+              min={1}
+              max={50}
+              value={threshold}
+              onChange={(e) => setThreshold(Number(e.target.value))}
+              style={inputStyle}
+            />
+          </Field>
+
+          <div style={{ gridColumn: "1 / -1" }}>
+            <button
+              type="submit"
+              disabled={creating}
+              style={{ display: "inline-flex", alignItems: "center", gap: 8, height: 40, padding: "0 16px", fontSize: 14, fontWeight: 600, fontFamily: FONT_INTER, borderRadius: 6, background: creating ? SLATE_300 : NAVY, color: "#fff", border: "none", cursor: creating ? "not-allowed" : "pointer" }}
+            >
+              {creating ? "Adding..." : "+ Add to monitoring"}
+            </button>
+          </div>
+        </form>
+      </div>
 
       <div>
-        <h2 className="font-display text-lg font-semibold">Your monitored sites ({sites.length}/10)</h2>
-        {sites.length === 0 ? (
-          <Card className="mt-4">
-            <CardContent className="flex flex-col items-center justify-center py-12 text-center">
-              <Globe className="h-10 w-10 text-muted-foreground" />
-              <p className="mt-3 text-sm text-muted-foreground">
-                No sites monitored yet. Add one above to get started.
-              </p>
-            </CardContent>
-          </Card>
+        <h2 style={{ fontFamily: FONT_DISPLAY, fontWeight: 600, fontSize: 17, color: NAVY, marginBottom: 12 }}>
+          Your monitored sites <span style={{ fontFamily: FONT_MONO, color: SLATE_500, fontWeight: 500 }}>({sites.length}/10)</span>
+        </h2>
+
+        {loading ? (
+          <div style={{ background: "#fff", border: `1px solid ${SLATE_200}`, borderRadius: 8, padding: 32, textAlign: "center", color: SLATE_500, fontFamily: FONT_INTER, fontSize: 13.5 }}>
+            Loading...
+          </div>
+        ) : sites.length === 0 ? (
+          <div style={{ background: "#fff", border: `1px solid ${SLATE_200}`, borderRadius: 8, padding: 48, display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center" }}>
+            <div style={{ fontFamily: FONT_DISPLAY, fontWeight: 600, fontSize: 16, color: NAVY }}>
+              No sites monitored yet
+            </div>
+            <p style={{ fontSize: 13, color: SLATE_500, marginTop: 6, marginBottom: 0, fontFamily: FONT_INTER }}>
+              Add one above to get started.
+            </p>
+          </div>
         ) : (
-          <div className="mt-4 grid gap-3">
+          <div style={{ display: "grid", gap: 10 }}>
             {sites.map((site) => (
-              <Card key={site.id}>
-                <CardContent className="flex flex-wrap items-center justify-between gap-3 py-4">
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2">
-                      <p className="truncate font-semibold">{site.label ?? site.url}</p>
-                      <Badge variant={site.enabled ? "default" : "secondary"}>
-                        {site.enabled ? "active" : "paused"}
-                      </Badge>
-                      <Badge variant="outline" className="text-xs">{site.cadence}</Badge>
-                    </div>
-                    <p className="truncate text-xs text-muted-foreground">{site.url}</p>
-                    <div className="mt-2 flex flex-wrap gap-4 text-xs text-muted-foreground">
-                      {site.last_scan_at ? (
-                        <>
-                          <span>
-                            Last scan: {new Date(site.last_scan_at).toLocaleString()}
-                          </span>
-                          <span className="font-semibold">Score: {site.last_score ?? "—"}</span>
-                          {site.last_critical > 0 && (
-                            <span className="flex items-center gap-1 text-red-600">
-                              <TrendingDown className="h-3 w-3" />
-                              {site.last_critical} critical
-                            </span>
-                          )}
-                        </>
-                      ) : (
-                        <span>Awaiting first scan on next cron tick…</span>
-                      )}
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Switch
-                      checked={site.enabled}
-                      onCheckedChange={() => toggleEnabled(site)}
-                    />
-                    <Button size="icon" variant="ghost" onClick={() => remove(site)}>
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
+              <SiteRow
+                key={site.id}
+                site={site}
+                onToggle={() => toggleEnabled(site)}
+                onRemove={() => remove(site)}
+              />
             ))}
           </div>
         )}
       </div>
     </div>
+  );
+}
+
+function Field({
+  label,
+  htmlFor,
+  colSpan,
+  children,
+}: {
+  label: string;
+  htmlFor: string;
+  colSpan?: boolean;
+  children: React.ReactNode;
+}) {
+  return (
+    <label
+      htmlFor={htmlFor}
+      style={{
+        display: "block",
+        fontFamily: FONT_INTER,
+        gridColumn: colSpan ? "1 / -1" : undefined,
+      }}
+    >
+      <div style={{ fontSize: 13, fontWeight: 600, color: NAVY, marginBottom: 6 }}>{label}</div>
+      {children}
+    </label>
+  );
+}
+
+function SiteRow({
+  site,
+  onToggle,
+  onRemove,
+}: {
+  site: MonitoredSite;
+  onToggle: () => void;
+  onRemove: () => void;
+}) {
+  return (
+    <div style={{ background: "#fff", border: `1px solid ${SLATE_200}`, borderRadius: 8, padding: 16, display: "flex", flexWrap: "wrap", justifyContent: "space-between", alignItems: "center", gap: 12, fontFamily: FONT_INTER }}>
+      <div style={{ minWidth: 0, flex: 1 }}>
+        <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 8 }}>
+          <span style={{ fontWeight: 600, color: NAVY, fontSize: 14 }}>
+            {site.label ?? site.url}
+          </span>
+          <span
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 5,
+              padding: "2px 8px",
+              borderRadius: 9999,
+              fontSize: 10.5,
+              fontWeight: 600,
+              background: site.enabled ? "rgba(22,163,74,0.10)" : SLATE_100,
+              color: site.enabled ? "#16a34a" : SLATE_500,
+            }}
+          >
+            <span style={{ width: 5, height: 5, borderRadius: "50%", background: site.enabled ? "#16a34a" : SLATE_500 }} aria-hidden />
+            {site.enabled ? "active" : "paused"}
+          </span>
+          <span style={{ display: "inline-flex", padding: "2px 8px", borderRadius: 4, fontSize: 10.5, fontWeight: 700, letterSpacing: "0.10em", textTransform: "uppercase", background: SLATE_100, color: SLATE_500 }}>
+            {site.cadence}
+          </span>
+        </div>
+        <p style={{ fontFamily: FONT_MONO, fontSize: 11.5, color: SLATE_500, margin: "4px 0 0", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+          {site.url}
+        </p>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 14, fontSize: 11.5, color: SLATE_500, marginTop: 8 }}>
+          {site.last_scan_at ? (
+            <>
+              <span>
+                Last scan: <span style={{ fontFamily: FONT_MONO, color: NAVY }}>{new Date(site.last_scan_at).toLocaleString()}</span>
+              </span>
+              <span style={{ fontWeight: 600 }}>
+                Score: <span style={{ fontFamily: FONT_MONO, color: NAVY }}>{site.last_score ?? "—"}</span>
+              </span>
+              {site.last_critical > 0 && (
+                <span style={{ display: "inline-flex", alignItems: "center", gap: 4, color: RED, fontWeight: 600 }}>
+                  ↓ {site.last_critical} critical
+                </span>
+              )}
+            </>
+          ) : (
+            <span>Awaiting first scan on next cron tick…</span>
+          )}
+        </div>
+      </div>
+      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+        <Toggle checked={site.enabled} onClick={onToggle} />
+        <button
+          type="button"
+          onClick={onRemove}
+          aria-label={`Stop monitoring ${site.label ?? site.url}`}
+          style={{ width: 32, height: 32, border: `1px solid ${SLATE_200}`, borderRadius: 6, background: "#fff", color: SLATE_500, cursor: "pointer", fontSize: 14 }}
+        >
+          🗑
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function Toggle({ checked, onClick }: { checked: boolean; onClick: () => void }) {
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={checked}
+      onClick={onClick}
+      style={{ position: "relative", width: 36, height: 20, borderRadius: 9999, background: checked ? CYAN : SLATE_300, border: "none", cursor: "pointer", padding: 0, transition: "background-color .15s ease" }}
+    >
+      <span
+        style={{
+          position: "absolute",
+          top: 2,
+          left: checked ? 18 : 2,
+          width: 16,
+          height: 16,
+          borderRadius: "50%",
+          background: "#fff",
+          boxShadow: "0 1px 2px rgba(0,0,0,0.15)",
+          transition: "left .15s ease",
+        }}
+        aria-hidden
+      />
+    </button>
   );
 }
