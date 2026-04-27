@@ -67,7 +67,8 @@
     "protected_settings": [
       {"path": "/settings", "file": "src/app/(dashboard)/settings/page.tsx", "purpose": "Profile"},
       {"path": "/settings/billing", "file": "src/app/(dashboard)/settings/billing/page.tsx", "purpose": "Stripe portal entry"},
-      {"path": "/settings/github", "file": "src/app/(dashboard)/settings/github/page.tsx", "purpose": "GitHub App connection"}
+      {"path": "/settings/github", "file": "src/app/(dashboard)/settings/github/page.tsx", "purpose": "GitHub App connection"},
+      {"path": "/settings/api-keys", "file": "src/app/(dashboard)/settings/api-keys/page.tsx", "purpose": "API Keys management (Business tier)"}
     ],
     "v2_preview_to_skip_in_audit": [
       "/v2", "/dashboard-v2-preview", "/scan-result-v2-preview", "/billing-v2-preview",
