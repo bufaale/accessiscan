@@ -61,6 +61,11 @@ async function deleteBranch(
     .catch(() => {});
 }
 
+// Run all auto-fix tests in this file sequentially — they all borrow the
+// same github_installation row (UNIQUE constraint), so parallel runs race
+// against auto-fix-deep.spec.ts.
+test.describe.configure({ mode: "serial" });
+
 test.describe("Auto-Fix PR — full UI flow", () => {
   test.setTimeout(180_000);
 

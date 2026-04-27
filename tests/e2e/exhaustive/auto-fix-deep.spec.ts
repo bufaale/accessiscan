@@ -74,6 +74,10 @@ async function deleteBranch(
     .catch(() => {});
 }
 
+// Run all auto-fix tests in this file sequentially — they all borrow the
+// same github_installation row (UNIQUE constraint), so parallel runs race.
+test.describe.configure({ mode: "serial" });
+
 test.describe("Auto-Fix PR — full E2E against bufaale/accessiscan-e2e-fixtures", () => {
   test.setTimeout(180_000);
 
