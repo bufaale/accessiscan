@@ -47,6 +47,7 @@ interface MonitoredSite {
   alert_email: string | null;
   regression_threshold: number;
   created_at: string;
+  sparkline?: Array<{ score: number; t: string }>;
 }
 
 type FilterKey = "all" | "monitoring" | "regressing" | "paused";
@@ -94,9 +95,16 @@ function siteStatus(site: MonitoredSite): "monitoring" | "paused" | "regressing"
   return "monitoring";
 }
 
-// ===== MOCK DATA — replaced by /api/sites/[id]/sparkline in Phase B =====
-// Generates 7-day score trend around a site's current score with slight jitter,
-// deterministic per id so re-renders don't make charts dance.
+// Pull real 7-day sparkline points from /api/monitored response when present,
+// fall back to a deterministic mock when scan_snapshots is empty (e.g. site
+// added today, no cron run yet).
+function sparklineFor(site: MonitoredSite): number[] {
+  if (site.sparkline && site.sparkline.length >= 2) {
+    return site.sparkline.map((p) => p.score);
+  }
+  return mockSparklineFor(site);
+}
+
 function mockSparklineFor(site: MonitoredSite): number[] {
   const base = site.last_score ?? 75;
   // Pseudo-random per id (stable across renders)
@@ -1098,7 +1106,7 @@ function SiteCard({
 }) {
   const status = siteStatus(site);
   const score = site.last_score;
-  const trend = mockSparklineFor(site);
+  const trend = sparklineFor(site);
   const trendColor = scoreColor(score);
   const delta = trend[trend.length - 1] - trend[0];
   const trendUp = delta >= 0;
