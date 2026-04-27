@@ -1,6 +1,10 @@
 import * as cheerio from "cheerio";
 
-export function extractInternalLinks(html: string, baseUrl: string): string[] {
+export function extractInternalLinks(
+  html: string,
+  baseUrl: string,
+  maxLinks = 9,
+): string[] {
   const $ = cheerio.load(html);
   const baseDomain = new URL(baseUrl).hostname;
   const links: Set<string> = new Set();
@@ -23,5 +27,5 @@ export function extractInternalLinks(html: string, baseUrl: string): string[] {
     }
   });
 
-  return Array.from(links).slice(0, 9); // Max 9 additional pages (10 total with main)
+  return Array.from(links).slice(0, Math.max(0, maxLinks));
 }
