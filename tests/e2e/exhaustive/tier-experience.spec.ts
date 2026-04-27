@@ -146,21 +146,16 @@ test.describe("Continuous monitoring — Business-tier gating at API", () => {
   test("free: POST /api/monitored returns 402 Business plan required", async ({
     page,
   }) => {
+    // After the A3 monitored-grid swap, the create form lives in a modal that
+    // the free user can't open (Add-site button is disabled with the Business
+    // upsell banner). Hit /api/monitored directly via the authed page context
+    // to verify the API-side 402 gate is intact.
     const u = await createTestUser("tier-mon-free", "free");
     try {
       await loginViaUI(page, u.email);
-      await page.goto("/dashboard/monitored");
-      await page.waitForLoadState("networkidle");
-
-      const urlInput = page.locator("input[placeholder*='example' i]").first();
-      await urlInput.fill("https://tier-mon-free.test");
-
-      const responsePromise = page.waitForResponse(
-        (res) => res.url().includes("/api/monitored") && res.request().method() === "POST",
-        { timeout: 10_000 },
-      );
-      await page.getByRole("button", { name: /add.*monitor|monitor|add\b/i }).first().click();
-      const res = await responsePromise;
+      const res = await page.request.post("/api/monitored", {
+        data: { url: "https://tier-mon-free.test", cadence: "weekly" },
+      });
       expect(res.status(), "Free tier should be 402 on /api/monitored POST").toBe(402);
     } finally {
       await deleteTestUser(u.id);
@@ -173,21 +168,12 @@ test.describe("Continuous monitoring — Business-tier gating at API", () => {
     const u = await createTestUser("tier-mon-biz", "business");
     try {
       await loginViaUI(page, u.email);
-      await page.goto("/dashboard/monitored");
-      await page.waitForLoadState("networkidle");
-
-      const urlInput = page.locator("input[placeholder*='example' i]").first();
-      await urlInput.fill("https://tier-mon-biz.test");
-
-      const responsePromise = page.waitForResponse(
-        (res) => res.url().includes("/api/monitored") && res.request().method() === "POST",
-        { timeout: 10_000 },
-      );
-      await page.getByRole("button", { name: /add.*monitor|monitor|add\b/i }).first().click();
-      const res = await responsePromise;
+      const res = await page.request.post("/api/monitored", {
+        data: { url: "https://tier-mon-biz.test", cadence: "weekly" },
+      });
       // Business tier should NOT be tier-gated. A 200 (success) or other
-      // non-402 status (e.g. validation error) is acceptable. 402 means the
-      // tier check incorrectly blocked Business.
+      // non-402 status (e.g. validation error from SSRF check) is acceptable.
+      // 402 means the tier check incorrectly blocked Business.
       expect(res.status(), `Business tier should NOT be 402; got ${res.status()}`).not.toBe(402);
     } finally {
       await deleteTestUser(u.id);
