@@ -666,7 +666,7 @@ function PricingCardsDetailed() {
                     }}
                   >
                     {t.excluded.map((e) => (
-                      <li key={e} style={{ display: "flex", gap: 10, fontSize: 12.5, color: "#94a3b8" }}>
+                      <li key={e} style={{ display: "flex", gap: 10, fontSize: 12.5, color: "#64748b" }}>
                         <IcX
                           size={14}
                           sw={2}
@@ -823,7 +823,7 @@ type CellValue = "yes" | "no" | "partial" | string;
 
 function ComparisonCell({ v }: { v: CellValue }) {
   if (v === "yes") return <IcCheck size={16} sw={2.5} style={{ color: "#0e7490" }} />;
-  if (v === "partial") return <IcMinus size={16} sw={2} style={{ color: "#94a3b8" }} />;
+  if (v === "partial") return <IcMinus size={16} sw={2} style={{ color: "#64748b" }} />;
   if (v === "no") return <IcX size={16} sw={2} style={{ color: "#cbd5e1" }} />;
   return <span style={{ fontSize: 13, color: "#475569" }}>{v}</span>;
 }

@@ -306,7 +306,7 @@ export function PricingCards() {
                         padding: "2px 6px",
                         borderRadius: 3,
                         background: active ? CYAN : "#ecfeff",
-                        color: active ? "#fff" : "#0891b2",
+                        color: active ? "#fff" : "#0e7490",
                       }}
                     >
                       Save ~17%
@@ -540,7 +540,7 @@ export function PricingCards() {
                             display: "flex",
                             gap: 10,
                             fontSize: 12.5,
-                            color: "#94a3b8",
+                            color: "#64748b",
                             lineHeight: 1.4,
                           }}
                         >

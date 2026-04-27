@@ -111,7 +111,7 @@ function Sidebar({ active = "Monitored sites" }: { active?: string }) {
   ];
   const renderGroup = (label: string, items: SidebarItem[]) => (
     <div>
-      <div style={{ padding: "0 10px 8px", fontSize: 10.5, letterSpacing: "0.14em", textTransform: "uppercase", color: "#94a3b8", fontWeight: 600 }}>{label}</div>
+      <div style={{ padding: "0 10px 8px", fontSize: 10.5, letterSpacing: "0.14em", textTransform: "uppercase", color: "#64748b", fontWeight: 600 }}>{label}</div>
       <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
         {items.map((it) => {
           const isActive = active === it.label;
@@ -137,7 +137,7 @@ function Sidebar({ active = "Monitored sites" }: { active?: string }) {
         {renderGroup("Main", main)}
         {renderGroup("Settings", settings)}
       </nav>
-      <div style={{ padding: "12px 20px", borderTop: "1px solid #e2e8f0", fontSize: 11, color: "#94a3b8", fontFamily: FONT_INTER }}>AccessiScan v1.0</div>
+      <div style={{ padding: "12px 20px", borderTop: "1px solid #e2e8f0", fontSize: 11, color: "#64748b", fontFamily: FONT_INTER }}>AccessiScan v1.0</div>
     </aside>
   );
 }
@@ -150,12 +150,12 @@ function Topbar({ title, breadcrumb, action }: { title: string; breadcrumb?: str
   return (
     <header style={{ minHeight: 88, padding: "16px 28px", borderBottom: "1px solid #e2e8f0", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 24, background: "#fff", flexShrink: 0 }}>
       <div style={{ minWidth: 0, flex: "1 1 auto" }}>
-        {breadcrumb && <div style={{ fontSize: 11, letterSpacing: "0.14em", textTransform: "uppercase", color: "#94a3b8", fontWeight: 600, marginBottom: 4, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{breadcrumb}</div>}
+        {breadcrumb && <div style={{ fontSize: 11, letterSpacing: "0.14em", textTransform: "uppercase", color: "#64748b", fontWeight: 600, marginBottom: 4, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{breadcrumb}</div>}
         <h1 style={{ margin: 0, fontFamily: FONT_DISPLAY, fontWeight: 600, fontSize: 22, lineHeight: 1.2, color: "#0b1f3a", letterSpacing: "-0.01em", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{title}</h1>
       </div>
       <div style={{ display: "flex", gap: 12, alignItems: "center", flexShrink: 0 }}>
         <div style={{ position: "relative" }}>
-          <span style={{ position: "absolute", left: 11, top: "50%", transform: "translateY(-50%)", color: "#94a3b8" }}><IcScan size={14} sw={2} /></span>
+          <span style={{ position: "absolute", left: 11, top: "50%", transform: "translateY(-50%)", color: "#64748b" }}><IcScan size={14} sw={2} /></span>
           <input placeholder="Search scans, sites, criteria…" style={{ height: 36, width: 280, padding: "0 12px 0 32px", border: "1px solid #e2e8f0", borderRadius: 6, fontSize: 13, fontFamily: FONT_INTER, color: "#475569", outline: "none" }} />
         </div>
         <button type="button" style={{ width: 36, height: 36, borderRadius: 6, border: "1px solid #e2e8f0", background: "#fff", color: "#475569", display: "inline-flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}><IcBell size={15} /></button>
@@ -292,10 +292,10 @@ function PortfolioSummary({ sites }: { sites: Site[] }) {
     <div style={{ background: "#fff", border: "1px solid #e2e8f0", borderRadius: 8, display: "grid", gridTemplateColumns: "repeat(4, 1fr)", marginBottom: 18, overflow: "hidden" }}>
       {items.map((it, i) => (
         <div key={it.label} style={{ padding: "16px 20px", borderRight: i < items.length - 1 ? "1px solid #f1f5f9" : 0 }}>
-          <div style={{ fontSize: 10.5, letterSpacing: "0.14em", textTransform: "uppercase", color: "#94a3b8", fontWeight: 600 }}>{it.label}</div>
+          <div style={{ fontSize: 10.5, letterSpacing: "0.14em", textTransform: "uppercase", color: "#64748b", fontWeight: 600 }}>{it.label}</div>
           <div style={{ marginTop: 8, display: "flex", alignItems: "baseline", gap: 6 }}>
             <span style={{ fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 28, color: it.color, letterSpacing: "-0.02em", lineHeight: 1 }}>{it.value}</span>
-            <span style={{ fontSize: 11.5, color: "#94a3b8", fontFamily: FONT_INTER }}>{it.suffix}</span>
+            <span style={{ fontSize: 11.5, color: "#64748b", fontFamily: FONT_INTER }}>{it.suffix}</span>
           </div>
         </div>
       ))}
@@ -395,7 +395,7 @@ function SiteCard({ site, isMenuOpen, onMenu, onAction }: { site: Site; isMenuOp
               <span style={{ fontFamily: FONT_INTER, fontWeight: 600, fontSize: 14, color: "#0b1f3a", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
                 {site.url}
               </span>
-              <IcExt size={11} sw={2} style={{ color: "#94a3b8", flexShrink: 0 }} />
+              <IcExt size={11} sw={2} style={{ color: "#64748b", flexShrink: 0 }} />
             </div>
             <div style={{ marginTop: 4 }}>
               <StatusPill status={site.status} />
@@ -432,7 +432,7 @@ function SiteCard({ site, isMenuOpen, onMenu, onAction }: { site: Site; isMenuOp
         <div style={{ minWidth: 0 }}>
           <div style={{ fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 44, lineHeight: 1, letterSpacing: "-0.025em", color: scoreColor(site.score), display: "inline-flex", alignItems: "baseline", gap: 4 }}>
             {site.score}
-            <span style={{ fontFamily: FONT_INTER, fontSize: 13, fontWeight: 500, color: "#94a3b8", letterSpacing: 0 }}>/100</span>
+            <span style={{ fontFamily: FONT_INTER, fontSize: 13, fontWeight: 500, color: "#64748b", letterSpacing: 0 }}>/100</span>
           </div>
           <div style={{ marginTop: 4, fontSize: 11, letterSpacing: "0.14em", textTransform: "uppercase", color: "#64748b", fontWeight: 600 }}>
             {scoreGrade(site.score)}
@@ -446,7 +446,7 @@ function SiteCard({ site, isMenuOpen, onMenu, onAction }: { site: Site; isMenuOp
 
       {/* Sparkline */}
       <div style={{ padding: "0 14px 12px" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10, fontFamily: FONT_MONO, color: "#94a3b8", padding: "0 4px 4px" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10, fontFamily: FONT_MONO, color: "#64748b", padding: "0 4px 4px" }}>
           <span>30d</span><span>now</span>
         </div>
         <div style={{ position: "relative", height: 44 }}>
@@ -457,7 +457,7 @@ function SiteCard({ site, isMenuOpen, onMenu, onAction }: { site: Site; isMenuOp
       {/* Issues + last scan strip */}
       <div style={{ margin: "0 18px", padding: "12px 0", borderTop: "1px solid #f1f5f9", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
         <div>
-          <div style={{ fontSize: 10.5, letterSpacing: "0.14em", textTransform: "uppercase", color: "#94a3b8", fontWeight: 600, marginBottom: 4 }}>Critical</div>
+          <div style={{ fontSize: 10.5, letterSpacing: "0.14em", textTransform: "uppercase", color: "#64748b", fontWeight: 600, marginBottom: 4 }}>Critical</div>
           <div style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
             {site.critical > 0 ? (
               <>
@@ -474,7 +474,7 @@ function SiteCard({ site, isMenuOpen, onMenu, onAction }: { site: Site; isMenuOp
           </div>
         </div>
         <div>
-          <div style={{ fontSize: 10.5, letterSpacing: "0.14em", textTransform: "uppercase", color: "#94a3b8", fontWeight: 600, marginBottom: 4 }}>Last scan</div>
+          <div style={{ fontSize: 10.5, letterSpacing: "0.14em", textTransform: "uppercase", color: "#64748b", fontWeight: 600, marginBottom: 4 }}>Last scan</div>
           <div style={{ display: "inline-flex", alignItems: "center", gap: 5, fontSize: 12, color: "#475569", fontFamily: FONT_INTER }}>
             <IcClock size={11} sw={2} />{site.lastScan}
           </div>
@@ -538,7 +538,7 @@ function AddSiteModal({ onClose, onSubmit }: { onClose: () => void; onSubmit: ()
             <div style={{ fontSize: 11, letterSpacing: "0.14em", textTransform: "uppercase", color: "#0e7490", fontWeight: 600 }}>Pro · continuous monitoring</div>
             <div style={{ fontFamily: FONT_DISPLAY, fontWeight: 600, fontSize: 20, color: "#0b1f3a", letterSpacing: "-0.01em", marginTop: 4 }}>Add a site to monitor.</div>
           </div>
-          <button type="button" onClick={onClose} aria-label="Close" style={{ width: 32, height: 32, borderRadius: 6, border: 0, background: "transparent", color: "#94a3b8", cursor: "pointer" }}>
+          <button type="button" onClick={onClose} aria-label="Close" style={{ width: 32, height: 32, borderRadius: 6, border: 0, background: "transparent", color: "#64748b", cursor: "pointer" }}>
             <IcX size={16} sw={2} />
           </button>
         </div>
@@ -546,7 +546,7 @@ function AddSiteModal({ onClose, onSubmit }: { onClose: () => void; onSubmit: ()
           <div>
             <label style={{ fontSize: 13, fontWeight: 600, color: "#0b1f3a", fontFamily: FONT_INTER, marginBottom: 6, display: "block" }}>Target URL</label>
             <input defaultValue="https://" placeholder="https://agency.gov" style={{ width: "100%", height: 40, padding: "0 12px", border: "1px solid #cbd5e1", borderRadius: 6, fontSize: 14, fontFamily: FONT_INTER, color: "#0b1f3a", outline: "none" }} />
-            <div style={{ marginTop: 6, fontSize: 11.5, color: "#94a3b8" }}>We&apos;ll crawl up to 5,000 pages on the Pro plan.</div>
+            <div style={{ marginTop: 6, fontSize: 11.5, color: "#64748b" }}>We&apos;ll crawl up to 5,000 pages on the Pro plan.</div>
           </div>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
             <div>

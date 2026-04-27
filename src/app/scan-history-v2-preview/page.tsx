@@ -121,7 +121,7 @@ function Sidebar({ active = "Scan history" }: { active?: string }) {
   ];
   const renderGroup = (label: string, items: SidebarItem[]) => (
     <div>
-      <div style={{ padding: "0 10px 8px", fontSize: 10.5, letterSpacing: "0.14em", textTransform: "uppercase", color: "#94a3b8", fontWeight: 600 }}>{label}</div>
+      <div style={{ padding: "0 10px 8px", fontSize: 10.5, letterSpacing: "0.14em", textTransform: "uppercase", color: "#64748b", fontWeight: 600 }}>{label}</div>
       <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
         {items.map((it) => {
           const isActive = active === it.label;
@@ -147,7 +147,7 @@ function Sidebar({ active = "Scan history" }: { active?: string }) {
         {renderGroup("Main", main)}
         {renderGroup("Settings", settings)}
       </nav>
-      <div style={{ padding: "12px 20px", borderTop: "1px solid #e2e8f0", fontSize: 11, color: "#94a3b8", fontFamily: FONT_INTER }}>AccessiScan v1.0</div>
+      <div style={{ padding: "12px 20px", borderTop: "1px solid #e2e8f0", fontSize: 11, color: "#64748b", fontFamily: FONT_INTER }}>AccessiScan v1.0</div>
     </aside>
   );
 }
@@ -160,12 +160,12 @@ function Topbar({ title, breadcrumb, action }: { title: string; breadcrumb?: str
   return (
     <header style={{ minHeight: 88, padding: "16px 28px", borderBottom: "1px solid #e2e8f0", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 24, background: "#fff", flexShrink: 0 }}>
       <div style={{ minWidth: 0, flex: "1 1 auto" }}>
-        {breadcrumb && <div style={{ fontSize: 11, letterSpacing: "0.14em", textTransform: "uppercase", color: "#94a3b8", fontWeight: 600, marginBottom: 4, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{breadcrumb}</div>}
+        {breadcrumb && <div style={{ fontSize: 11, letterSpacing: "0.14em", textTransform: "uppercase", color: "#64748b", fontWeight: 600, marginBottom: 4, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{breadcrumb}</div>}
         <h1 style={{ margin: 0, fontFamily: FONT_DISPLAY, fontWeight: 600, fontSize: 22, lineHeight: 1.2, color: "#0b1f3a", letterSpacing: "-0.01em", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{title}</h1>
       </div>
       <div style={{ display: "flex", gap: 12, alignItems: "center", flexShrink: 0 }}>
         <div style={{ position: "relative" }}>
-          <span style={{ position: "absolute", left: 11, top: "50%", transform: "translateY(-50%)", color: "#94a3b8" }}><IcScan size={14} sw={2} /></span>
+          <span style={{ position: "absolute", left: 11, top: "50%", transform: "translateY(-50%)", color: "#64748b" }}><IcScan size={14} sw={2} /></span>
           <input placeholder="Search scans, sites, criteria…" style={{ height: 36, width: 280, padding: "0 12px 0 32px", border: "1px solid #e2e8f0", borderRadius: 6, fontSize: 13, fontFamily: FONT_INTER, color: "#475569", outline: "none" }} />
         </div>
         <button type="button" style={{ width: 36, height: 36, borderRadius: 6, border: "1px solid #e2e8f0", background: "#fff", color: "#475569", display: "inline-flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}><IcBell size={15} /></button>
@@ -198,7 +198,7 @@ function HistoryStats() {
           </div>
           <div style={{ fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 30, lineHeight: 1, color: s.danger ? "#dc2626" : "#0b1f3a", letterSpacing: "-0.02em" }}>{s.value}</div>
           <div style={{ marginTop: 10, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
-            <span style={{ fontSize: 11.5, color: "#94a3b8" }}>{s.sub}</span>
+            <span style={{ fontSize: 11.5, color: "#64748b" }}>{s.sub}</span>
             {s.delta && (
               <span style={{ fontSize: 11, color: s.delta.positive ? "#16a34a" : "#dc2626", fontWeight: 600, fontFamily: FONT_INTER }}>{s.delta.text}</span>
             )}
@@ -231,7 +231,7 @@ function DateRangePicker({ value, onChange }: { value: string; onChange: (v: str
       <button type="button" onClick={() => setOpen((o) => !o)} style={{ height: 38, padding: "0 12px", border: "1px solid #e2e8f0", borderRadius: 6, background: "#fff", color: "#0b1f3a", fontSize: 13, fontFamily: FONT_INTER, fontWeight: 500, display: "inline-flex", alignItems: "center", gap: 8, cursor: "pointer", minWidth: 170 }}>
         <IcCalendar size={13} sw={1.8} style={{ color: "#64748b" }} />
         <span style={{ flex: 1, textAlign: "left" }}>{current.l}</span>
-        <IcChevron size={12} sw={2} style={{ color: "#94a3b8" }} />
+        <IcChevron size={12} sw={2} style={{ color: "#64748b" }} />
       </button>
       {open && (
         <>
@@ -255,10 +255,10 @@ function FilterDropdown({ label, value, onChange, options }: { label: string; va
   return (
     <div style={{ position: "relative" }}>
       <button type="button" onClick={() => setOpen((o) => !o)} style={{ height: 38, padding: "0 12px", border: "1px solid #e2e8f0", borderRadius: 6, background: "#fff", color: "#0b1f3a", fontSize: 13, fontFamily: FONT_INTER, fontWeight: 500, display: "inline-flex", alignItems: "center", gap: 8, cursor: "pointer", minWidth: 150 }}>
-        <span style={{ fontSize: 11, color: "#94a3b8", letterSpacing: "0.06em", textTransform: "uppercase", fontWeight: 600 }}>{label}</span>
+        <span style={{ fontSize: 11, color: "#64748b", letterSpacing: "0.06em", textTransform: "uppercase", fontWeight: 600 }}>{label}</span>
         {current.dot && <span style={{ width: 6, height: 6, borderRadius: "50%", background: current.dot }} />}
         <span style={{ flex: 1, textAlign: "left" }}>{current.label}</span>
-        <IcChevron size={12} sw={2} style={{ color: "#94a3b8" }} />
+        <IcChevron size={12} sw={2} style={{ color: "#64748b" }} />
       </button>
       {open && (
         <>
@@ -282,7 +282,7 @@ function FilterBar({ filters, setFilters }: { filters: Filters; setFilters: (f: 
   return (
     <div style={{ background: "#fff", border: "1px solid #e2e8f0", borderRadius: 8, padding: 14, display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
       <div style={{ position: "relative", flex: "1 1 280px", minWidth: 240 }}>
-        <span style={{ position: "absolute", left: 11, top: "50%", transform: "translateY(-50%)", color: "#94a3b8" }}><IcScan size={14} sw={2} /></span>
+        <span style={{ position: "absolute", left: 11, top: "50%", transform: "translateY(-50%)", color: "#64748b" }}><IcScan size={14} sw={2} /></span>
         <input
           value={filters.search}
           onChange={(e) => setFilters({ ...filters, search: e.target.value })}
@@ -506,7 +506,7 @@ function ScansTable({ scans }: { scans: Scan[] }) {
                   </td>
                   <td style={{ padding: "14px 16px", whiteSpace: "nowrap" }}>
                     <div style={{ fontSize: 13, color: "#0b1f3a", fontWeight: 500 }}>{r.date}</div>
-                    <div style={{ fontSize: 11, color: "#94a3b8", fontFamily: FONT_MONO, marginTop: 2 }}>scan #{r.id}</div>
+                    <div style={{ fontSize: 11, color: "#64748b", fontFamily: FONT_MONO, marginTop: 2 }}>scan #{r.id}</div>
                   </td>
                   <td style={{ padding: "14px 16px", textAlign: "right", fontFamily: FONT_MONO, fontWeight: 600, color: r.pages == null ? "#cbd5e1" : "#0b1f3a", fontSize: 13 }}>
                     {r.pages ?? "—"}

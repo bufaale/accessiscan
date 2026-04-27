@@ -502,7 +502,7 @@ export function ProfileForm(props: ProfileFormProps) {
                   Unsaved changes.
                 </>
               ) : savedToast ? (
-                <span style={{ color: "#0891b2", display: "inline-flex", alignItems: "center", gap: 6, fontWeight: 500 }}>
+                <span style={{ color: "#0e7490", display: "inline-flex", alignItems: "center", gap: 6, fontWeight: 500 }}>
                   <CheckIcon size={12} sw={2.5} /> Saved.
                 </span>
               ) : (

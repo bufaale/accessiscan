@@ -160,7 +160,7 @@ function Eyebrow({ children, color = "slate" }: { children: ReactNode; color?: "
     );
   }
   return (
-    <span style={{ fontFamily: FONT_INTER, fontSize: 11, fontWeight: 600, letterSpacing: "0.14em", textTransform: "uppercase", color: color === "cyan" ? "#06b6d4" : "#64748b" }}>
+    <span style={{ fontFamily: FONT_INTER, fontSize: 11, fontWeight: 600, letterSpacing: "0.14em", textTransform: "uppercase", color: color === "cyan" ? "#0e7490" : "#64748b" }}>
       {children}
     </span>
   );
@@ -315,7 +315,7 @@ function StatsStrip() {
 type CellValue = "yes" | "no" | "partial";
 function Cell({ v }: { v: CellValue }) {
   if (v === "yes") return <IconCheck size={16} style={{ color: "#0e7490" }} />;
-  if (v === "partial") return <IconMinus size={16} style={{ color: "#94a3b8" }} />;
+  if (v === "partial") return <IconMinus size={16} style={{ color: "#64748b" }} />;
   return <IconX size={16} style={{ color: "#cbd5e1" }} />;
 }
 

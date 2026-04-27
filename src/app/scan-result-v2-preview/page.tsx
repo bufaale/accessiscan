@@ -112,7 +112,7 @@ function Sidebar({ active = "Scan history" }: { active?: string }) {
   const settings: [string, ReactNode][] = [["Profile", <IcUser key="u" size={15} />], ["Billing", <IcCard key="c" size={15} />]];
   const renderGroup = (label: string, items: [string, ReactNode][]) => (
     <div>
-      <div style={{ padding: "0 10px 8px", fontSize: 10.5, letterSpacing: "0.14em", textTransform: "uppercase", color: "#94a3b8", fontWeight: 600 }}>{label}</div>
+      <div style={{ padding: "0 10px 8px", fontSize: 10.5, letterSpacing: "0.14em", textTransform: "uppercase", color: "#64748b", fontWeight: 600 }}>{label}</div>
       <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
         {items.map(([title, ico]) => {
           const isActive = active === title;
@@ -157,12 +157,12 @@ function Topbar({ title, breadcrumb, action }: { title: string; breadcrumb?: str
   return (
     <header style={{ minHeight: 64, padding: "12px 24px", borderBottom: "1px solid #e2e8f0", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 24, background: "#fff", flexShrink: 0 }}>
       <div style={{ minWidth: 0, flex: "1 1 auto" }}>
-        {breadcrumb && <div style={{ fontSize: 10.5, letterSpacing: "0.14em", textTransform: "uppercase", color: "#94a3b8", fontWeight: 600, marginBottom: 3, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{breadcrumb}</div>}
+        {breadcrumb && <div style={{ fontSize: 10.5, letterSpacing: "0.14em", textTransform: "uppercase", color: "#64748b", fontWeight: 600, marginBottom: 3, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{breadcrumb}</div>}
         <h1 style={{ margin: 0, fontFamily: FONT_DISPLAY, fontWeight: 600, fontSize: 18, lineHeight: 1.2, color: "#0b1f3a", letterSpacing: "-0.01em", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{title}</h1>
       </div>
       <div style={{ display: "flex", gap: 10, alignItems: "center", flexShrink: 0 }}>
         <div style={{ position: "relative" }}>
-          <span style={{ position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)", color: "#94a3b8" }}><IcScan size={13} sw={2} /></span>
+          <span style={{ position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)", color: "#64748b" }}><IcScan size={13} sw={2} /></span>
           <input placeholder="Search scans, sites, criteria…" style={{ height: 32, width: 240, padding: "0 12px 0 30px", border: "1px solid #e2e8f0", borderRadius: 6, fontSize: 12.5, fontFamily: FONT_INTER, color: "#475569", outline: "none" }} />
         </div>
         <button type="button" style={{ width: 32, height: 32, borderRadius: 6, border: "1px solid #e2e8f0", background: "#fff", color: "#475569", display: "inline-flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}><IcBell size={14} /></button>
@@ -190,7 +190,7 @@ function ScanHeader({ onOpenPR }: { onOpenPR: () => void }) {
     <div style={{ background: "#fff", border: "1px solid #e2e8f0", borderRadius: 8, padding: "20px 24px" }}>
       <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 24 }}>
         <div style={{ minWidth: 0, flex: 1 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 11, letterSpacing: "0.14em", textTransform: "uppercase", color: "#94a3b8", fontWeight: 600 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 11, letterSpacing: "0.14em", textTransform: "uppercase", color: "#64748b", fontWeight: 600 }}>
             <span>Scan #1847</span>
             <span style={{ color: "#cbd5e1" }}>·</span>
             <span style={{ color: "#0e7490" }}>WCAG 2.1 AA</span>
@@ -232,7 +232,7 @@ function ScanHeader({ onOpenPR }: { onOpenPR: () => void }) {
             </div>
           </div>
           <div>
-            <div style={{ fontSize: 10.5, letterSpacing: "0.14em", textTransform: "uppercase", color: "#94a3b8", fontWeight: 600 }}>Compliance score</div>
+            <div style={{ fontSize: 10.5, letterSpacing: "0.14em", textTransform: "uppercase", color: "#64748b", fontWeight: 600 }}>Compliance score</div>
             <div style={{ marginTop: 4, fontFamily: FONT_DISPLAY, fontWeight: 600, fontSize: 18, color: "#0b1f3a" }}>Grade {grade} · partial</div>
             <div style={{ marginTop: 6, fontSize: 11.5, color: "#16a34a", fontWeight: 600, fontFamily: FONT_INTER, display: "inline-flex", alignItems: "center", gap: 4 }}>
               <span>↑ {score - prevScore}</span>
@@ -242,7 +242,7 @@ function ScanHeader({ onOpenPR }: { onOpenPR: () => void }) {
         </div>
         <div>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 10 }}>
-            <div style={{ fontSize: 10.5, letterSpacing: "0.14em", textTransform: "uppercase", color: "#94a3b8", fontWeight: 600 }}>{total} violations across 11 success criteria</div>
+            <div style={{ fontSize: 10.5, letterSpacing: "0.14em", textTransform: "uppercase", color: "#64748b", fontWeight: 600 }}>{total} violations across 11 success criteria</div>
             <div style={{ fontSize: 11.5, color: "#64748b", fontFamily: FONT_INTER }}><b style={{ color: "#0e7490", fontFamily: FONT_MONO, fontSize: 12 }}>69</b> auto-fixable · <span style={{ fontFamily: FONT_MONO, fontSize: 12, color: "#475569" }}>9</span> manual</div>
           </div>
           <div style={{ display: "flex", height: 10, borderRadius: 4, overflow: "hidden", background: "#f1f5f9" }}>
@@ -276,7 +276,7 @@ function FilterBar({ filters, setFilters, query, setQuery, totalShown }: { filte
   return (
     <div style={{ background: "#fff", border: "1px solid #e2e8f0", borderRadius: 8, padding: "12px 16px", display: "flex", alignItems: "center", gap: 14, flexWrap: "wrap" }}>
       <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-        <span style={{ fontSize: 10.5, letterSpacing: "0.14em", textTransform: "uppercase", color: "#94a3b8", fontWeight: 600, marginRight: 4 }}>Severity</span>
+        <span style={{ fontSize: 10.5, letterSpacing: "0.14em", textTransform: "uppercase", color: "#64748b", fontWeight: 600, marginRight: 4 }}>Severity</span>
         {sevs.map((s) => (
           <button key={s} type="button" onClick={() => toggle(s)} style={{ display: "inline-flex", alignItems: "center", gap: 6, height: 28, padding: "0 11px", borderRadius: 6, border: `1px solid ${filters[s] ? SEV[s].color : "#e2e8f0"}`, background: filters[s] ? SEV[s].soft : "#fff", color: filters[s] ? SEV[s].color : "#475569", fontSize: 12, fontWeight: 600, fontFamily: FONT_INTER, cursor: "pointer" }}>
             <span style={{ width: 7, height: 7, borderRadius: "50%", background: filters[s] ? SEV[s].color : "#cbd5e1" }} />
@@ -294,12 +294,12 @@ function FilterBar({ filters, setFilters, query, setQuery, totalShown }: { filte
         <option>/services</option>
         <option>/forms/I-90</option>
       </select>
-      <button type="button" style={{ display: "inline-flex", alignItems: "center", gap: 6, height: 28, padding: "0 11px", borderRadius: 6, border: "1px solid #06b6d4", background: "#ecfeff", color: "#0891b2", fontSize: 12, fontWeight: 600, fontFamily: FONT_INTER, cursor: "pointer" }}>
+      <button type="button" style={{ display: "inline-flex", alignItems: "center", gap: 6, height: 28, padding: "0 11px", borderRadius: 6, border: "1px solid #06b6d4", background: "#ecfeff", color: "#0e7490", fontSize: 12, fontWeight: 600, fontFamily: FONT_INTER, cursor: "pointer" }}>
         <IcSparkle size={12} sw={2.2} />Auto-fixable only
       </button>
       <div style={{ flex: 1 }} />
       <div style={{ position: "relative" }}>
-        <span style={{ position: "absolute", left: 9, top: "50%", transform: "translateY(-50%)", color: "#94a3b8" }}><IcScan size={13} sw={2} /></span>
+        <span style={{ position: "absolute", left: 9, top: "50%", transform: "translateY(-50%)", color: "#64748b" }}><IcScan size={13} sw={2} /></span>
         <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search WCAG ID, criterion, selector…" style={{ height: 28, width: 240, padding: "0 10px 0 28px", border: "1px solid #e2e8f0", borderRadius: 6, fontSize: 12, fontFamily: FONT_INTER, color: "#475569", outline: "none" }} />
       </div>
       <span style={{ fontSize: 11.5, color: "#64748b", fontFamily: FONT_INTER }}>{totalShown} shown</span>
@@ -316,7 +316,7 @@ function ViolationRow({ v, last, onPreview, selected }: { v: Violation; last: bo
     <div style={{ padding: "16px 18px", borderBottom: last ? "none" : "1px solid #f1f5f9", background: selected ? "rgba(6,182,212,0.06)" : "#fff", borderLeft: selected ? "3px solid #06b6d4" : "3px solid transparent", display: "grid", gridTemplateColumns: "auto 1fr auto", gap: 16, alignItems: "flex-start", transition: "background-color .15s" }}>
       <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6, paddingTop: 2 }}>
         <span style={{ fontFamily: FONT_MONO, fontWeight: 700, fontSize: 12, color: sev.color, background: sev.soft, padding: "5px 9px", borderRadius: 4, minWidth: 56, textAlign: "center" }}>{v.wcag}</span>
-        <span style={{ fontSize: 9.5, letterSpacing: "0.10em", textTransform: "uppercase", color: "#94a3b8", fontWeight: 600 }}>Level {v.level}</span>
+        <span style={{ fontSize: 9.5, letterSpacing: "0.10em", textTransform: "uppercase", color: "#64748b", fontWeight: 600 }}>Level {v.level}</span>
       </div>
       <div style={{ minWidth: 0 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
@@ -336,7 +336,7 @@ function ViolationRow({ v, last, onPreview, selected }: { v: Violation; last: bo
         <div style={{ marginTop: 8, display: "flex", alignItems: "flex-start", gap: 8, fontSize: 12.5, color: "#475569", fontFamily: FONT_INTER, lineHeight: 1.5 }}>
           {v.fixable
             ? <span style={{ flexShrink: 0, marginTop: 1, color: "#0e7490" }}><IcSparkle size={13} sw={2.2} /></span>
-            : <span style={{ flexShrink: 0, marginTop: 1, color: "#94a3b8" }}><IcEye size={13} sw={2} /></span>}
+            : <span style={{ flexShrink: 0, marginTop: 1, color: "#64748b" }}><IcEye size={13} sw={2} /></span>}
           <span><b style={{ color: "#0b1f3a" }}>{v.fixable ? "Suggested fix" : "Manual review"}:</b> {v.fixDesc}</span>
         </div>
         <div style={{ marginTop: 8, fontFamily: FONT_MONO, fontSize: 11, color: "#64748b" }}>
@@ -345,7 +345,7 @@ function ViolationRow({ v, last, onPreview, selected }: { v: Violation; last: bo
       </div>
       <div style={{ display: "flex", flexDirection: "column", gap: 6, alignItems: "flex-end" }}>
         {v.fixable
-          ? <Btn variant={selected ? "cyan" : "outline"} size="sm" onClick={() => onPreview(v)} leadIcon={<IcPr size={12} sw={2} />} style={selected ? {} : { borderColor: "#06b6d4", color: "#0891b2" }}>{selected ? "Previewing" : "Open Auto-Fix PR"}</Btn>
+          ? <Btn variant={selected ? "cyan" : "outline"} size="sm" onClick={() => onPreview(v)} leadIcon={<IcPr size={12} sw={2} />} style={selected ? {} : { borderColor: "#06b6d4", color: "#0e7490" }}>{selected ? "Previewing" : "Open Auto-Fix PR"}</Btn>
           : <Btn variant="ghost" size="sm" leadIcon={<IcEye size={12} sw={2} />}>Review</Btn>}
         <button type="button" style={{ fontSize: 11, color: "#64748b", fontFamily: FONT_INTER, background: "none", border: "none", cursor: "pointer", padding: "2px 4px" }}>Ignore</button>
       </div>
@@ -360,13 +360,13 @@ function ViolationsGroup({ sev, items, expanded, setExpanded, onPreview, selecte
   return (
     <div style={{ background: "#fff", border: "1px solid #e2e8f0", borderRadius: 8, overflow: "hidden" }}>
       <button type="button" onClick={() => setExpanded({ ...expanded, [sev]: !isOpen })} style={{ width: "100%", display: "flex", alignItems: "center", gap: 12, padding: "14px 18px", borderBottom: isOpen ? "1px solid #f1f5f9" : "none", background: "#fff", border: "none", cursor: "pointer", textAlign: "left" }}>
-        {isOpen ? <IcChevD size={14} sw={2} style={{ color: "#94a3b8" }} /> : <IcChevR size={14} sw={2} style={{ color: "#94a3b8" }} />}
+        {isOpen ? <IcChevD size={14} sw={2} style={{ color: "#64748b" }} /> : <IcChevR size={14} sw={2} style={{ color: "#64748b" }} />}
         <span style={{ width: 8, height: 8, borderRadius: 2, background: SEV[sev].color }} />
         <span style={{ fontFamily: FONT_DISPLAY, fontWeight: 600, fontSize: 15, color: "#0b1f3a" }}>{SEV[sev].label}</span>
         <span style={{ fontFamily: FONT_MONO, fontSize: 11.5, color: SEV[sev].color, background: SEV[sev].soft, padding: "3px 8px", borderRadius: 4, fontWeight: 700 }}>{totalCount} instances · {items.length} criteria</span>
         <div style={{ flex: 1 }} />
         {fixable > 0 && (
-          <span style={{ display: "inline-flex", alignItems: "center", gap: 5, fontSize: 11.5, color: "#0891b2", fontFamily: FONT_INTER, fontWeight: 600 }}>
+          <span style={{ display: "inline-flex", alignItems: "center", gap: 5, fontSize: 11.5, color: "#0e7490", fontFamily: FONT_INTER, fontWeight: 600 }}>
             <IcSparkle size={12} sw={2.2} />{fixable} auto-fixable
           </span>
         )}
@@ -415,7 +415,7 @@ function DiffView({ v }: { v: Violation | undefined }) {
         ))}
       </div>
       <div style={{ padding: 12, background: "#ecfeff", border: "1px solid rgba(6,182,212,0.3)", borderRadius: 6, fontFamily: FONT_INTER, fontSize: 12, color: "#0b1f3a", lineHeight: 1.5 }}>
-        <div style={{ fontSize: 10, letterSpacing: "0.14em", textTransform: "uppercase", color: "#0891b2", fontWeight: 700, marginBottom: 6, display: "flex", alignItems: "center", gap: 4 }}>
+        <div style={{ fontSize: 10, letterSpacing: "0.14em", textTransform: "uppercase", color: "#0e7490", fontWeight: 700, marginBottom: 6, display: "flex", alignItems: "center", gap: 4 }}>
           <IcSparkle size={11} sw={2.2} />Why this fix
         </div>
         <div>{v.fixDesc}. WCAG <b style={{ fontFamily: FONT_MONO }}>{v.wcag}</b> requires {v.measured ? `a ${v.required} contrast ratio` : "this attribute"} — applies to <b style={{ fontFamily: FONT_MONO }}>×{v.count}</b> instance{v.count > 1 ? "s" : ""} of the selector.</div>
@@ -466,11 +466,11 @@ Verified: zero new violations introduced
 Co-Authored-By: AccessiScan <bot@accessiscan.piposlab.com>`;
   return (
     <div style={{ padding: 14, fontFamily: FONT_INTER, fontSize: 12.5 }}>
-      <div style={{ fontSize: 10, letterSpacing: "0.14em", textTransform: "uppercase", color: "#94a3b8", fontWeight: 600, marginBottom: 6 }}>PR title</div>
+      <div style={{ fontSize: 10, letterSpacing: "0.14em", textTransform: "uppercase", color: "#64748b", fontWeight: 600, marginBottom: 6 }}>PR title</div>
       <div style={{ fontFamily: FONT_MONO, fontSize: 12.5, color: "#0b1f3a", background: "#fff", border: "1px solid #e2e8f0", borderRadius: 6, padding: "8px 10px", fontWeight: 600 }}>
         a11y: fix {fixes.length} WCAG 2.1 AA violations on agency.gov
       </div>
-      <div style={{ marginTop: 14, fontSize: 10, letterSpacing: "0.14em", textTransform: "uppercase", color: "#94a3b8", fontWeight: 600, marginBottom: 6 }}>Description</div>
+      <div style={{ marginTop: 14, fontSize: 10, letterSpacing: "0.14em", textTransform: "uppercase", color: "#64748b", fontWeight: 600, marginBottom: 6 }}>Description</div>
       <div style={{ background: "#fff", border: "1px solid #e2e8f0", borderRadius: 6, padding: 12, fontFamily: FONT_MONO, fontSize: 11.5, color: "#334155", lineHeight: 1.6, whiteSpace: "pre-wrap" }}>{description}</div>
       <div style={{ marginTop: 14, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
         <Field label="Target branch" v="main" />
@@ -485,7 +485,7 @@ Co-Authored-By: AccessiScan <bot@accessiscan.piposlab.com>`;
 function Field({ label, v, mono }: { label: string; v: string; mono?: boolean }) {
   return (
     <div>
-      <div style={{ fontSize: 9.5, letterSpacing: "0.14em", textTransform: "uppercase", color: "#94a3b8", fontWeight: 600, marginBottom: 4 }}>{label}</div>
+      <div style={{ fontSize: 9.5, letterSpacing: "0.14em", textTransform: "uppercase", color: "#64748b", fontWeight: 600, marginBottom: 4 }}>{label}</div>
       <div style={{ fontSize: 11.5, color: "#0b1f3a", background: "#fff", border: "1px solid #e2e8f0", borderRadius: 5, padding: "6px 8px", fontFamily: mono ? FONT_MONO : FONT_INTER, fontWeight: 500 }}>{v}</div>
     </div>
   );
@@ -551,7 +551,7 @@ function PRPanel({ violation, onClose, allFixable, queueIds, toggleQueue }: { vi
           <Btn variant="outline" size="sm" style={{ flex: 1, justifyContent: "center" }} leadIcon={<IcCopy size={12} sw={2} />}>Copy patch</Btn>
           <Btn variant="outline" size="sm" style={{ flex: 1, justifyContent: "center" }} leadIcon={<IcDownload size={12} sw={2} />}>Download .patch</Btn>
         </div>
-        <div style={{ fontSize: 10.5, color: "#94a3b8", fontFamily: FONT_INTER, lineHeight: 1.5, textAlign: "center" }}>
+        <div style={{ fontSize: 10.5, color: "#64748b", fontFamily: FONT_INTER, lineHeight: 1.5, textAlign: "center" }}>
           Patches written by Claude · review before merge · AccessiScan does not warrant legal compliance.
         </div>
       </div>

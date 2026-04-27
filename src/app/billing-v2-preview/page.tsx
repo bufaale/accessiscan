@@ -103,7 +103,7 @@ function Sidebar({ active = "Billing" }: { active?: string }) {
   ];
   const renderGroup = (label: string, items: SidebarItem[]) => (
     <div>
-      <div style={{ padding: "0 10px 8px", fontSize: 10.5, letterSpacing: "0.14em", textTransform: "uppercase", color: "#94a3b8", fontWeight: 600 }}>{label}</div>
+      <div style={{ padding: "0 10px 8px", fontSize: 10.5, letterSpacing: "0.14em", textTransform: "uppercase", color: "#64748b", fontWeight: 600 }}>{label}</div>
       <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
         {items.map((it) => {
           const isActive = active === it.label;
@@ -129,7 +129,7 @@ function Sidebar({ active = "Billing" }: { active?: string }) {
         {renderGroup("Main", main)}
         {renderGroup("Settings", settings)}
       </nav>
-      <div style={{ padding: "12px 20px", borderTop: "1px solid #e2e8f0", fontSize: 11, color: "#94a3b8", fontFamily: FONT_INTER }}>AccessiScan v1.0</div>
+      <div style={{ padding: "12px 20px", borderTop: "1px solid #e2e8f0", fontSize: 11, color: "#64748b", fontFamily: FONT_INTER }}>AccessiScan v1.0</div>
     </aside>
   );
 }
@@ -142,12 +142,12 @@ function Topbar({ title, breadcrumb, action }: { title: string; breadcrumb?: str
   return (
     <header style={{ minHeight: 88, padding: "16px 28px", borderBottom: "1px solid #e2e8f0", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 24, background: "#fff", flexShrink: 0 }}>
       <div style={{ minWidth: 0, flex: "1 1 auto" }}>
-        {breadcrumb && <div style={{ fontSize: 11, letterSpacing: "0.14em", textTransform: "uppercase", color: "#94a3b8", fontWeight: 600, marginBottom: 4, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{breadcrumb}</div>}
+        {breadcrumb && <div style={{ fontSize: 11, letterSpacing: "0.14em", textTransform: "uppercase", color: "#64748b", fontWeight: 600, marginBottom: 4, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{breadcrumb}</div>}
         <h1 style={{ margin: 0, fontFamily: FONT_DISPLAY, fontWeight: 600, fontSize: 22, lineHeight: 1.2, color: "#0b1f3a", letterSpacing: "-0.01em", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{title}</h1>
       </div>
       <div style={{ display: "flex", gap: 12, alignItems: "center", flexShrink: 0 }}>
         <div style={{ position: "relative" }}>
-          <span style={{ position: "absolute", left: 11, top: "50%", transform: "translateY(-50%)", color: "#94a3b8" }}><IcScan size={14} sw={2} /></span>
+          <span style={{ position: "absolute", left: 11, top: "50%", transform: "translateY(-50%)", color: "#64748b" }}><IcScan size={14} sw={2} /></span>
           <input placeholder="Search scans, sites, criteria…" style={{ height: 36, width: 280, padding: "0 12px 0 32px", border: "1px solid #e2e8f0", borderRadius: 6, fontSize: 13, fontFamily: FONT_INTER, color: "#475569", outline: "none" }} />
         </div>
         <button type="button" style={{ width: 36, height: 36, borderRadius: 6, border: "1px solid #e2e8f0", background: "#fff", color: "#475569", display: "inline-flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}><IcBell size={15} /></button>
@@ -199,7 +199,7 @@ function Section({ title, sub, children }: { title?: string; sub?: string; child
 function Meta({ label, value, sub }: { label: string; value: string; sub?: string }) {
   return (
     <div>
-      <div style={{ fontSize: 10.5, letterSpacing: "0.12em", textTransform: "uppercase", color: "#94a3b8", fontWeight: 600, marginBottom: 4 }}>{label}</div>
+      <div style={{ fontSize: 10.5, letterSpacing: "0.12em", textTransform: "uppercase", color: "#64748b", fontWeight: 600, marginBottom: 4 }}>{label}</div>
       <div style={{ fontSize: 14, color: "#0b1f3a", fontWeight: 600, fontFamily: FONT_INTER }}>{value}</div>
       {sub && <div style={{ fontSize: 11.5, color: "#64748b", marginTop: 2 }}>{sub}</div>}
     </div>
@@ -294,7 +294,7 @@ function UsageRow() {
                 <div style={{ height: 5, background: "linear-gradient(90deg,#06b6d4 0%,#22d3ee 100%)", borderRadius: 3, opacity: 0.35 }} />
               )}
               <div style={{ marginTop: 8, display: "flex", justifyContent: "space-between", fontSize: 11, fontFamily: FONT_INTER }}>
-                <span style={{ color: "#94a3b8", letterSpacing: "0.10em", textTransform: "uppercase", fontWeight: 600 }}>{u.limit}</span>
+                <span style={{ color: "#64748b", letterSpacing: "0.10em", textTransform: "uppercase", fontWeight: 600 }}>{u.limit}</span>
                 {atCap && <span style={{ color: "#dc2626", fontWeight: 600 }}>At capacity</span>}
               </div>
             </div>
@@ -632,7 +632,7 @@ export default function BillingV2PreviewPage() {
               {/* Footer note */}
               <div style={{ marginTop: 6, padding: "14px 18px", border: "1px solid #e2e8f0", borderRadius: 8, background: "#fff", display: "flex", alignItems: "center", justifyContent: "space-between", fontFamily: FONT_INTER, fontSize: 12.5, color: "#64748b" }}>
                 <span>Need a custom invoice, PO, or annual contract? Email <a style={{ color: "#0b1f3a", fontWeight: 600 }}>billing@accessiscan.com</a>.</span>
-                <span style={{ fontFamily: FONT_MONO, fontSize: 11, color: "#94a3b8" }}>Acct · acme-agency · 4f8b9c</span>
+                <span style={{ fontFamily: FONT_MONO, fontSize: 11, color: "#64748b" }}>Acct · acme-agency · 4f8b9c</span>
               </div>
             </div>
           </main>

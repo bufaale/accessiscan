@@ -67,7 +67,10 @@ function Eyebrow({ children, color = "slate" }: { children: ReactNode; color?: "
             fontWeight: 600,
             letterSpacing: "0.14em",
             textTransform: "uppercase",
-            color: CYAN,
+            // cyan700 (#0e7490) keeps brand teal but passes AA on the light
+            // cyan-pill background (5.66:1 vs 4.5 required). CYAN (#06b6d4)
+            // fails at 2.21:1.
+            color: "#0e7490",
           }}
         >
           {children}
@@ -83,7 +86,7 @@ function Eyebrow({ children, color = "slate" }: { children: ReactNode; color?: "
         fontWeight: 600,
         letterSpacing: "0.14em",
         textTransform: "uppercase",
-        color: color === "cyan" ? CYAN : SLATE_500,
+        color: color === "cyan" ? "#0e7490" : SLATE_500,
       }}
     >
       {children}

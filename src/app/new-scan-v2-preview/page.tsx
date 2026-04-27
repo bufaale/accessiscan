@@ -153,7 +153,7 @@ function Sidebar({ active = "New scan" }: { active?: string }) {
   ];
   const renderGroup = (label: string, items: SidebarItem[]) => (
     <div>
-      <div style={{ padding: "0 10px 8px", fontSize: 10.5, letterSpacing: "0.14em", textTransform: "uppercase", color: "#94a3b8", fontWeight: 600 }}>{label}</div>
+      <div style={{ padding: "0 10px 8px", fontSize: 10.5, letterSpacing: "0.14em", textTransform: "uppercase", color: "#64748b", fontWeight: 600 }}>{label}</div>
       <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
         {items.map((it) => {
           const isActive = active === it.label;
@@ -179,7 +179,7 @@ function Sidebar({ active = "New scan" }: { active?: string }) {
         {renderGroup("Main", main)}
         {renderGroup("Settings", settings)}
       </nav>
-      <div style={{ padding: "12px 20px", borderTop: "1px solid #e2e8f0", fontSize: 11, color: "#94a3b8", fontFamily: FONT_INTER }}>AccessiScan v1.0</div>
+      <div style={{ padding: "12px 20px", borderTop: "1px solid #e2e8f0", fontSize: 11, color: "#64748b", fontFamily: FONT_INTER }}>AccessiScan v1.0</div>
     </aside>
   );
 }
@@ -192,12 +192,12 @@ function Topbar({ title, breadcrumb, action }: { title: string; breadcrumb?: str
   return (
     <header style={{ minHeight: 88, padding: "16px 28px", borderBottom: "1px solid #e2e8f0", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 24, background: "#fff", flexShrink: 0 }}>
       <div style={{ minWidth: 0, flex: "1 1 auto" }}>
-        {breadcrumb && <div style={{ fontSize: 11, letterSpacing: "0.14em", textTransform: "uppercase", color: "#94a3b8", fontWeight: 600, marginBottom: 4, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{breadcrumb}</div>}
+        {breadcrumb && <div style={{ fontSize: 11, letterSpacing: "0.14em", textTransform: "uppercase", color: "#64748b", fontWeight: 600, marginBottom: 4, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{breadcrumb}</div>}
         <h1 style={{ margin: 0, fontFamily: FONT_DISPLAY, fontWeight: 600, fontSize: 22, lineHeight: 1.2, color: "#0b1f3a", letterSpacing: "-0.01em", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{title}</h1>
       </div>
       <div style={{ display: "flex", gap: 12, alignItems: "center", flexShrink: 0 }}>
         <div style={{ position: "relative" }}>
-          <span style={{ position: "absolute", left: 11, top: "50%", transform: "translateY(-50%)", color: "#94a3b8" }}><IcScan size={14} sw={2} /></span>
+          <span style={{ position: "absolute", left: 11, top: "50%", transform: "translateY(-50%)", color: "#64748b" }}><IcScan size={14} sw={2} /></span>
           <input placeholder="Search scans, sites, criteria…" style={{ height: 36, width: 280, padding: "0 12px 0 32px", border: "1px solid #e2e8f0", borderRadius: 6, fontSize: 13, fontFamily: FONT_INTER, color: "#475569", outline: "none" }} />
         </div>
         <button type="button" style={{ width: 36, height: 36, borderRadius: 6, border: "1px solid #e2e8f0", background: "#fff", color: "#475569", display: "inline-flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}><IcBell size={15} /></button>
@@ -228,7 +228,7 @@ function UrlScanField({ url, onUrlChange }: { url: string; onUrlChange: (v: stri
       </label>
 
       <div style={{ display: "flex", alignItems: "stretch", background: "#fff", border: `1.5px solid ${borderColor}`, borderRadius: 8, boxShadow: ring, transition: "border-color .15s, box-shadow .15s", overflow: "hidden" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "0 14px 0 18px", borderRight: "1px solid #f1f5f9", color: "#94a3b8", flexShrink: 0 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "0 14px 0 18px", borderRight: "1px solid #f1f5f9", color: "#64748b", flexShrink: 0 }}>
           <IcLock size={15} sw={2} />
           <span style={{ fontFamily: FONT_MONO, fontSize: 13, color: "#64748b", fontWeight: 500 }}>https://</span>
         </div>
@@ -254,10 +254,10 @@ function UrlScanField({ url, onUrlChange }: { url: string; onUrlChange: (v: stri
 
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 10, fontSize: 12, color: "#64748b", fontFamily: FONT_INTER }}>
         <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
-          <IcInfo size={12} sw={2} style={{ color: "#94a3b8" }} />
+          <IcInfo size={12} sw={2} style={{ color: "#64748b" }} />
           We respect <span style={{ fontFamily: FONT_MONO, color: "#0b1f3a" }}>robots.txt</span> and authenticated routes by default.
         </span>
-        <span style={{ display: "inline-flex", alignItems: "center", gap: 14, color: "#94a3b8" }}>
+        <span style={{ display: "inline-flex", alignItems: "center", gap: 14, color: "#64748b" }}>
           <span style={{ display: "inline-flex", alignItems: "center", gap: 5 }}>
             <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#06b6d4" }} />
             axe-core 4.10
@@ -416,7 +416,7 @@ function QuickOptions({
 }) {
   return (
     <div style={{ background: "#fff", border: "1px solid #e2e8f0", borderRadius: 8, padding: 22 }}>
-      <div style={{ fontFamily: FONT_INTER, fontSize: 11, fontWeight: 600, letterSpacing: "0.14em", textTransform: "uppercase", color: "#94a3b8", marginBottom: 16 }}>
+      <div style={{ fontFamily: FONT_INTER, fontSize: 11, fontWeight: 600, letterSpacing: "0.14em", textTransform: "uppercase", color: "#64748b", marginBottom: 16 }}>
         Scan options
       </div>
 
@@ -630,7 +630,7 @@ function WhatWeCheck() {
                     {g.letter}
                   </span>
                   <span style={{ fontFamily: FONT_DISPLAY, fontWeight: 600, fontSize: 15, color: "#0b1f3a" }}>{g.title}</span>
-                  <span style={{ fontFamily: FONT_MONO, fontSize: 11, fontWeight: 600, color: "#94a3b8", marginLeft: "auto" }}>{g.criteria.length}</span>
+                  <span style={{ fontFamily: FONT_MONO, fontSize: 11, fontWeight: 600, color: "#64748b", marginLeft: "auto" }}>{g.criteria.length}</span>
                 </div>
                 <div style={{ fontSize: 12, color: "#64748b", marginBottom: 12, fontFamily: FONT_INTER }}>{g.blurb}</div>
                 <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
@@ -653,7 +653,7 @@ function WhatWeCheck() {
                       }}
                     >
                       <span style={{ color: "#0b1f3a", fontWeight: 700 }}>{id}</span>
-                      <span style={{ color: "#94a3b8" }}>·</span>
+                      <span style={{ color: "#64748b" }}>·</span>
                       <span>{label}</span>
                     </span>
                   ))}
@@ -685,7 +685,7 @@ function RecentlyScanned() {
     <div style={{ background: "#fff", border: "1px solid #e2e8f0", borderRadius: 8, overflow: "hidden" }}>
       <div style={{ padding: "16px 22px", display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid #f1f5f9" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <IcHistory size={15} sw={2} style={{ color: "#94a3b8" }} />
+          <IcHistory size={15} sw={2} style={{ color: "#64748b" }} />
           <span style={{ fontFamily: FONT_DISPLAY, fontWeight: 600, fontSize: 15, color: "#0b1f3a" }}>Recently scanned</span>
         </div>
         <a style={{ fontSize: 12, color: "#64748b", textDecoration: "none", fontFamily: FONT_INTER, fontWeight: 500, cursor: "pointer" }}>
@@ -711,10 +711,10 @@ function RecentlyScanned() {
               }}
             >
               <div style={{ minWidth: 0, display: "flex", alignItems: "center", gap: 10 }}>
-                <IcGlobe size={13} sw={1.7} style={{ color: "#94a3b8", flexShrink: 0 }} />
+                <IcGlobe size={13} sw={1.7} style={{ color: "#64748b", flexShrink: 0 }} />
                 <span style={{ color: "#0b1f3a", fontWeight: 500, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{r.url}</span>
               </div>
-              <span style={{ color: "#94a3b8", fontSize: 12 }}>{r.when}</span>
+              <span style={{ color: "#64748b", fontSize: 12 }}>{r.when}</span>
               <span style={{ fontFamily: FONT_MONO, fontSize: 12.5, fontWeight: 700, color: scoreColor, minWidth: 28, textAlign: "right" }}>
                 {r.status === "running" ? (
                   <span style={{ color: "#a855f7", fontFamily: FONT_INTER, fontWeight: 500, fontSize: 11 }}>Scanning…</span>
@@ -847,7 +847,7 @@ export default function NewScanV2PreviewPage() {
             <form onSubmit={handleSubmit} style={{ maxWidth: 760, margin: "0 auto" }}>
               {/* Title */}
               <div style={{ marginBottom: 28 }}>
-                <div style={{ fontFamily: FONT_INTER, fontSize: 11, fontWeight: 600, letterSpacing: "0.14em", textTransform: "uppercase", color: "#94a3b8", marginBottom: 10 }}>
+                <div style={{ fontFamily: FONT_INTER, fontSize: 11, fontWeight: 600, letterSpacing: "0.14em", textTransform: "uppercase", color: "#64748b", marginBottom: 10 }}>
                   Scans · New
                 </div>
                 <h1 style={{ margin: 0, fontFamily: FONT_DISPLAY, fontWeight: 600, fontSize: 40, lineHeight: 1.05, letterSpacing: "-0.02em", color: "#0b1f3a" }}>
@@ -890,7 +890,7 @@ export default function NewScanV2PreviewPage() {
               </div>
 
               {/* Footer microcopy */}
-              <div style={{ marginTop: 24, fontSize: 11, color: "#94a3b8", textAlign: "center", fontFamily: FONT_INTER, lineHeight: 1.6 }}>
+              <div style={{ marginTop: 24, fontSize: 11, color: "#64748b", textAlign: "center", fontFamily: FONT_INTER, lineHeight: 1.6 }}>
                 AccessiScan does not warrant legal compliance. Consult qualified counsel.
               </div>
             </form>

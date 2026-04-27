@@ -172,7 +172,7 @@ function Sidebar({ active = "Dashboard" }: { active?: string }) {
   ];
   const renderGroup = (label: string, items: SidebarItem[]) => (
     <div>
-      <div style={{ padding: "0 10px 8px", fontSize: 10.5, letterSpacing: "0.14em", textTransform: "uppercase", color: "#94a3b8", fontWeight: 600 }}>{label}</div>
+      <div style={{ padding: "0 10px 8px", fontSize: 10.5, letterSpacing: "0.14em", textTransform: "uppercase", color: "#64748b", fontWeight: 600 }}>{label}</div>
       <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
         {items.map((it) => {
           const isActive = active === it.label;
@@ -198,7 +198,7 @@ function Sidebar({ active = "Dashboard" }: { active?: string }) {
         {renderGroup("Main", main)}
         {renderGroup("Settings", settings)}
       </nav>
-      <div style={{ padding: "12px 20px", borderTop: "1px solid #e2e8f0", fontSize: 11, color: "#94a3b8", fontFamily: FONT_INTER }}>AccessiScan v1.0</div>
+      <div style={{ padding: "12px 20px", borderTop: "1px solid #e2e8f0", fontSize: 11, color: "#64748b", fontFamily: FONT_INTER }}>AccessiScan v1.0</div>
     </aside>
   );
 }
@@ -211,12 +211,12 @@ function Topbar({ title, breadcrumb, action }: { title: string; breadcrumb?: str
   return (
     <header style={{ minHeight: 88, padding: "16px 28px", borderBottom: "1px solid #e2e8f0", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 24, background: "#fff", flexShrink: 0 }}>
       <div style={{ minWidth: 0, flex: "1 1 auto" }}>
-        {breadcrumb && <div style={{ fontSize: 11, letterSpacing: "0.14em", textTransform: "uppercase", color: "#94a3b8", fontWeight: 600, marginBottom: 4, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{breadcrumb}</div>}
+        {breadcrumb && <div style={{ fontSize: 11, letterSpacing: "0.14em", textTransform: "uppercase", color: "#64748b", fontWeight: 600, marginBottom: 4, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{breadcrumb}</div>}
         <h1 style={{ margin: 0, fontFamily: FONT_DISPLAY, fontWeight: 600, fontSize: 22, lineHeight: 1.2, color: "#0b1f3a", letterSpacing: "-0.01em", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{title}</h1>
       </div>
       <div style={{ display: "flex", gap: 12, alignItems: "center", flexShrink: 0 }}>
         <div style={{ position: "relative" }}>
-          <span style={{ position: "absolute", left: 11, top: "50%", transform: "translateY(-50%)", color: "#94a3b8" }}><IcScan size={14} sw={2} /></span>
+          <span style={{ position: "absolute", left: 11, top: "50%", transform: "translateY(-50%)", color: "#64748b" }}><IcScan size={14} sw={2} /></span>
           <input placeholder="Search scans, sites, criteria…" style={{ height: 36, width: 280, padding: "0 12px 0 32px", border: "1px solid #e2e8f0", borderRadius: 6, fontSize: 13, fontFamily: FONT_INTER, color: "#475569", outline: "none" }} />
         </div>
         <button type="button" style={{ width: 36, height: 36, borderRadius: 6, border: "1px solid #e2e8f0", background: "#fff", color: "#475569", display: "inline-flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}><IcBell size={15} /></button>
@@ -263,7 +263,7 @@ function SettingsTabs({ active = "Profile" }: { active?: string }) {
             >
               {t}
               {t === "Team" && (
-                <span style={{ fontSize: 9.5, letterSpacing: "0.12em", textTransform: "uppercase", fontWeight: 700, color: "#94a3b8", border: "1px solid #e2e8f0", borderRadius: 3, padding: "1px 5px" }}>Soon</span>
+                <span style={{ fontSize: 9.5, letterSpacing: "0.12em", textTransform: "uppercase", fontWeight: 700, color: "#64748b", border: "1px solid #e2e8f0", borderRadius: 3, padding: "1px 5px" }}>Soon</span>
               )}
               {isActive && <span style={{ position: "absolute", left: 10, right: 10, bottom: -1, height: 2, background: "#0b1f3a", borderRadius: 2 }} />}
             </button>
@@ -388,7 +388,7 @@ function TextInput({
         transition: "border-color .15s",
       }}
     >
-      {prefix && <span style={{ paddingLeft: 12, color: "#94a3b8", display: "inline-flex" }}>{prefix}</span>}
+      {prefix && <span style={{ paddingLeft: 12, color: "#64748b", display: "inline-flex" }}>{prefix}</span>}
       <input
         type={type}
         value={value}
@@ -505,7 +505,7 @@ function ConnectedAccountRow({
                 padding: "2px 8px",
                 borderRadius: 4,
                 background: "rgba(6,182,212,0.1)",
-                color: "#0891b2",
+                color: "#0e7490",
                 fontSize: 10.5,
                 fontWeight: 600,
                 letterSpacing: "0.08em",
@@ -765,7 +765,7 @@ function ProfileSettings() {
                     Remove
                   </Btn>
                 </div>
-                <div style={{ marginTop: 10, fontSize: 12, color: "#94a3b8", fontFamily: FONT_INTER, display: "flex", alignItems: "center", gap: 6 }}>
+                <div style={{ marginTop: 10, fontSize: 12, color: "#64748b", fontFamily: FONT_INTER, display: "flex", alignItems: "center", gap: 6 }}>
                   <IcInfo size={12} sw={2} />
                   PNG or JPG. 512×512px recommended. Max 2 MB.
                 </div>
@@ -787,7 +787,7 @@ function ProfileSettings() {
                         Unsaved changes.
                       </>
                     ) : savedToast ? (
-                      <span style={{ color: "#0891b2", display: "inline-flex", alignItems: "center", gap: 6, fontWeight: 500 }}>
+                      <span style={{ color: "#0e7490", display: "inline-flex", alignItems: "center", gap: 6, fontWeight: 500 }}>
                         <IcCheck size={12} sw={2.5} />
                         Saved.
                       </span>
@@ -981,7 +981,7 @@ function ProfileSettings() {
           </SettingsSection>
         </div>
 
-        <div style={{ marginTop: 28, fontSize: 11.5, color: "#94a3b8", fontFamily: FONT_INTER, textAlign: "center" }}>
+        <div style={{ marginTop: 28, fontSize: 11.5, color: "#64748b", fontFamily: FONT_INTER, textAlign: "center" }}>
           AccessiScan does not warrant legal compliance. Consult qualified counsel.
         </div>
       </div>

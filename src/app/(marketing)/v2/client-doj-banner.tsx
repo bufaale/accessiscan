@@ -83,7 +83,7 @@ export function DojBannerLive() {
           <div style={{ fontSize: 13, fontWeight: 600 }}>
             DOJ Title II Web Accessibility Deadline · Apr 26, 2027
           </div>
-          <div style={{ fontSize: 11.5, color: "rgba(255,255,255,.85)" }}>
+          <div style={{ fontSize: 11.5, color: "#fff" }}>
             Public entities with 50,000+ residents
           </div>
         </div>
@@ -114,7 +114,7 @@ export function DojBannerLive() {
                   fontSize: 8.5,
                   textTransform: "uppercase",
                   letterSpacing: "0.10em",
-                  color: "rgba(255,255,255,.75)",
+                  color: "#fff",
                   marginTop: 2,
                 }}
               >

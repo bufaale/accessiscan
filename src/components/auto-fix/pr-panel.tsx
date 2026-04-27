@@ -569,7 +569,7 @@ function DiffView({ issue }: { issue: ScanIssue | null }) {
             fontSize: 10,
             letterSpacing: "0.14em",
             textTransform: "uppercase",
-            color: "#0891b2",
+            color: "#0e7490",
             fontWeight: 700,
             marginBottom: 6,
           }}

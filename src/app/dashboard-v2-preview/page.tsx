@@ -100,7 +100,7 @@ function Sidebar({ active = "Dashboard" }: { active?: string }) {
   ];
   const renderGroup = (label: string, items: SidebarItem[]) => (
     <div>
-      <div style={{ padding: "0 10px 8px", fontSize: 10.5, letterSpacing: "0.14em", textTransform: "uppercase", color: "#94a3b8", fontWeight: 600 }}>{label}</div>
+      <div style={{ padding: "0 10px 8px", fontSize: 10.5, letterSpacing: "0.14em", textTransform: "uppercase", color: "#64748b", fontWeight: 600 }}>{label}</div>
       <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
         {items.map((it) => {
           const isActive = active === it.label;
@@ -126,7 +126,7 @@ function Sidebar({ active = "Dashboard" }: { active?: string }) {
         {renderGroup("Main", main)}
         {renderGroup("Settings", settings)}
       </nav>
-      <div style={{ padding: "12px 20px", borderTop: "1px solid #e2e8f0", fontSize: 11, color: "#94a3b8", fontFamily: FONT_INTER }}>AccessiScan v1.0</div>
+      <div style={{ padding: "12px 20px", borderTop: "1px solid #e2e8f0", fontSize: 11, color: "#64748b", fontFamily: FONT_INTER }}>AccessiScan v1.0</div>
     </aside>
   );
 }
@@ -139,12 +139,12 @@ function Topbar({ title, breadcrumb, action }: { title: string; breadcrumb?: str
   return (
     <header style={{ minHeight: 88, padding: "16px 28px", borderBottom: "1px solid #e2e8f0", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 24, background: "#fff", flexShrink: 0 }}>
       <div style={{ minWidth: 0, flex: "1 1 auto" }}>
-        {breadcrumb && <div style={{ fontSize: 11, letterSpacing: "0.14em", textTransform: "uppercase", color: "#94a3b8", fontWeight: 600, marginBottom: 4, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{breadcrumb}</div>}
+        {breadcrumb && <div style={{ fontSize: 11, letterSpacing: "0.14em", textTransform: "uppercase", color: "#64748b", fontWeight: 600, marginBottom: 4, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{breadcrumb}</div>}
         <h1 style={{ margin: 0, fontFamily: FONT_DISPLAY, fontWeight: 600, fontSize: 22, lineHeight: 1.2, color: "#0b1f3a", letterSpacing: "-0.01em", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{title}</h1>
       </div>
       <div style={{ display: "flex", gap: 12, alignItems: "center", flexShrink: 0 }}>
         <div style={{ position: "relative" }}>
-          <span style={{ position: "absolute", left: 11, top: "50%", transform: "translateY(-50%)", color: "#94a3b8" }}><IcScan size={14} sw={2} /></span>
+          <span style={{ position: "absolute", left: 11, top: "50%", transform: "translateY(-50%)", color: "#64748b" }}><IcScan size={14} sw={2} /></span>
           <input placeholder="Search scans, sites, criteria…" style={{ height: 36, width: 280, padding: "0 12px 0 32px", border: "1px solid #e2e8f0", borderRadius: 6, fontSize: 13, fontFamily: FONT_INTER, color: "#475569", outline: "none" }} />
         </div>
         <button type="button" style={{ width: 36, height: 36, borderRadius: 6, border: "1px solid #e2e8f0", background: "#fff", color: "#475569", display: "inline-flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}><IcBell size={15} /></button>
@@ -209,10 +209,10 @@ function KpiCards() {
           </div>
           <div style={{ display: "flex", alignItems: "baseline", gap: 4, marginBottom: 8 }}>
             <span style={{ fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 36, lineHeight: 1, color: s.danger ? "#dc2626" : "#0b1f3a", letterSpacing: "-0.02em" }}>{s.value}</span>
-            {s.suffix && <span style={{ fontFamily: FONT_DISPLAY, fontWeight: 500, fontSize: 16, color: "#94a3b8" }}>{s.suffix}</span>}
+            {s.suffix && <span style={{ fontFamily: FONT_DISPLAY, fontWeight: 500, fontSize: 16, color: "#64748b" }}>{s.suffix}</span>}
           </div>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "auto", paddingTop: 4 }}>
-            <span style={{ fontSize: 11.5, color: "#94a3b8" }}>{s.sub}</span>
+            <span style={{ fontSize: 11.5, color: "#64748b" }}>{s.sub}</span>
             {s.delta && <span style={{ fontSize: 11.5, fontWeight: 600, color: s.delta.neutral ? "#64748b" : s.delta.good === false ? "#dc2626" : "#16a34a", fontFamily: FONT_INTER, display: "inline-flex", alignItems: "center", gap: 3 }}>{s.delta.up ? "▲" : "▼"} {s.delta.text}</span>}
           </div>
         </div>
@@ -251,13 +251,13 @@ function WcagBreakdown() {
           </svg>
           <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 2 }}>
             <span style={{ fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 48, color: "#0b1f3a", letterSpacing: "-0.03em", lineHeight: 1 }}>{score}</span>
-            <span style={{ fontFamily: FONT_MONO, fontSize: 11, color: "#94a3b8", fontWeight: 600, marginTop: 4 }}>/ 100</span>
+            <span style={{ fontFamily: FONT_MONO, fontSize: 11, color: "#64748b", fontWeight: 600, marginTop: 4 }}>/ 100</span>
           </div>
         </div>
         <div style={{ display: "flex", justifyContent: "space-between", paddingTop: 14, borderTop: "1px solid #f1f5f9", fontSize: 11.5, fontFamily: FONT_INTER }}>
           {[["Passing", "345", "#16a34a"], ["Failing", "55", "#dc2626"], ["N/A", "23", "#64748b"]].map(([label, val, color]) => (
             <div key={label}>
-              <div style={{ color: "#94a3b8", fontSize: 10.5, letterSpacing: "0.12em", textTransform: "uppercase", fontWeight: 600 }}>{label}</div>
+              <div style={{ color: "#64748b", fontSize: 10.5, letterSpacing: "0.12em", textTransform: "uppercase", fontWeight: 600 }}>{label}</div>
               <div style={{ fontFamily: FONT_MONO, fontSize: 14, color, fontWeight: 700, marginTop: 4 }}>{val}</div>
             </div>
           ))}
@@ -279,7 +279,7 @@ function WcagBreakdown() {
                 <span style={{ width: 28, height: 28, borderRadius: 6, background: p.danger ? "rgba(220,38,38,0.08)" : "rgba(6,182,212,0.08)", color, display: "inline-flex", alignItems: "center", justifyContent: "center", fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 13 }}>{p.key}</span>
                 <div>
                   <div style={{ fontSize: 13.5, fontWeight: 600, color: "#0b1f3a", fontFamily: FONT_INTER }}>{p.name}</div>
-                  <div style={{ fontSize: 11.5, color: "#94a3b8", marginTop: 2 }}>{p.desc}</div>
+                  <div style={{ fontSize: 11.5, color: "#64748b", marginTop: 2 }}>{p.desc}</div>
                 </div>
                 <div style={{ height: 8, background: "#f1f5f9", borderRadius: 2, overflow: "hidden" }}>
                   <div style={{ width: `${p.v}%`, height: "100%", background: color, transition: "width .4s ease" }} />
@@ -424,7 +424,7 @@ function TopViolationsTable() {
                     <span style={{ fontFamily: FONT_MONO, fontWeight: 700, fontSize: 11.5, color: "#0b1f3a", background: "#f1f5f9", padding: "4px 8px", borderRadius: 4, letterSpacing: "0.04em" }}>{v.id}</span>
                     <div>
                       <div style={{ fontWeight: 600, color: "#0b1f3a", fontSize: 13.5 }}>{v.label}</div>
-                      <div style={{ fontSize: 11.5, color: "#94a3b8", marginTop: 2, maxWidth: 380 }}>{v.desc}</div>
+                      <div style={{ fontSize: 11.5, color: "#64748b", marginTop: 2, maxWidth: 380 }}>{v.desc}</div>
                     </div>
                   </div>
                 </td>
@@ -441,7 +441,7 @@ function TopViolationsTable() {
                   </span>
                 </td>
                 <td style={{ padding: "16px 20px", textAlign: "right" }}>
-                  {v.fixable ? <Btn variant="cyan" size="sm" leadIcon={<IcPr size={11} sw={2} />}>Fix in PR</Btn> : <span style={{ fontSize: 11, color: "#94a3b8", fontFamily: FONT_INTER, fontWeight: 500 }}>Manual review</span>}
+                  {v.fixable ? <Btn variant="cyan" size="sm" leadIcon={<IcPr size={11} sw={2} />}>Fix in PR</Btn> : <span style={{ fontSize: 11, color: "#64748b", fontFamily: FONT_INTER, fontWeight: 500 }}>Manual review</span>}
                 </td>
               </tr>
             );
