@@ -15,6 +15,9 @@ const FONT_MONO = "var(--font-mono), monospace";
 
 const NAVY = "#0b1f3a";
 const CYAN = "#06b6d4";
+// AA-safe text shade (5.66:1 on white). Use for any cyan TEXT on light bg.
+// CYAN (#06b6d4) stays for backgrounds, borders, icons, and decorative dots.
+const CYAN_TEXT = "#0e7490";
 const SLATE_500 = "#64748b";
 
 // ---------- Icons ----------
@@ -316,7 +319,7 @@ function VendorComparison() {
                         fontWeight: 700,
                         letterSpacing: "0.14em",
                         textTransform: "uppercase",
-                        color: CYAN,
+                        color: CYAN_TEXT,
                         borderTop: "1px solid #e2e8f0",
                       }}
                     >
@@ -541,7 +544,7 @@ function GovernmentCallout() {
             }}
           >
             Procurement-ready on the{" "}
-            <span style={{ color: CYAN }}>Team tier.</span>
+            <span style={{ color: CYAN_TEXT }}>Team tier.</span>
           </h2>
           <p
             style={{
