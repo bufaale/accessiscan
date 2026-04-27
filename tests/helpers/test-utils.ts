@@ -107,9 +107,16 @@ export async function setUserRole(userId: string, role: "admin" | "user"): Promi
 // ------- Login / logout helpers -------
 export async function loginViaUI(page: Page, email: string, password: string = TEST_PASSWORD) {
   await page.goto("/login");
-  await page.getByRole("textbox", { name: "Email" }).fill(email);
-  await page.getByRole("textbox", { name: "Password" }).fill(password);
-  await page.getByRole("button", { name: "Sign in" }).click();
+  // Use stable id selectors so this works against both the v1 form ("Email"
+  // label) and the v2 AuthShell ("Work email" label). The IDs are part of the
+  // form contract.
+  const emailInput = page.locator("#login-email, input[type='email']").first();
+  const passwordInput = page.locator("#login-password, input[type='password']").first();
+  await emailInput.fill(email);
+  await passwordInput.fill(password);
+  // The v2 AuthShell has a "Sign in" tab AND a "Sign in" submit button. Scope
+  // to the submit type to disambiguate.
+  await page.locator("button[type='submit']").filter({ hasText: /^sign in|^signing in/i }).first().click();
   await page.waitForURL("**/dashboard**", { timeout: 15_000 });
 }
 

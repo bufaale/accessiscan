@@ -1281,8 +1281,8 @@ function LeftPanel({ mode, setMode }: { mode: Mode; setMode: (m: Mode) => void }
           <a href="/terms" style={{ color: "inherit", textDecoration: "none" }}>
             Terms
           </a>
-          <a href="/security" style={{ color: "inherit", textDecoration: "none" }}>
-            Security
+          <a href="/refund" style={{ color: "inherit", textDecoration: "none" }}>
+            Refund
           </a>
         </div>
       </div>
