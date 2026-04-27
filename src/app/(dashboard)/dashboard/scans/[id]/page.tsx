@@ -495,6 +495,15 @@ export default function ScanResultsPage({ params }: { params: Promise<{ id: stri
         <ScoreCard label="Visual AI" score={scan.visual_score} accent={VIOLET} proGated={scan.visual_score === null && subscriptionPlan === "free"} />
       </div>
 
+      {scan.pour_scores ? (
+        <div data-testid="pour-breakdown" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12 }}>
+          <PourCard label="Perceivable" score={scan.pour_scores.perceivable} />
+          <PourCard label="Operable" score={scan.pour_scores.operable} />
+          <PourCard label="Understandable" score={scan.pour_scores.understandable} />
+          <PourCard label="Robust" score={scan.pour_scores.robust} />
+        </div>
+      ) : null}
+
       <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
         {(["critical", "serious", "moderate", "minor"] as const).map((sev) => {
           const count = issueCounts[sev];
@@ -642,6 +651,28 @@ function ScoreCard({
           PRO
         </span>
       )}
+    </div>
+  );
+}
+
+function PourCard({ label, score }: { label: string; score: number }) {
+  const accent = score >= 85 ? GREEN : score >= 70 ? "#f59e0b" : "#dc2626";
+  const description: Record<string, string> = {
+    Perceivable: "Information must be presentable to users in ways they can perceive.",
+    Operable: "User interface components and navigation must be operable.",
+    Understandable: "Information and operation of the user interface must be understandable.",
+    Robust: "Content must be robust enough for assistive technologies.",
+  };
+  return (
+    <div style={{ background: "#fff", border: `1px solid ${SLATE_200}`, borderLeft: `3px solid ${accent}`, borderRadius: 8, padding: 16, fontFamily: FONT_INTER }}>
+      <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: 6 }}>
+        <span style={{ fontFamily: FONT_DISPLAY, fontWeight: 600, fontSize: 14, color: NAVY }}>{label}</span>
+        <span style={{ fontFamily: FONT_MONO, fontWeight: 700, fontSize: 22, color: accent }}>{score}</span>
+      </div>
+      <div style={{ height: 4, borderRadius: 2, background: SLATE_100, overflow: "hidden", marginBottom: 8 }}>
+        <div style={{ width: `${Math.max(0, Math.min(100, score))}%`, height: "100%", background: accent }} />
+      </div>
+      <p style={{ fontSize: 11.5, color: SLATE_500, margin: 0, lineHeight: 1.4 }}>{description[label]}</p>
     </div>
   );
 }

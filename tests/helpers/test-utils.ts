@@ -314,11 +314,12 @@ export async function seedScan(
     serious_count: number;
     moderate_count: number;
     minor_count: number;
+    pour_scores: { perceivable: number; operable: number; understandable: number; robust: number };
   }> = {},
 ): Promise<{ id: string; url: string }> {
   const url = overrides.url ?? `https://example-${Date.now()}.test`;
   const domain = new URL(url).hostname;
-  const payload = {
+  const payload: Record<string, unknown> = {
     user_id: userId,
     url,
     domain,
@@ -331,6 +332,7 @@ export async function seedScan(
     moderate_count: overrides.moderate_count ?? 8,
     minor_count: overrides.minor_count ?? 3,
   };
+  if (overrides.pour_scores) payload.pour_scores = overrides.pour_scores;
   const res = await fetch(`${supabaseUrl()}/rest/v1/scans`, {
     method: "POST",
     headers: {

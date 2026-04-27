@@ -37,6 +37,7 @@ export interface Scan {
   level_a_score: number | null;
   level_aa_score: number | null;
   level_aaa_score: number | null;
+  pour_scores: { perceivable: number; operable: number; understandable: number; robust: number } | null;
   total_issues: number;
   critical_count: number;
   serious_count: number;
