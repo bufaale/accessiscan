@@ -2,23 +2,25 @@ import Link from "next/link";
 import { Shield, ArrowUpRight } from "lucide-react";
 import { CROSS_PROMO_OTHER_APPS as CROSS_PROMO } from "@/config/cross-promo";
 
+// Anchors must match the IDs on the v2 landing (#features, #cta, #pricing).
+// `#product` and `#government` were stale — they scrolled to nothing.
 const COLUMNS = [
   {
     title: "Product",
     links: [
-      { label: "WCAG scanner", href: "#product" },
-      { label: "VPAT 2.5", href: "#government" },
-      { label: "GitHub Action", href: "#government" },
-      { label: "Pricing", href: "#pricing" },
+      { label: "WCAG scanner", href: "/#features" },
+      { label: "VPAT 2.5", href: "/pricing" },
+      { label: "GitHub Action", href: "/#features" },
+      { label: "Pricing", href: "/pricing" },
     ],
   },
   {
     title: "Compliance",
     links: [
-      { label: "WCAG 2.1 AA", href: "#product" },
-      { label: "Section 508", href: "#government" },
-      { label: "DOJ Title II", href: "/" },
-      { label: "EN 301 549", href: "#government" },
+      { label: "WCAG 2.1 AA", href: "/#features" },
+      { label: "Section 508", href: "/#cta" },
+      { label: "DOJ Title II", href: "/#cta" },
+      { label: "EN 301 549", href: "/#cta" },
     ],
   },
   {
@@ -27,7 +29,7 @@ const COLUMNS = [
       { label: "Blog", href: "/blog" },
       { label: "Overlay detector (free)", href: "/overlay-detector" },
       { label: "Why not overlays", href: "/why-not-overlays" },
-      { label: "Sample VPAT", href: "#government" },
+      { label: "Sample VPAT", href: "/#cta" },
     ],
   },
   {
