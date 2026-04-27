@@ -85,7 +85,7 @@ export function PricingFaq() {
               fontWeight: 600,
               letterSpacing: "0.14em",
               textTransform: "uppercase",
-              color: "#06b6d4",
+              color: "#0e7490",
             }}
           >
             Pricing FAQ

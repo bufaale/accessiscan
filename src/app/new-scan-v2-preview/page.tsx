@@ -223,7 +223,7 @@ function UrlScanField({ url, onUrlChange }: { url: string; onUrlChange: (v: stri
 
   return (
     <div>
-      <label style={{ display: "block", fontSize: 11, fontWeight: 600, letterSpacing: "0.14em", textTransform: "uppercase", color: "#06b6d4", marginBottom: 12, fontFamily: FONT_INTER }}>
+      <label style={{ display: "block", fontSize: 11, fontWeight: 600, letterSpacing: "0.14em", textTransform: "uppercase", color: "#0e7490", marginBottom: 12, fontFamily: FONT_INTER }}>
         URL · Required
       </label>
 
@@ -241,7 +241,7 @@ function UrlScanField({ url, onUrlChange }: { url: string; onUrlChange: (v: stri
           style={{ flex: 1, minWidth: 0, height: 68, padding: "0 16px", border: 0, outline: "none", fontSize: 20, fontFamily: FONT_INTER, fontWeight: 500, color: "#0b1f3a", background: "transparent", letterSpacing: "-0.005em" }}
         />
         {showValid && (
-          <div style={{ display: "flex", alignItems: "center", padding: "0 4px 0 12px", color: "#06b6d4", fontWeight: 600, fontSize: 12, fontFamily: FONT_INTER, gap: 6 }}>
+          <div style={{ display: "flex", alignItems: "center", padding: "0 4px 0 12px", color: "#0e7490", fontWeight: 600, fontSize: 12, fontFamily: FONT_INTER, gap: 6 }}>
             <IcCheck size={14} sw={2.5} /> Valid
           </div>
         )}
@@ -576,7 +576,7 @@ function WhatWeCheck() {
         style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, padding: "18px 22px", background: "#fff", border: 0, cursor: "pointer", textAlign: "left" }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: 14, minWidth: 0 }}>
-          <span style={{ width: 36, height: 36, flexShrink: 0, borderRadius: 6, background: "#ecfeff", color: "#06b6d4", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
+          <span style={{ width: 36, height: 36, flexShrink: 0, borderRadius: 6, background: "#ecfeff", color: "#0e7490", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
             <IcShield size={17} sw={2.2} />
           </span>
           <div>
@@ -589,7 +589,7 @@ function WhatWeCheck() {
           </div>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-          <span style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 11, fontWeight: 600, letterSpacing: "0.14em", textTransform: "uppercase", color: "#06b6d4", fontFamily: FONT_INTER }}>
+          <span style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 11, fontWeight: 600, letterSpacing: "0.14em", textTransform: "uppercase", color: "#0e7490", fontFamily: FONT_INTER }}>
             <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#06b6d4" }} />
             All AA covered
           </span>
@@ -689,7 +689,7 @@ function RecentlyScanned() {
           <span style={{ fontFamily: FONT_DISPLAY, fontWeight: 600, fontSize: 15, color: "#0b1f3a" }}>Recently scanned</span>
         </div>
         <a style={{ fontSize: 12, color: "#64748b", textDecoration: "none", fontFamily: FONT_INTER, fontWeight: 500, cursor: "pointer" }}>
-          View all <span style={{ color: "#06b6d4" }}>→</span>
+          View all <span style={{ color: "#0e7490" }}>→</span>
         </a>
       </div>
 
@@ -773,7 +773,7 @@ function EduCallout() {
       />
 
       <div style={{ position: "relative" }}>
-        <div style={{ fontFamily: FONT_INTER, fontSize: 11, fontWeight: 600, letterSpacing: "0.14em", textTransform: "uppercase", color: "#06b6d4", marginBottom: 14 }}>
+        <div style={{ fontFamily: FONT_INTER, fontSize: 11, fontWeight: 600, letterSpacing: "0.14em", textTransform: "uppercase", color: "#0e7490", marginBottom: 14 }}>
           Why axe-core + AI vision.
         </div>
 
@@ -788,7 +788,7 @@ function EduCallout() {
         <div style={{ marginTop: 22, display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 14 }}>
           {cards.map((c) => (
             <div key={c.k} style={{ padding: 14, borderRadius: 6, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.10)" }}>
-              <div style={{ fontFamily: FONT_MONO, fontSize: 11, fontWeight: 700, color: "#06b6d4", marginBottom: 8 }}>{c.k}</div>
+              <div style={{ fontFamily: FONT_MONO, fontSize: 11, fontWeight: 700, color: "#0e7490", marginBottom: 8 }}>{c.k}</div>
               <div style={{ fontFamily: FONT_DISPLAY, fontWeight: 600, fontSize: 15, marginBottom: 4 }}>{c.v}</div>
               <div style={{ fontSize: 12, color: "rgba(255,255,255,0.55)" }}>{c.note}</div>
             </div>

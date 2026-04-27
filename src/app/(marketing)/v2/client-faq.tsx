@@ -100,7 +100,7 @@ export function Faq() {
               fontWeight: 600,
               letterSpacing: "0.14em",
               textTransform: "uppercase",
-              color: "#06b6d4",
+              color: "#0e7490",
             }}
           >
             Frequently asked
@@ -165,7 +165,7 @@ export function Faq() {
                         fontFamily: "var(--font-mono), monospace",
                         fontSize: 11,
                         fontWeight: 700,
-                        color: "#06b6d4",
+                        color: "#0e7490",
                         minWidth: 28,
                       }}
                     >

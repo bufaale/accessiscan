@@ -46,7 +46,7 @@ type Sev = "critical" | "serious" | "moderate" | "minor";
 const SEV: Record<Sev, { color: string; bg: string; soft: string; label: string }> = {
   critical: { color: "#dc2626", bg: "#fef2f2", soft: "rgba(220,38,38,0.10)", label: "Critical" },
   serious: { color: "#ea580c", bg: "#fff7ed", soft: "rgba(234,88,12,0.10)", label: "Serious" },
-  moderate: { color: "#06b6d4", bg: "#ecfeff", soft: "rgba(6,182,212,0.10)", label: "Moderate" },
+  moderate: { color: "#0e7490", bg: "#ecfeff", soft: "rgba(6,182,212,0.10)", label: "Moderate" },
   minor: { color: "#64748b", bg: "#f1f5f9", soft: "rgba(100,116,139,0.10)", label: "Minor" },
 };
 
@@ -193,7 +193,7 @@ function ScanHeader({ onOpenPR }: { onOpenPR: () => void }) {
           <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 11, letterSpacing: "0.14em", textTransform: "uppercase", color: "#94a3b8", fontWeight: 600 }}>
             <span>Scan #1847</span>
             <span style={{ color: "#cbd5e1" }}>·</span>
-            <span style={{ color: "#06b6d4" }}>WCAG 2.1 AA</span>
+            <span style={{ color: "#0e7490" }}>WCAG 2.1 AA</span>
             <span style={{ color: "#cbd5e1" }}>·</span>
             <span style={{ color: "#dc2626" }}>3 critical fixable</span>
           </div>
@@ -243,7 +243,7 @@ function ScanHeader({ onOpenPR }: { onOpenPR: () => void }) {
         <div>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 10 }}>
             <div style={{ fontSize: 10.5, letterSpacing: "0.14em", textTransform: "uppercase", color: "#94a3b8", fontWeight: 600 }}>{total} violations across 11 success criteria</div>
-            <div style={{ fontSize: 11.5, color: "#64748b", fontFamily: FONT_INTER }}><b style={{ color: "#06b6d4", fontFamily: FONT_MONO, fontSize: 12 }}>69</b> auto-fixable · <span style={{ fontFamily: FONT_MONO, fontSize: 12, color: "#475569" }}>9</span> manual</div>
+            <div style={{ fontSize: 11.5, color: "#64748b", fontFamily: FONT_INTER }}><b style={{ color: "#0e7490", fontFamily: FONT_MONO, fontSize: 12 }}>69</b> auto-fixable · <span style={{ fontFamily: FONT_MONO, fontSize: 12, color: "#475569" }}>9</span> manual</div>
           </div>
           <div style={{ display: "flex", height: 10, borderRadius: 4, overflow: "hidden", background: "#f1f5f9" }}>
             {sevs.map((s) => <div key={s} style={{ width: `${((counts[s] || 0) / total) * 100}%`, background: SEV[s].color }} />)}
@@ -335,12 +335,12 @@ function ViolationRow({ v, last, onPreview, selected }: { v: Violation; last: bo
         )}
         <div style={{ marginTop: 8, display: "flex", alignItems: "flex-start", gap: 8, fontSize: 12.5, color: "#475569", fontFamily: FONT_INTER, lineHeight: 1.5 }}>
           {v.fixable
-            ? <span style={{ flexShrink: 0, marginTop: 1, color: "#06b6d4" }}><IcSparkle size={13} sw={2.2} /></span>
+            ? <span style={{ flexShrink: 0, marginTop: 1, color: "#0e7490" }}><IcSparkle size={13} sw={2.2} /></span>
             : <span style={{ flexShrink: 0, marginTop: 1, color: "#94a3b8" }}><IcEye size={13} sw={2} /></span>}
           <span><b style={{ color: "#0b1f3a" }}>{v.fixable ? "Suggested fix" : "Manual review"}:</b> {v.fixDesc}</span>
         </div>
         <div style={{ marginTop: 8, fontFamily: FONT_MONO, fontSize: 11, color: "#64748b" }}>
-          <span style={{ color: "#06b6d4" }}>{v.file}</span>{v.line > 0 && <>:<span style={{ color: "#0b1f3a", fontWeight: 600 }}>{v.line}</span></>}
+          <span style={{ color: "#0e7490" }}>{v.file}</span>{v.line > 0 && <>:<span style={{ color: "#0b1f3a", fontWeight: 600 }}>{v.line}</span></>}
         </div>
       </div>
       <div style={{ display: "flex", flexDirection: "column", gap: 6, alignItems: "flex-end" }}>
@@ -524,7 +524,7 @@ function PRPanel({ violation, onClose, allFixable, queueIds, toggleQueue }: { vi
           <IcBranch size={12} sw={2} />
           <span style={{ color: "#475569" }}>main</span>
           <IcArrow size={11} sw={2.5} style={{ color: "#cbd5e1" }} />
-          <span style={{ color: "#06b6d4", fontWeight: 600 }}>{branchName}</span>
+          <span style={{ color: "#0e7490", fontWeight: 600 }}>{branchName}</span>
         </div>
       </div>
       <div style={{ display: "flex", borderBottom: "1px solid #e2e8f0", padding: "0 12px", flexShrink: 0 }}>

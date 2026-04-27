@@ -908,7 +908,7 @@ function ProfileSettings() {
                   gap: 8,
                 }}
               >
-                <IcInfo size={13} sw={2} style={{ color: "#06b6d4", flexShrink: 0 }} />
+                <IcInfo size={13} sw={2} style={{ color: "#0e7490", flexShrink: 0 }} />
                 Auto-Fix PRs are active for{" "}
                 <span style={{ fontFamily: FONT_MONO, fontWeight: 600 }}>agency-org/website</span>,{" "}
                 <span style={{ fontFamily: FONT_MONO, fontWeight: 600 }}>agency-org/forms</span>, and 2 more.

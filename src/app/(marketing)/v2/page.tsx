@@ -155,7 +155,7 @@ function Eyebrow({ children, color = "slate" }: { children: ReactNode; color?: "
     return (
       <span style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "5px 10px", border: "1px solid rgba(6,182,212,.40)", background: "rgba(6,182,212,.10)", borderRadius: 4 }}>
         <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#06b6d4" }} />
-        <span style={{ fontFamily: FONT_INTER, fontSize: 11, fontWeight: 600, letterSpacing: "0.14em", textTransform: "uppercase", color: "#06b6d4" }}>{children}</span>
+        <span style={{ fontFamily: FONT_INTER, fontSize: 11, fontWeight: 600, letterSpacing: "0.14em", textTransform: "uppercase", color: "#0e7490" }}>{children}</span>
       </span>
     );
   }
@@ -195,7 +195,7 @@ function WcagSchematic() {
   type ChipProps = { id: string; label: string; style: CSSProperties };
   const Chip = ({ id, label, style }: ChipProps) => (
     <div style={{ position: "absolute", zIndex: 20, display: "flex", alignItems: "center", gap: 8, borderRadius: 4, border: "1px solid rgba(6,182,212,.40)", background: "#0b1f3a", padding: "5px 10px", boxShadow: "0 10px 24px rgba(0,0,0,.3)", ...style }}>
-      <span style={{ fontFamily: FONT_MONO, fontSize: 11, fontWeight: 700, color: "#06b6d4" }}>{id}</span>
+      <span style={{ fontFamily: FONT_MONO, fontSize: 11, fontWeight: 700, color: "#0e7490" }}>{id}</span>
       <span style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: "0.10em", color: "rgba(255,255,255,0.7)" }}>{label}</span>
     </div>
   );
@@ -258,10 +258,10 @@ function Hero() {
             <span style={{ color: "#fff", fontWeight: 600 }}>$19/mo</span>.
           </p>
           <figure style={{ marginTop: 28, maxWidth: 560, borderRadius: 8, border: "1px solid rgba(255,255,255,0.10)", background: "rgba(255,255,255,0.05)", padding: 22, display: "flex", gap: 16, alignItems: "flex-start" }}>
-            <span style={{ fontFamily: FONT_DISPLAY, fontSize: 48, fontWeight: 700, lineHeight: 1, color: "#06b6d4" }} aria-hidden>“</span>
+            <span style={{ fontFamily: FONT_DISPLAY, fontSize: 48, fontWeight: 700, lineHeight: 1, color: "#0e7490" }} aria-hidden>“</span>
             <div>
               <blockquote style={{ margin: 0, fontSize: 19, lineHeight: 1.3, color: "#fff" }}>
-                The FTC fined accessiBe <span style={{ color: "#06b6d4" }}>$1M</span> for deceptive “fully compliant” claims.
+                The FTC fined accessiBe <span style={{ color: "#0e7490" }}>$1M</span> for deceptive “fully compliant” claims.
               </blockquote>
               <figcaption style={{ marginTop: 10, fontSize: 11, letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.5)" }}>
                 U.S. Federal Trade Commission · 2025 consent order
@@ -275,7 +275,7 @@ function Hero() {
           <div style={{ marginTop: 22, display: "flex", flexWrap: "wrap", gap: "8px 20px", fontSize: 12, color: "rgba(255,255,255,0.55)" }}>
             {["No credit card required", "Free tier · 2 scans/mo", "Not an overlay"].map((t) => (
               <span key={t} style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
-                <IconCheck size={13} style={{ color: "#06b6d4" }} />
+                <IconCheck size={13} style={{ color: "#0e7490" }} />
                 {t}
               </span>
             ))}
@@ -314,7 +314,7 @@ function StatsStrip() {
 
 type CellValue = "yes" | "no" | "partial";
 function Cell({ v }: { v: CellValue }) {
-  if (v === "yes") return <IconCheck size={16} style={{ color: "#06b6d4" }} />;
+  if (v === "yes") return <IconCheck size={16} style={{ color: "#0e7490" }} />;
   if (v === "partial") return <IconMinus size={16} style={{ color: "#94a3b8" }} />;
   return <IconX size={16} style={{ color: "#cbd5e1" }} />;
 }
@@ -457,7 +457,7 @@ function FeatureTriplet() {
             <article key={f.eyebrow} style={{ border: "1px solid #e2e8f0", borderRadius: 8, background: "#fff", display: "flex", flexDirection: "column", overflow: "hidden" }}>
               <div style={{ padding: 24, borderBottom: "1px solid #f1f5f9", background: "#f8fafc" }}>{f.art}</div>
               <div style={{ padding: "24px 24px 28px", display: "flex", flexDirection: "column", gap: 14 }}>
-                <span style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.14em", textTransform: "uppercase", color: "#06b6d4" }}>{f.eyebrow}</span>
+                <span style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.14em", textTransform: "uppercase", color: "#0e7490" }}>{f.eyebrow}</span>
                 <h3 style={{ margin: 0, fontFamily: FONT_DISPLAY, fontSize: 22, fontWeight: 600, lineHeight: 1.2, color: "#0b1f3a", letterSpacing: "-0.01em" }}>{f.title}</h3>
                 <p style={{ margin: 0, fontSize: 14, lineHeight: 1.6, color: "#475569" }}>{f.body}</p>
                 <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 4 }}>
@@ -488,7 +488,7 @@ function PrMockup() {
       </div>
       <div style={{ padding: "12px 16px", display: "flex", justifyContent: "space-between", fontSize: 11.5, color: "rgba(255,255,255,0.55)", borderBottom: "1px solid rgba(255,255,255,0.08)", fontFamily: FONT_INTER }}>
         <span>
-          <span style={{ color: "#06b6d4" }}>accessiscan-bot</span> wants to merge{" "}
+          <span style={{ color: "#0e7490" }}>accessiscan-bot</span> wants to merge{" "}
           <span style={{ color: "#fff" }}>1 commit</span> into <span style={{ color: "#fff" }}>main</span> from{" "}
           <span style={{ color: "#fff" }}>fix/wcag-1-4-3</span>
         </span>
@@ -535,7 +535,7 @@ function AutoFixPr() {
           <Eyebrow color="cyan-pill">The differentiator</Eyebrow>
           <h2 style={{ marginTop: 20, fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 52, lineHeight: 1.05, letterSpacing: "-0.02em" }}>
             We don&apos;t just audit. <br />
-            <span style={{ color: "#06b6d4" }}>We open the PR.</span>
+            <span style={{ color: "#0e7490" }}>We open the PR.</span>
           </h2>
           <p style={{ marginTop: 20, maxWidth: 520, fontSize: 17, lineHeight: 1.55, color: "rgba(255,255,255,0.72)" }}>
             Every other scanner hands engineers a 200-row CSV and walks away. AccessiScan ships diff-ready fix code as a GitHub Pull Request — your team reviews, merges, ships.
@@ -548,7 +548,7 @@ function AutoFixPr() {
               "Re-runs the scan in CI before requesting review",
             ].map((t) => (
               <li key={t} style={{ display: "flex", gap: 10, fontSize: 15, color: "rgba(255,255,255,0.85)" }}>
-                <IconCheck size={18} style={{ color: "#06b6d4", flexShrink: 0, marginTop: 2 }} />
+                <IconCheck size={18} style={{ color: "#0e7490", flexShrink: 0, marginTop: 2 }} />
                 {t}
               </li>
             ))}
@@ -618,7 +618,7 @@ function Pricing() {
               <ul style={{ marginTop: 20, padding: 0, listStyle: "none", display: "flex", flexDirection: "column", gap: 10, flex: 1 }}>
                 {t.features.map((f) => (
                   <li key={f} style={{ display: "flex", gap: 10, fontSize: 13.5, color: "#475569" }}>
-                    <IconCheck size={15} style={{ color: "#06b6d4", flexShrink: 0, marginTop: 2 }} />
+                    <IconCheck size={15} style={{ color: "#0e7490", flexShrink: 0, marginTop: 2 }} />
                     {f}
                   </li>
                 ))}

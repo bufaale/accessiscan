@@ -359,7 +359,7 @@ function PlanTiers() {
           <div style={{ fontSize: 13, color: "#64748b", marginTop: 2 }}>Prorated upgrades take effect immediately. Downgrades apply at next renewal.</div>
         </div>
         <div style={{ display: "inline-flex", padding: 3, background: "#f1f5f9", borderRadius: 6, fontFamily: FONT_INTER, fontSize: 12.5 }}>
-          <button type="button" style={{ height: 28, padding: "0 14px", borderRadius: 4, border: 0, background: "#fff", color: "#0b1f3a", fontWeight: 600, cursor: "pointer", boxShadow: "0 1px 2px rgba(15,23,42,0.06)" }}>Annual <span style={{ color: "#06b6d4", marginLeft: 4 }}>−17%</span></button>
+          <button type="button" style={{ height: 28, padding: "0 14px", borderRadius: 4, border: 0, background: "#fff", color: "#0b1f3a", fontWeight: 600, cursor: "pointer", boxShadow: "0 1px 2px rgba(15,23,42,0.06)" }}>Annual <span style={{ color: "#0e7490", marginLeft: 4 }}>−17%</span></button>
           <button type="button" style={{ height: 28, padding: "0 14px", borderRadius: 4, border: 0, background: "transparent", color: "#64748b", fontWeight: 500, cursor: "pointer" }}>Monthly</button>
         </div>
       </div>
@@ -390,7 +390,7 @@ function PlanTiers() {
               <ul style={{ padding: 0, margin: "16px 0 18px", listStyle: "none", display: "flex", flexDirection: "column", gap: 9 }}>
                 {t.features.map((f) => (
                   <li key={f} style={{ display: "flex", alignItems: "flex-start", gap: 9, fontSize: 13, color: "#334155", fontFamily: FONT_INTER, lineHeight: 1.5 }}>
-                    <span style={{ color: "#06b6d4", marginTop: 3, flexShrink: 0, display: "inline-flex" }}><IcCheck size={13} sw={2.5} /></span>
+                    <span style={{ color: "#0e7490", marginTop: 3, flexShrink: 0, display: "inline-flex" }}><IcCheck size={13} sw={2.5} /></span>
                     {f}
                   </li>
                 ))}
@@ -577,7 +577,7 @@ function InvoicesTable() {
               <td style={{ padding: "13px 16px", fontFamily: FONT_MONO, fontWeight: 600, color: "#0b1f3a", textAlign: "right" }}>{inv.amount}</td>
               <td style={{ padding: "13px 16px" }}><InvoiceStatusBadge s={inv.status} /></td>
               <td style={{ padding: "13px 16px", textAlign: "right" }}>
-                <a style={{ display: "inline-flex", alignItems: "center", gap: 6, color: "#06b6d4", fontWeight: 600, fontSize: 12, fontFamily: FONT_INTER, textDecoration: "none", cursor: "pointer" }}>
+                <a style={{ display: "inline-flex", alignItems: "center", gap: 6, color: "#0e7490", fontWeight: 600, fontSize: 12, fontFamily: FONT_INTER, textDecoration: "none", cursor: "pointer" }}>
                   <IcDownload size={12} sw={2} />PDF
                 </a>
               </td>
@@ -587,7 +587,7 @@ function InvoicesTable() {
       </table>
       <div style={{ padding: "12px 24px", borderTop: "1px solid #e2e8f0", display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: 12, color: "#64748b", fontFamily: FONT_INTER, background: "#f8fafc" }}>
         <span>Showing 12 of 20 invoices</span>
-        <a style={{ color: "#06b6d4", fontWeight: 600, cursor: "pointer" }}>View all in Stripe portal →</a>
+        <a style={{ color: "#0e7490", fontWeight: 600, cursor: "pointer" }}>View all in Stripe portal →</a>
       </div>
     </Card>
   );

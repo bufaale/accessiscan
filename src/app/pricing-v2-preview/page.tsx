@@ -98,7 +98,7 @@ function Eyebrow({ children, color = "slate" }: { children: ReactNode; color?: E
             fontWeight: 600,
             letterSpacing: "0.14em",
             textTransform: "uppercase",
-            color: "#06b6d4",
+            color: "#0e7490",
           }}
         >
           {children}
@@ -375,7 +375,7 @@ function PricingHeader() {
         >
           {trustItems.map((t) => (
             <span key={t} style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
-              <IcCheck size={14} sw={2.5} style={{ color: "#06b6d4" }} />
+              <IcCheck size={14} sw={2.5} style={{ color: "#0e7490" }} />
               {t}
             </span>
           ))}
@@ -641,7 +641,7 @@ function PricingCardsDetailed() {
                       <IcCheck
                         size={16}
                         sw={2.5}
-                        style={{ color: "#06b6d4", flexShrink: 0, marginTop: 2 }}
+                        style={{ color: "#0e7490", flexShrink: 0, marginTop: 2 }}
                       />
                       <div>
                         <div style={{ fontSize: 13.5, fontWeight: 600, color: "#0f172a", lineHeight: 1.4 }}>
@@ -794,7 +794,7 @@ function UniversalFeatures() {
                   justifyContent: "center",
                 }}
               >
-                <IcCheck size={18} sw={2.5} style={{ color: "#06b6d4" }} />
+                <IcCheck size={18} sw={2.5} style={{ color: "#0e7490" }} />
               </span>
               <div
                 style={{
@@ -822,7 +822,7 @@ function UniversalFeatures() {
 type CellValue = "yes" | "no" | "partial" | string;
 
 function ComparisonCell({ v }: { v: CellValue }) {
-  if (v === "yes") return <IcCheck size={16} sw={2.5} style={{ color: "#06b6d4" }} />;
+  if (v === "yes") return <IcCheck size={16} sw={2.5} style={{ color: "#0e7490" }} />;
   if (v === "partial") return <IcMinus size={16} sw={2} style={{ color: "#94a3b8" }} />;
   if (v === "no") return <IcX size={16} sw={2} style={{ color: "#cbd5e1" }} />;
   return <span style={{ fontSize: 13, color: "#475569" }}>{v}</span>;
@@ -973,7 +973,7 @@ function VendorComparison() {
                         fontWeight: 700,
                         letterSpacing: "0.14em",
                         textTransform: "uppercase",
-                        color: "#06b6d4",
+                        color: "#0e7490",
                         borderTop: "1px solid #e2e8f0",
                       }}
                     >
@@ -1146,7 +1146,7 @@ function GovernmentCallout() {
           >
             Need FedRAMP-aligned hosting?
             <br />
-            <span style={{ color: "#06b6d4" }}>Talk to government sales.</span>
+            <span style={{ color: "#0e7490" }}>Talk to government sales.</span>
           </h2>
           <p
             style={{
@@ -1180,7 +1180,7 @@ function GovernmentCallout() {
                   color: "rgba(255,255,255,0.85)",
                 }}
               >
-                <IcCheck size={18} sw={2.5} style={{ color: "#06b6d4", flexShrink: 0, marginTop: 2 }} />
+                <IcCheck size={18} sw={2.5} style={{ color: "#0e7490", flexShrink: 0, marginTop: 2 }} />
                 {t}
               </li>
             ))}
@@ -1234,7 +1234,7 @@ function GovernmentCallout() {
                   color: "#fff",
                 }}
               >
-                Starts at <span style={{ color: "#06b6d4" }}>$2,400</span>
+                Starts at <span style={{ color: "#0e7490" }}>$2,400</span>
                 <span style={{ fontSize: 18, color: "rgba(255,255,255,0.55)" }}>/mo</span>
               </div>
               <div style={{ marginTop: 4, fontSize: 12, color: "rgba(255,255,255,0.55)" }}>
@@ -1306,7 +1306,7 @@ function GovernmentCallout() {
                       fontFamily: FONT_MONO,
                       fontSize: 11,
                       fontWeight: 700,
-                      color: "#06b6d4",
+                      color: "#0e7490",
                       letterSpacing: "0.05em",
                     }}
                   >
@@ -1484,7 +1484,7 @@ function FinalPricingCta() {
           }}
         >
           Less than your office coffee budget. <br />
-          <span style={{ color: "#06b6d4" }}>More compliance than your last RFP.</span>
+          <span style={{ color: "#0e7490" }}>More compliance than your last RFP.</span>
         </h2>
         <p style={{ marginTop: 18, fontSize: 17, color: "rgba(255,255,255,0.72)" }}>
           Start with a free scan. Upgrade when you&apos;re ready to ship fixes.

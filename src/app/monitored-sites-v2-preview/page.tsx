@@ -193,11 +193,11 @@ function ProUpsellBanner({ onDismiss }: { onDismiss: () => void }) {
     <div style={{ background: "#0b1f3a", borderRadius: 8, padding: "18px 22px", color: "#fff", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 24, position: "relative", overflow: "hidden", marginBottom: 18 }}>
       <div style={{ position: "absolute", inset: 0, opacity: 0.06, backgroundImage: "linear-gradient(#fff 1px,transparent 1px),linear-gradient(90deg,#fff 1px,transparent 1px)", backgroundSize: "40px 40px", pointerEvents: "none" }} />
       <div style={{ display: "flex", alignItems: "center", gap: 18, position: "relative", minWidth: 0 }}>
-        <div style={{ width: 44, height: 44, borderRadius: 6, background: "rgba(6,182,212,0.15)", border: "1px solid rgba(6,182,212,0.4)", display: "inline-flex", alignItems: "center", justifyContent: "center", flexShrink: 0, color: "#06b6d4" }}>
+        <div style={{ width: 44, height: 44, borderRadius: 6, background: "rgba(6,182,212,0.15)", border: "1px solid rgba(6,182,212,0.4)", display: "inline-flex", alignItems: "center", justifyContent: "center", flexShrink: 0, color: "#0e7490" }}>
           <IcZap size={20} sw={2} />
         </div>
         <div style={{ minWidth: 0 }}>
-          <div style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "3px 8px", border: "1px solid rgba(6,182,212,0.4)", background: "rgba(6,182,212,0.1)", borderRadius: 4, fontSize: 10, fontWeight: 600, letterSpacing: "0.14em", textTransform: "uppercase", color: "#06b6d4", marginBottom: 8 }}>
+          <div style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "3px 8px", border: "1px solid rgba(6,182,212,0.4)", background: "rgba(6,182,212,0.1)", borderRadius: 4, fontSize: 10, fontWeight: 600, letterSpacing: "0.14em", textTransform: "uppercase", color: "#0e7490", marginBottom: 8 }}>
             <span style={{ width: 5, height: 5, borderRadius: "50%", background: "#06b6d4" }} />Pro tier
           </div>
           <div style={{ fontFamily: FONT_DISPLAY, fontWeight: 600, fontSize: 18, lineHeight: 1.3, letterSpacing: "-0.01em" }}>
@@ -501,7 +501,7 @@ function SiteCard({ site, isMenuOpen, onMenu, onAction }: { site: Site; isMenuOp
 function EmptyState({ onAddSite }: { onAddSite: () => void }) {
   return (
     <div style={{ background: "#fff", border: "1px dashed #cbd5e1", borderRadius: 10, padding: "56px 32px", textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center", gap: 14 }}>
-      <div style={{ width: 56, height: 56, borderRadius: 12, background: "#ecfeff", display: "inline-flex", alignItems: "center", justifyContent: "center", color: "#06b6d4" }}>
+      <div style={{ width: 56, height: 56, borderRadius: 12, background: "#ecfeff", display: "inline-flex", alignItems: "center", justifyContent: "center", color: "#0e7490" }}>
         <IcGlobe size={26} sw={1.8} />
       </div>
       <div>
@@ -535,7 +535,7 @@ function AddSiteModal({ onClose, onSubmit }: { onClose: () => void; onSubmit: ()
       <div style={{ position: "relative", background: "#fff", border: "1px solid #e2e8f0", borderRadius: 10, width: 520, maxWidth: "calc(100% - 32px)", padding: 0, overflow: "hidden", boxShadow: "0 12px 32px rgba(15,23,42,0.18)" }}>
         <div style={{ padding: "20px 24px", borderBottom: "1px solid #e2e8f0", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <div>
-            <div style={{ fontSize: 11, letterSpacing: "0.14em", textTransform: "uppercase", color: "#06b6d4", fontWeight: 600 }}>Pro · continuous monitoring</div>
+            <div style={{ fontSize: 11, letterSpacing: "0.14em", textTransform: "uppercase", color: "#0e7490", fontWeight: 600 }}>Pro · continuous monitoring</div>
             <div style={{ fontFamily: FONT_DISPLAY, fontWeight: 600, fontSize: 20, color: "#0b1f3a", letterSpacing: "-0.01em", marginTop: 4 }}>Add a site to monitor.</div>
           </div>
           <button type="button" onClick={onClose} aria-label="Close" style={{ width: 32, height: 32, borderRadius: 6, border: 0, background: "transparent", color: "#94a3b8", cursor: "pointer" }}>

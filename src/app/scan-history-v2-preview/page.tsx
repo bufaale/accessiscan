@@ -551,11 +551,11 @@ function ScansTable({ scans }: { scans: Scan[] }) {
                         </button>
                       )}
                       {r.pr ? (
-                        <button type="button" title={`Open PR ${r.pr}`} style={{ ...ICON_BTN_STYLE, color: "#06b6d4" }}>
+                        <button type="button" title={`Open PR ${r.pr}`} style={{ ...ICON_BTN_STYLE, color: "#0e7490" }}>
                           <IcPr size={14} sw={1.8} />
                         </button>
                       ) : r.status === "completed" && (r.critical ?? 0) > 0 ? (
-                        <button type="button" title="Open Auto-Fix PR" style={{ ...ICON_BTN_STYLE, color: "#06b6d4" }}>
+                        <button type="button" title="Open Auto-Fix PR" style={{ ...ICON_BTN_STYLE, color: "#0e7490" }}>
                           <IcPr size={14} sw={1.8} />
                         </button>
                       ) : null}

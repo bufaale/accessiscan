@@ -171,7 +171,7 @@ function DojUrgentStrip() {
           <IcAlert size={17} sw={2.2} />
         </span>
         <div>
-          <div style={{ fontSize: 10.5, letterSpacing: "0.14em", textTransform: "uppercase", color: "#06b6d4", fontWeight: 700, marginBottom: 3 }}>DOJ Title II · WCAG 2.1 AA · 50,000+ residents</div>
+          <div style={{ fontSize: 10.5, letterSpacing: "0.14em", textTransform: "uppercase", color: "#0e7490", fontWeight: 700, marginBottom: 3 }}>DOJ Title II · WCAG 2.1 AA · 50,000+ residents</div>
           <div style={{ fontSize: 14, fontWeight: 600, color: "#fff" }}>
             <span style={{ fontFamily: FONT_MONO, color: "#dc2626", fontWeight: 700 }}>{days}</span>{" "}days until enforcement deadline · April 26, 2027
           </div>
@@ -179,7 +179,7 @@ function DojUrgentStrip() {
       </div>
       <div style={{ display: "flex", gap: 8, alignItems: "center", position: "relative" }}>
         <span style={{ fontSize: 11.5, color: "rgba(255,255,255,0.55)", fontFamily: FONT_INTER, marginRight: 4 }}>
-          Your readiness: <span style={{ color: "#06b6d4", fontWeight: 600 }}>87%</span>
+          Your readiness: <span style={{ color: "#0e7490", fontWeight: 600 }}>87%</span>
         </span>
         <Btn size="sm" variant="urgent" trailIcon={<IcArrow size={11} sw={2.5} />}>Open Title II checklist</Btn>
       </div>

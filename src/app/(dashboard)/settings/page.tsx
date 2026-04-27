@@ -98,7 +98,7 @@ export default function SettingsPage() {
         </h1>
         <p style={{ fontSize: 13.5, color: SLATE_500, marginTop: 4, fontFamily: FONT_INTER }}>
           Manage your account information.{" "}
-          <a href="/settings/profile" style={{ color: "#06b6d4", fontWeight: 600 }}>
+          <a href="/settings/profile" style={{ color: "#0e7490", fontWeight: 600 }}>
             Open the full profile experience →
           </a>
         </p>

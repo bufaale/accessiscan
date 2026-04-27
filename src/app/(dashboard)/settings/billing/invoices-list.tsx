@@ -210,7 +210,7 @@ export function InvoicesList() {
                     href={inv.invoice_pdf}
                     target="_blank"
                     rel="noopener"
-                    style={{ color: "#06b6d4", fontWeight: 600, fontSize: 12 }}
+                    style={{ color: "#0e7490", fontWeight: 600, fontSize: 12 }}
                   >
                     PDF
                   </a>
@@ -219,7 +219,7 @@ export function InvoicesList() {
                     href={inv.hosted_invoice_url}
                     target="_blank"
                     rel="noopener"
-                    style={{ color: "#06b6d4", fontWeight: 600, fontSize: 12 }}
+                    style={{ color: "#0e7490", fontWeight: 600, fontSize: 12 }}
                   >
                     View
                   </a>
