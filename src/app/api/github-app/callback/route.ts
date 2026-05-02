@@ -1,25 +1,39 @@
 // GitHub App installation callback. Fires after the user clicks "Install" on
 // the AccessiScan Auto-Fix App page on github.com.
 //
-// GitHub redirects to: /api/github-app/callback?installation_id=...&setup_action=install&state=<user_id>
+// GitHub redirects to: /api/github-app/callback?installation_id=...&setup_action=install&state=<signedState>
 //
 // We persist the installation_id in github_installations so the auto-fix
 // endpoint can use it. RLS only allows the owning user to see/delete.
+//
+// Security: the `state` param is HMAC-signed when the install URL is generated
+// (see src/app/(dashboard)/settings/github/page.tsx). On callback we
+// REQUIRE an authenticated session AND a state whose signed payload matches
+// that authenticated user_id. We never use `state` as a fallback identity —
+// doing so would let an attacker forge `?state=<victim_user_id>` and have
+// their installation persisted against the victim's account.
 
 import { NextRequest, NextResponse } from "next/server";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { appOctokit } from "@/lib/github/app-client";
+import { verifyState } from "@/lib/security/tokens";
 
 export async function GET(req: NextRequest) {
   const baseURL = process.env.NEXT_PUBLIC_APP_URL?.trim() || "https://accessiscan.piposlab.com";
   const url = new URL(req.url);
   const installationId = url.searchParams.get("installation_id");
   const setupAction = url.searchParams.get("setup_action");
-  const state = url.searchParams.get("state"); // we set state=user_id when starting the install
+  const state = url.searchParams.get("state");
 
   const settingsUrl = (params: Record<string, string>) => {
     const u = new URL("/settings/github", baseURL);
     for (const [k, v] of Object.entries(params)) u.searchParams.set(k, v);
+    return u;
+  };
+
+  const loginUrl = () => {
+    const u = new URL("/login", baseURL);
+    u.searchParams.set("next", "/settings/github");
     return u;
   };
 
@@ -29,10 +43,21 @@ export async function GET(req: NextRequest) {
 
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  // Fall back to state-supplied user_id if cookie session got dropped during the redirect.
-  const userId = user?.id ?? state ?? null;
-  if (!userId) {
-    return NextResponse.redirect(new URL("/login", baseURL));
+  // Hard requirement: must be a real authenticated session. If the cookie
+  // expired or the user is not logged in, send them to /login?next=… and
+  // persist NOTHING. We never trust the `state` param to identify the user.
+  if (!user) {
+    return NextResponse.redirect(loginUrl());
+  }
+  const userId = user.id;
+
+  // Defense-in-depth: even with a valid session, if the signed state does not
+  // verify (or names a different user_id), reject. This blocks the case where
+  // an attacker tricks an authenticated victim into clicking a callback URL
+  // crafted with their own installation_id and a forged/old state.
+  const verifiedPayload = verifyState(state);
+  if (!verifiedPayload || verifiedPayload !== userId) {
+    return NextResponse.redirect(settingsUrl({ error: "invalid_state" }));
   }
 
   // Pull installation metadata from GitHub so we can show repo count + account in the UI.

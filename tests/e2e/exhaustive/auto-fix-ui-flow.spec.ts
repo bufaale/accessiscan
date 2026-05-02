@@ -193,9 +193,16 @@ test.describe("Auto-Fix PR — full UI flow", () => {
       expect(href).toMatch(
         /^https:\/\/github\.com\/apps\/accessiscan-auto-fix\/installations\/new\?state=/,
       );
-      // The state param should equal the test user id so the callback can
-      // tie the install to them
-      expect(href).toContain(`state=${u.id}`);
+      // The state param is HMAC-signed at install URL generation time so the
+      // callback can verify it without trusting the user_id encoded inside.
+      // Format is `<base64url(payload)>.<base64url(hmac)>`. We assert the
+      // shape (two non-empty base64url segments joined by a dot) rather than
+      // a literal user id, since the raw id never appears in the URL.
+      const stateMatch = href?.match(/[?&]state=([^&]+)/);
+      expect(stateMatch).not.toBeNull();
+      const decodedState = decodeURIComponent(stateMatch![1]);
+      expect(decodedState).toMatch(/^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/);
+      expect(decodedState).not.toContain(u.id);
     } finally {
       await deleteTestUser(u.id);
     }

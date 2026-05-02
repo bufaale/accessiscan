@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
+import { signState } from "@/lib/security/tokens";
 
 const FONT_DISPLAY = "var(--font-display), sans-serif";
 const FONT_INTER = "var(--font-inter), sans-serif";
@@ -50,7 +51,13 @@ export default async function GithubSettingsPage({
   }> | null;
 
   const appName = process.env.GITHUB_APP_NAME?.trim() || "accessiscan-auto-fix";
-  const installUrl = `https://github.com/apps/${appName}/installations/new?state=${user.id}`;
+  // Sign the state with HMAC so a malicious party cannot forge a state pointing
+  // at a different user_id and reassign an installation through a tricked
+  // victim. The callback verifies the signature AND requires an authenticated
+  // session matching the payload — so even a leaked signed state cannot
+  // hijack another user's installation.
+  const signedState = signState(user.id);
+  const installUrl = `https://github.com/apps/${appName}/installations/new?state=${encodeURIComponent(signedState)}`;
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 18, padding: "24px 28px 48px", color: NAVY }}>
