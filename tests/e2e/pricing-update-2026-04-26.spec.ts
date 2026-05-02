@@ -57,15 +57,17 @@ test.describe("Pricing structure (post 2026-04-26 update)", () => {
 
 test.describe("Pricing landing page rendering", () => {
   test("renders all 5 tiers including new Team tier", async ({ page }) => {
-    await page.goto("/");
-    // Pricing CTAs are on the landing
+    // Tiers are on /pricing (the standalone pricing page), not on the
+    // marketing landing /. The original spec went to / and timed out
+    // looking for $599/$299 that lived elsewhere.
+    await page.goto("/pricing");
     await expect(page.getByText("Team", { exact: true }).first()).toBeVisible();
     await expect(page.getByText("$599", { exact: false }).first()).toBeVisible();
     await expect(page.getByText("$299", { exact: false }).first()).toBeVisible();
   });
 
   test("Team tier CTA points to mailto, not Stripe", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/pricing");
     const contactCta = page.getByRole("link", { name: /Contact sales/i }).first();
     await expect(contactCta).toBeVisible();
     const href = await contactCta.getAttribute("href");
@@ -73,7 +75,7 @@ test.describe("Pricing landing page rendering", () => {
   });
 
   test("no plan still shows the old $199 Business price", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/pricing");
     const html = await page.content();
     // Business is now $299. The string "199" should NOT appear as a price.
     // (allow "$1990" since pre-existing Pro yearly used to be 190 - check carefully)

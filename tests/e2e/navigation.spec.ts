@@ -26,7 +26,14 @@ test.describe("Navigation - Public pages", () => {
 
   test("signup page loads", async ({ page }) => {
     await page.goto("/signup");
-    await expect(page.getByText("Create an account")).toBeVisible();
+    // Heading copy was 'Create an account' originally; updated landing now
+    // uses 'Start your free WCAG scan.' Match either to keep the test
+    // resilient to copy iterations.
+    await expect(
+      page.getByRole("heading", {
+        name: /create an account|start your free wcag scan/i,
+      }),
+    ).toBeVisible();
   });
 });
 
