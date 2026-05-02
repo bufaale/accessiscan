@@ -1,4 +1,4 @@
-name: E2E Tests
+name: Tests
 
 on:
   push:
@@ -7,11 +7,25 @@ on:
     branches: [master, main]
   schedule:
     # Nightly at 03:00 UTC — catches drift with upstream services (Stripe,
-    # Supabase) without waiting for the next PR.
+    # Supabase, GitHub App) without waiting for the next PR.
     - cron: "0 3 * * *"
   workflow_dispatch:
 
 jobs:
+  unit:
+    name: Vitest unit + integration
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+      - run: npm ci
+      - name: Run unit tests
+        run: npm test
+
   e2e:
     name: Playwright E2E
     runs-on: ubuntu-latest
@@ -19,6 +33,7 @@ jobs:
     # pdf-scans-deep) have room — they each create live PRs / scans against
     # bufaale/accessiscan-e2e-fixtures and Supabase prod.
     timeout-minutes: 45
+    needs: unit
     steps:
       - uses: actions/checkout@v4
 
@@ -34,13 +49,38 @@ jobs:
 
       - name: Run E2E tests (against production)
         env:
+          # Public site URL — used by tests as TEST_BASE_URL and by some
+          # specs to reconstruct signed URLs for HMAC verification.
           TEST_BASE_URL: ${{ secrets.TEST_BASE_URL }}
+          NEXT_PUBLIC_APP_URL: ${{ secrets.TEST_BASE_URL }}
+          NEXT_PUBLIC_SITE_URL: ${{ secrets.TEST_BASE_URL }}
+
+          # Supabase (required for createTestUser, fetch helpers, RLS specs)
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
-          # GH_TOKEN_E2E enables auto-fix-deep + auto-fix-ui-flow specs;
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+
+          # Stripe — webhook lifecycle + checkout + price-id allowlist
+          STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
+          STRIPE_WEBHOOK_SECRET: ${{ secrets.STRIPE_WEBHOOK_SECRET }}
+          NEXT_PUBLIC_STRIPE_PRO_MONTHLY_PRICE_ID: ${{ secrets.NEXT_PUBLIC_STRIPE_PRO_MONTHLY_PRICE_ID }}
+          NEXT_PUBLIC_STRIPE_PRO_YEARLY_PRICE_ID: ${{ secrets.NEXT_PUBLIC_STRIPE_PRO_YEARLY_PRICE_ID }}
+          NEXT_PUBLIC_STRIPE_AGENCY_MONTHLY_PRICE_ID: ${{ secrets.NEXT_PUBLIC_STRIPE_AGENCY_MONTHLY_PRICE_ID }}
+          NEXT_PUBLIC_STRIPE_AGENCY_YEARLY_PRICE_ID: ${{ secrets.NEXT_PUBLIC_STRIPE_AGENCY_YEARLY_PRICE_ID }}
+          NEXT_PUBLIC_STRIPE_BUSINESS_MONTHLY_PRICE_ID: ${{ secrets.NEXT_PUBLIC_STRIPE_BUSINESS_MONTHLY_PRICE_ID }}
+          NEXT_PUBLIC_STRIPE_BUSINESS_YEARLY_PRICE_ID: ${{ secrets.NEXT_PUBLIC_STRIPE_BUSINESS_YEARLY_PRICE_ID }}
+
+          # GitHub App — auto-fix-deep + auto-fix-ui-flow specs;
           # without it those specs skip silently.
           GH_TOKEN_E2E: ${{ secrets.GH_TOKEN_E2E }}
+
+          # Cron secret — gates /api/cron/* endpoints under integration specs
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+
+          # Health check (gates /api/health/full when set)
+          HEALTH_CHECK_TOKEN: ${{ secrets.HEALTH_CHECK_TOKEN }}
         run: npx playwright test --reporter=html,list
 
       - name: Upload Playwright artifacts on failure
