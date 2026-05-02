@@ -128,6 +128,10 @@ test.describe("AutoFix endpoint — tier + auth matrix", () => {
       const ownerIssue = await seedScanIssue(ownerScan.id);
 
       lease = await borrowGithubInstall(intruder.id, TEST_INSTALLATION_ID);
+      if (!lease) {
+        test.skip(true, "AccessiScan GitHub App not installed in this Supabase env");
+        return;
+      }
       await loginViaUI(page, intruder.email);
 
       const res = await postAutoFix(page, request, {
@@ -152,6 +156,10 @@ test.describe("AutoFix endpoint — tier + auth matrix", () => {
       const issue = await seedScanIssue(scan.id);
 
       lease = await borrowGithubInstall(u.id, TEST_INSTALLATION_ID);
+      if (!lease) {
+        test.skip(true, "AccessiScan GitHub App not installed in this Supabase env");
+        return;
+      }
       await loginViaUI(page, u.email);
 
       const res = await postAutoFix(page, request, {

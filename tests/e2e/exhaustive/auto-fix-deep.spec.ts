@@ -98,6 +98,10 @@ test.describe("Auto-Fix PR — full E2E against bufaale/accessiscan-e2e-fixtures
 
     try {
       installLease = await borrowGithubInstall(u.id, TEST_INSTALLATION_ID);
+      if (!installLease) {
+        test.skip(true, "AccessiScan GitHub App not installed in this Supabase env");
+        return;
+      }
       const scan = await seedScan(u.id, {
         url: "https://accessiscan-e2e-fixtures.test/",
         compliance_score: 60,

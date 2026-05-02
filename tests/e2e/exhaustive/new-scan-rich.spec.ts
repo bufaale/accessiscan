@@ -127,6 +127,10 @@ test.describe("New scan page — rich features", () => {
     let installLease: { release: () => Promise<void> } | null = null;
     try {
       installLease = await borrowGithubInstall(u.id, TEST_INSTALLATION_ID);
+      if (!installLease) {
+        test.skip(true, "AccessiScan GitHub App not installed in this Supabase env");
+        return;
+      }
 
       await loginViaUI(page, u.email);
       await page.goto("/dashboard/scans/new");

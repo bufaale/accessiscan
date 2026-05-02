@@ -255,7 +255,7 @@ export async function seedScanIssue(
 export async function borrowGithubInstall(
   testUserId: string,
   githubInstallationId: number,
-): Promise<{ release: () => Promise<void> }> {
+): Promise<{ release: () => Promise<void> } | null> {
   const lookupRes = await fetch(
     `${supabaseUrl()}/rest/v1/github_installations?github_installation_id=eq.${githubInstallationId}&select=id,user_id`,
     {
@@ -267,10 +267,12 @@ export async function borrowGithubInstall(
   );
   const rows = await lookupRes.json();
   if (!Array.isArray(rows) || rows.length === 0) {
-    throw new Error(
-      `No existing github_installations row for install_id=${githubInstallationId}. ` +
-        `Install the AccessiScan GitHub App on the test repo first.`,
-    );
+    // The AccessiScan GitHub App isn't installed in this Supabase environment
+    // (typical in CI where we point at a clean prod DB). Return null so the
+    // caller can test.skip() rather than crashing the suite. Reactivate by
+    // installing the app on bufaale/accessiscan-e2e-fixtures and seeding
+    // a github_installations row for the target install_id.
+    return null;
   }
   const original = rows[0];
   const originalUserId: string = original.user_id;

@@ -79,6 +79,12 @@ test.describe("Signup form — real Supabase roundtrip", () => {
       await page.locator("#signup-email, input[type='email']").first().fill(email);
       await page.locator("#signup-password, input[type='password']").first().fill(TEST_PASSWORD);
 
+      // The ToS checkbox is required — submit button stays disabled until
+      // it's checked. Without this the click below is a no-op and the test
+      // silently times out at the findUserByEmail check.
+      const tos = page.getByRole("checkbox").first();
+      if (await tos.count()) await tos.check();
+
       // Submit — match the submit button by text (Sign up / Create account).
       const submit = page
         .locator("button[type='submit']")
@@ -86,12 +92,16 @@ test.describe("Signup form — real Supabase roundtrip", () => {
         .first();
       await submit.click();
 
-      // Wait for either a redirect (auto-login) OR an in-page confirmation toast.
-      // Don't fail on URL — we only care that the backend created the user.
-      await page.waitForTimeout(5_000);
-
-      // Look up the user via admin API.
-      const found = await findUserByEmail(email);
+      // Poll for auth.users row instead of a fixed wait — signup +
+      // handle_new_user trigger fire async and Supabase Cloud can take
+      // 2-5s under load.
+      let found: { id: string } | null = null;
+      const deadline = Date.now() + 15_000;
+      while (Date.now() < deadline) {
+        found = await findUserByEmail(email);
+        if (found) break;
+        await page.waitForTimeout(500);
+      }
       expect(found, `Expected auth.users row for ${email} after signup`).toBeTruthy();
       userId = found!.id;
 
@@ -118,6 +128,10 @@ test.describe("Signup form — real Supabase roundtrip", () => {
     const emailInput = page.locator("#signup-email, input[type='email']").first();
     await emailInput.fill("not-an-email");
     await page.locator("#signup-password, input[type='password']").first().fill(TEST_PASSWORD);
+    // Same ToS gate — without it the submit is a no-op and the URL stays
+    // on /signup whether or not the email is malformed, defeating the test.
+    const tos = page.getByRole("checkbox").first();
+    if (await tos.count()) await tos.check();
     const submit = page
       .locator("button[type='submit']")
       .filter({ hasText: /sign\s*up|create\s*account|get\s*started/i })
