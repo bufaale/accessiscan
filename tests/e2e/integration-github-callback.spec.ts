@@ -30,8 +30,12 @@ test.describe("GitHub callback — anonymous → redirect to /login", () => {
     request,
   }) => {
     void request;
+    // setup_action is required — the handler short-circuits without it to
+    // /settings/github?error=missing_install_params before the auth check.
+    // Including it lets us reach the "user not authenticated" branch where
+    // the redirect goes to /login.
     const r = await fetch(
-      `${BASE_URL}/api/github-app/callback?installation_id=123&state=anything`,
+      `${BASE_URL}/api/github-app/callback?installation_id=123&state=anything&setup_action=install`,
       { redirect: "manual" },
     );
     expect([302, 307, 308]).toContain(r.status);

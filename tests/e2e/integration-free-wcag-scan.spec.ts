@@ -83,7 +83,7 @@ test.describe("Free WCAG scanner — input validation", () => {
 });
 
 test.describe("Free WCAG scanner — happy path returns scan result shape", () => {
-  test("scans https://example.com → 200 with { score, issues } shape", async () => {
+  test("scans https://example.com → 200 with { report.health_score, report.issues } shape", async () => {
     test.setTimeout(45_000);
     const res = await fetch(`${BASE_URL}/api/free/wcag-scan`, {
       method: "POST",
@@ -92,13 +92,17 @@ test.describe("Free WCAG scanner — happy path returns scan result shape", () =
     });
     expect(res.status).toBe(200);
     const json = await res.json();
-    // Result shape contract — adjust if the route shape changes
-    expect(json).toHaveProperty("score");
-    expect(typeof json.score).toBe("number");
-    expect(json.score).toBeGreaterThanOrEqual(0);
-    expect(json.score).toBeLessThanOrEqual(100);
-    expect(json).toHaveProperty("issues");
-    expect(Array.isArray(json.issues)).toBe(true);
+    // Endpoint returns { report, email_captured, upgrade_cta }. The actual
+    // scan output lives under .report — typed as WcagFreeReport in
+    // src/lib/free-scan/lite-scanner.ts (health_score, issues, notes, ...).
+    expect(json).toHaveProperty("report");
+    expect(json.report).toHaveProperty("health_score");
+    expect(typeof json.report.health_score).toBe("number");
+    expect(json.report.health_score).toBeGreaterThanOrEqual(0);
+    expect(json.report.health_score).toBeLessThanOrEqual(100);
+    expect(json.report).toHaveProperty("issues");
+    expect(Array.isArray(json.report.issues)).toBe(true);
+    expect(json).toHaveProperty("upgrade_cta");
   });
 
   test("scans a known-bad page (no html lang) → flags serious issue", async () => {
@@ -114,7 +118,7 @@ test.describe("Free WCAG scanner — happy path returns scan result shape", () =
       const json = await res.json();
       // example.com is well-formed for our regex checks; expected score
       // should be very high (60+).
-      expect(json.score).toBeGreaterThan(50);
+      expect(json.report.health_score).toBeGreaterThan(50);
     }
   });
 });

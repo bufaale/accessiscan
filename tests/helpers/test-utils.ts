@@ -50,14 +50,16 @@ export async function createTestUser(
   });
   if (!res.ok) throw new Error(`Failed to create user: ${await res.text()}`);
   const user = await res.json();
-  if (tier !== "free") {
-    for (let i = 0; i < 3; i++) {
-      try {
-        await setUserPlan(user.id, tier);
-        break;
-      } catch {
-        await new Promise((r) => setTimeout(r, 500));
-      }
+  // Always seed the plan explicitly — relying on the DB default leaves
+  // the column NULL for new accounts, which trips tier-gated handlers
+  // (e.g. /api/scans/[id]/vpat checks `subscription_plan === "free"` and
+  // a NULL value falls through to the success path).
+  for (let i = 0; i < 3; i++) {
+    try {
+      await setUserPlan(user.id, tier);
+      break;
+    } catch {
+      await new Promise((r) => setTimeout(r, 500));
     }
   }
   return { id: user.id, email };
