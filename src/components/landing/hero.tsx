@@ -63,8 +63,8 @@ export function Hero() {
               className="h-12 rounded-md bg-[#dc2626] px-6 text-base font-semibold text-white shadow-none transition-colors hover:bg-[#b91c1c]"
               asChild
             >
-              <Link href="/signup">
-                Start free Title II scan
+              <Link href="/free/wcag-scanner">
+                Scan my site free — no signup
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
             </Button>
@@ -74,13 +74,12 @@ export function Hero() {
               className="h-12 rounded-md border-white/25 bg-transparent px-6 text-base font-semibold text-white shadow-none transition-colors hover:border-white hover:bg-white/5"
               asChild
             >
-              <Link href="#comparison">See how we compare</Link>
+              <Link href="/signup">Sign up for full report</Link>
             </Button>
           </div>
 
           <div className="mt-6 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-white/55">
-            <TrustItem>No credit card required</TrustItem>
-            <TrustItem>Free tier · 2 scans/mo</TrustItem>
+            <TrustItem>Instant scan · no signup · WCAG 2.1 AA</TrustItem>
             <TrustItem>Not an overlay</TrustItem>
           </div>
         </div>
