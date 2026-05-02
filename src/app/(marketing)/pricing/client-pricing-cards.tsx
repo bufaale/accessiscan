@@ -444,14 +444,17 @@ export function PricingCards() {
                   </div>
                 )}
 
-                {/* CTA */}
+                {/* CTA — aria-label MUST contain the visible text (axe
+                    label-content-name-mismatch rule). We append the plan
+                    name for screen-reader context, e.g. "Start free scan
+                    — Free", "Start 14-day trial — Pro". */}
                 <div style={{ marginTop: 22 }}>
                   {plan.id === "free" ? (
                     <Btn
                       variant="outline"
                       href="/signup"
                       testId={`cta-${plan.id}`}
-                      ariaLabel={`Sign up for ${plan.name}`}
+                      ariaLabel={`${ctaLabel(plan)} — ${plan.name} plan`}
                     >
                       {ctaLabel(plan)}
                     </Btn>
@@ -460,7 +463,7 @@ export function PricingCards() {
                       variant="outline-mailto"
                       href={CONTACT_SALES_URL}
                       testId={`cta-${plan.id}`}
-                      ariaLabel={`Contact sales for ${plan.name}`}
+                      ariaLabel={`${ctaLabel(plan)} — ${plan.name} plan`}
                     >
                       {ctaLabel(plan)}
                     </Btn>
@@ -470,7 +473,7 @@ export function PricingCards() {
                       onClick={() => handleCheckout(plan)}
                       disabled={isLoading}
                       testId={`cta-${plan.id}`}
-                      ariaLabel={`Start trial for ${plan.name}`}
+                      ariaLabel={`${ctaLabel(plan)} — ${plan.name} plan`}
                     >
                       {isLoading ? "Loading…" : ctaLabel(plan)}
                     </Btn>
