@@ -48,24 +48,20 @@ test.describe("Critical user journey — automated", () => {
       await page.goto("/signup");
       await page.waitForLoadState("networkidle");
 
-      // Fill signup form (v2 AuthShell has Full name, Work email, Password,
-      // Terms checkbox). Use stable id selectors.
-      await page.locator("#signup-name").fill("E2E Journey User");
-      await page.locator("#signup-email").fill(email);
-      await page.locator("#signup-password").fill(TEST_PASSWORD);
-      // Accept Terms checkbox. The v2 Checkbox component may visually hide
-      // the input behind a styled span, so use {force: true} or fall back to
-      // clicking the label.
-      const agree = page.locator("#agree");
-      await agree.check({ force: true }).catch(async () => {
-        // Fall back to clicking the label that wraps the checkbox
-        await page.locator("label[for='agree']").click();
+      // Form ids: #name, #email, #password, #tos (NOT #signup-* — older
+      // spec assumed the v2 AuthShell naming that never landed in
+      // AccessiScan). Selectors below match src/components/auth/signup-form.tsx.
+      await page.locator("#name").fill("E2E Journey User");
+      await page.locator("#email").fill(email);
+      await page.locator("#password").fill(TEST_PASSWORD);
+      await page.locator("#tos").check({ force: true }).catch(async () => {
+        await page.locator("label[for='tos']").click();
       });
 
-      // Click submit (v2 button text is "Start free WCAG scan").
+      // Submit button text in current form is "Sign up" / "Creating account…"
       await page
         .locator("button[type='submit']")
-        .filter({ hasText: /start free.*scan|sign\s*up|create/i })
+        .filter({ hasText: /sign\s*up|create|start/i })
         .first()
         .click();
 

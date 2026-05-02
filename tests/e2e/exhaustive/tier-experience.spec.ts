@@ -246,8 +246,11 @@ test.describe("Pro-tier full journey: login → dashboard → seeded scan → re
       // Dashboard
       await page.goto("/dashboard");
       await page.waitForLoadState("networkidle");
+      // Dashboard renders the host portion of the URL (no protocol), so
+      // assert the host substring rather than the full https:// URL.
+      const expectedHost = new URL(seeded.url).host;
       const dashboardBody = await page.locator("body").innerText();
-      expect(dashboardBody).toContain(seeded.url);
+      expect(dashboardBody).toContain(expectedHost);
 
       // Click into the scan row → result page
       const scanRow = page.locator(`[data-scan-id="${seeded.id}"]`).first();
