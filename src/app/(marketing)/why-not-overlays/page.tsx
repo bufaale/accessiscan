@@ -165,7 +165,7 @@ export default function WhyNotOverlaysPage() {
           </p>
           <div className="mt-8 flex items-center justify-center gap-4">
             <Button size="lg" asChild>
-              <Link href="/signup">Start Free Scan</Link>
+              <Link href="/free/wcag-scanner">Start Free Scan</Link>
             </Button>
             <Button size="lg" variant="outline" asChild>
               <Link href="/#comparison">See How We Compare</Link>

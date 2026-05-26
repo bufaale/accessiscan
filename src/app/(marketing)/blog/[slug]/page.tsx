@@ -72,7 +72,7 @@ export default async function BlogPostPage({
             monitoring, and an EN 301 549 Conformance Report.
           </p>
           <Link
-            href="/signup"
+            href="/free/wcag-scanner"
             className="mt-4 inline-flex h-10 items-center justify-center rounded-md bg-[#0b1f3a] px-5 text-sm font-semibold text-white transition-colors hover:bg-[#071428]"
           >
             Start a free scan

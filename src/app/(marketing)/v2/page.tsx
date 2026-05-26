@@ -183,7 +183,7 @@ function Navbar() {
       </div>
       <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
         <Btn variant="ghost" size="sm" href="/login">Sign in</Btn>
-        <Btn variant="primary" size="sm" href="/signup" trailIcon={<IconArrowR />}>Free scan</Btn>
+        <Btn variant="primary" size="sm" href="/free/wcag-scanner" trailIcon={<IconArrowR />}>Free scan</Btn>
       </div>
     </nav>
   );
@@ -270,7 +270,7 @@ function Hero() {
             </div>
           </figure>
           <div style={{ marginTop: 28, display: "flex", gap: 12 }}>
-            <Btn variant="urgent" size="lg" href="/signup" trailIcon={<IconArrowR size={16} />}>Start free Title II scan</Btn>
+            <Btn variant="urgent" size="lg" href="/free/wcag-scanner" trailIcon={<IconArrowR size={16} />}>Start free Title II scan</Btn>
             <Btn variant="outline-dark" size="lg" href="#comparison">See how we compare</Btn>
           </div>
           <div style={{ marginTop: 22, display: "flex", flexWrap: "wrap", gap: "8px 20px", fontSize: 12, color: "rgba(255,255,255,0.55)" }}>
@@ -654,7 +654,7 @@ function FinalCta() {
         </h2>
         <p style={{ marginTop: 18, fontSize: 17, color: "rgba(255,255,255,0.72)" }}>Scan your domain in 90 seconds. No card required.</p>
         <div style={{ marginTop: 28, display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
-          <Btn variant="urgent" size="lg" href="/signup" trailIcon={<IconArrowR size={16} />}>Start free Title II scan</Btn>
+          <Btn variant="urgent" size="lg" href="/free/wcag-scanner" trailIcon={<IconArrowR size={16} />}>Start free Title II scan</Btn>
           <Btn variant="outline-dark" size="lg" href="mailto:government@accessiscan.piposlab.com">Book government demo</Btn>
         </div>
       </div>

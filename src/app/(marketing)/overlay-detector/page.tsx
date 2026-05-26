@@ -122,7 +122,7 @@ export default function OverlayDetectorPage() {
               </p>
               <div className="mt-7 flex flex-wrap gap-3">
                 <Link
-                  href="/signup"
+                  href="/free/wcag-scanner"
                   className="inline-flex h-11 items-center rounded-md bg-[#0b1f3a] px-5 text-sm font-semibold text-white transition-colors hover:bg-[#071428]"
                 >
                   Start a free real audit
