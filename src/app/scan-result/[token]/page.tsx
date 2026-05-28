@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { ScanLeadCapture } from "@/components/free-scan/scan-lead-capture";
 
 interface ScanIssue {
   rule: string;
@@ -124,6 +125,8 @@ export default async function PublicScanResultPage({
       <div className="text-slate-600 mb-8">WCAG 2.1 AA conformance scan · AccessiScan</div>
 
       <ScoreCard score={report.health_score} totalIssues={report.total_issue_count} />
+
+      <ScanLeadCapture token={token} url={report.url} score={report.health_score} />
 
       {report.issues && report.issues.length > 0 ? (
         <section className="mt-10">
