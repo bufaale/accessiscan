@@ -1,8 +1,18 @@
 "use client";
 
 import { useState } from "react";
-import { Loader2, Search, AlertTriangle, CheckCircle, ArrowRight, Copy, Check } from "lucide-react";
+import { Loader2, Search, AlertTriangle, CheckCircle, ArrowRight, Copy, Check, Lock } from "lucide-react";
 import Link from "next/link";
+
+// Number of fix recommendations shown free as a teaser. The rest are
+// gated behind a free signup — the diagnosis (what's wrong) stays open
+// so the scan still has wedge value + is shareable, but the remediation
+// (how to fix, example code, VPAT, auto-fix PRs) is the paid hook.
+// Rationale: through 2026-05 the fully-open scan gave away both the
+// diagnosis AND the cure, so 236 paid clicks + 58 cold emails converted
+// to 0 signups. Gating the cure creates the reason to sign up.
+const FREE_FIX_COUNT = 1;
+const SIGNUP_UTM = "/signup?utm_source=free_scan&utm_medium=gate&utm_campaign=fix_unlock";
 
 interface FreeScanResponse {
   report: {
@@ -208,33 +218,83 @@ export function FreeScannerForm() {
             </div>
           ) : (
             <ul className="space-y-3">
-              {result.report.issues.map((iss, i) => (
-                <li
-                  key={i}
-                  className={`rounded-lg border p-4 ${SEVERITY_COLOR[iss.severity]}`}
-                >
-                  <div className="flex items-start justify-between gap-2">
-                    <div>
-                      <div className="flex items-center gap-2 text-sm font-semibold">
-                        <AlertTriangle className="h-4 w-4" />
-                        {iss.rule}
+              {result.report.issues.map((iss, i) => {
+                const fixUnlocked = i < FREE_FIX_COUNT;
+                return (
+                  <li
+                    key={i}
+                    className={`rounded-lg border p-4 ${SEVERITY_COLOR[iss.severity]}`}
+                  >
+                    {/* Diagnosis — always free (rule + WCAG ref + count + severity) */}
+                    <div className="flex items-start justify-between gap-2">
+                      <div>
+                        <div className="flex items-center gap-2 text-sm font-semibold">
+                          <AlertTriangle className="h-4 w-4" />
+                          {iss.rule}
+                        </div>
+                        <p className="mt-1 text-xs opacity-80">{iss.wcag_ref}</p>
                       </div>
-                      <p className="mt-1 text-xs opacity-80">{iss.wcag_ref}</p>
+                      <span className="rounded-full border border-current px-2 py-0.5 text-xs font-medium">
+                        {iss.count}× · {iss.severity}
+                      </span>
                     </div>
-                    <span className="rounded-full border border-current px-2 py-0.5 text-xs font-medium">
-                      {iss.count}× · {iss.severity}
-                    </span>
-                  </div>
-                  <p className="mt-3 text-xs">{iss.fix_hint}</p>
-                  {iss.example && (
-                    <pre className="mt-2 overflow-x-auto rounded bg-white/60 p-2 text-[11px]">
-                      <code>{iss.example}</code>
-                    </pre>
-                  )}
-                </li>
-              ))}
+
+                    {fixUnlocked ? (
+                      <>
+                        <p className="mt-3 text-xs">{iss.fix_hint}</p>
+                        {iss.example && (
+                          <pre className="mt-2 overflow-x-auto rounded bg-white/60 p-2 text-[11px]">
+                            <code>{iss.example}</code>
+                          </pre>
+                        )}
+                      </>
+                    ) : (
+                      /* Remediation gated — the paid hook */
+                      <Link
+                        href={SIGNUP_UTM}
+                        className="mt-3 flex items-center gap-2 rounded-md border border-dashed border-current/40 bg-white/40 px-3 py-2 text-xs font-medium hover:bg-white/70"
+                        data-testid="fix-gate"
+                      >
+                        <Lock className="h-3.5 w-3.5" />
+                        Fix steps + example code — unlock free
+                      </Link>
+                    )}
+                  </li>
+                );
+              })}
             </ul>
           )}
+
+          {/* Single prominent gate card after the issue list — the main
+              conversion CTA. Only shown when there are gated fixes. */}
+          {!result.report.error &&
+          result.report.issues.length > FREE_FIX_COUNT ? (
+            <div
+              className="rounded-lg border-2 border-[#0b1f3a] bg-[#0b1f3a] p-5 text-white"
+              data-testid="scan-unlock-cta"
+            >
+              <div className="flex items-center gap-2 text-sm font-semibold">
+                <Lock className="h-4 w-4" />
+                {result.report.issues.length - FREE_FIX_COUNT} more fixes ready to unlock
+              </div>
+              <p className="mt-2 text-sm text-white/80">
+                You can see <span className="font-semibold">what&apos;s wrong</span>. Sign up free to
+                see <span className="font-semibold">how to fix every issue</span> — step-by-step
+                remediation, copy-paste example code, a full Playwright crawl of every page,
+                auto-fix pull requests against your repo, and a VPAT 2.5 export for procurement.
+              </p>
+              <p className="mt-2 text-xs text-white/60">
+                DOJ Title II web-accessibility deadline: April 2027. Free tier, no credit card.
+              </p>
+              <Link
+                href={SIGNUP_UTM}
+                data-testid="scan-unlock-signup"
+                className="mt-4 inline-flex items-center gap-1.5 rounded-md bg-white px-4 py-2 text-sm font-semibold text-[#0b1f3a] hover:bg-slate-100"
+              >
+                Unlock all fixes free <ArrowRight className="h-4 w-4" />
+              </Link>
+            </div>
+          ) : null}
 
           {/* PUBLIC PERMALINK — the viral wedge. Surfaces the public URL
               so the visitor can share their score with their team / boss /
