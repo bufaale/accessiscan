@@ -4,6 +4,7 @@ import { getStripe } from "@/lib/stripe/server";
 import { createAdminClient } from "@/lib/supabase/server";
 import { getPlanByPriceId } from "@/lib/stripe/plans";
 import { logAuditEvent } from "@/lib/audit/log";
+import { fulfilPaidAudit } from "@/lib/audit/fulfill";
 import type Stripe from "stripe";
 
 function getPlanIdFromSubscription(subscription: Stripe.Subscription): string {
@@ -39,6 +40,21 @@ export async function POST(req: Request) {
   switch (event.type) {
     case "checkout.session.completed": {
       const session = event.data.object as Stripe.Checkout.Session;
+
+      // One-time $149 audit (no-account purchase). Fulfil: scan + email report.
+      if (session.mode === "payment" && session.metadata?.kind === "one_time_audit") {
+        const targetUrl = session.metadata.target_url;
+        const auditEmail = session.metadata.audit_email || session.customer_details?.email || session.customer_email;
+        if (targetUrl && auditEmail) {
+          // Await fulfilment so a webhook retry re-runs it if it throws; the
+          // function is internally guarded and marks paid_audits status.
+          await fulfilPaidAudit({ sessionId: session.id, email: auditEmail, targetUrl });
+        } else {
+          console.error("[webhook] one_time_audit missing url/email", session.id);
+        }
+        break;
+      }
+
       if (session.mode === "subscription" && session.subscription) {
         const subscription = await getStripe().subscriptions.retrieve(session.subscription as string);
         const userId = subscription.metadata.supabase_user_id || session.metadata?.supabase_user_id;

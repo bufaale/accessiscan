@@ -286,13 +286,25 @@ export function FreeScannerForm() {
               <p className="mt-2 text-xs text-white/60">
                 DOJ Title II web-accessibility deadline: April 2027. Free tier, no credit card.
               </p>
-              <Link
-                href={SIGNUP_UTM}
-                data-testid="scan-unlock-signup"
-                className="mt-4 inline-flex items-center gap-1.5 rounded-md bg-white px-4 py-2 text-sm font-semibold text-[#0b1f3a] hover:bg-slate-100"
-              >
-                Unlock all fixes free <ArrowRight className="h-4 w-4" />
-              </Link>
+              <div className="mt-4 flex flex-wrap items-center gap-3">
+                <Link
+                  href={SIGNUP_UTM}
+                  data-testid="scan-unlock-signup"
+                  className="inline-flex items-center gap-1.5 rounded-md bg-white px-4 py-2 text-sm font-semibold text-[#0b1f3a] hover:bg-slate-100"
+                >
+                  Unlock fixes free <ArrowRight className="h-4 w-4" />
+                </Link>
+                <Link
+                  href="/audit?utm_source=free_scan&utm_medium=gate&utm_campaign=audit_upsell"
+                  data-testid="scan-unlock-audit"
+                  className="inline-flex items-center gap-1.5 rounded-md border border-white/40 px-4 py-2 text-sm font-semibold text-white hover:bg-white/10"
+                >
+                  Or get a done-for-you audit + VPAT ($149)
+                </Link>
+              </div>
+              <p className="mt-2 text-xs text-white/55">
+                DIY free, or skip the work: we email you the full audit + VPAT for $149. No account.
+              </p>
             </div>
           ) : null}
 

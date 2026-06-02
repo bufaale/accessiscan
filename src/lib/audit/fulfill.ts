@@ -1,0 +1,133 @@
+import { Resend } from "resend";
+import { scanUrlLite } from "@/lib/free-scan/lite-scanner";
+import { createAdminClient } from "@/lib/supabase/admin";
+
+/**
+ * Fulfil a paid one-time WCAG audit: run the scan, persist results, and email
+ * the buyer their report. Called by the Stripe webhook on
+ * checkout.session.completed when metadata.kind === "one_time_audit".
+ *
+ * Legal framing (enforced by legal-compliance agent): the email + report state
+ * the automated-scope limitation explicitly and NEVER claim the site is
+ * "compliant". We sell a documented good-faith audit, not a legal guarantee.
+ */
+
+interface FulfilArgs {
+  sessionId: string;
+  email: string;
+  targetUrl: string;
+}
+
+const SEVERITY_ORDER: Record<string, number> = { critical: 0, serious: 1, moderate: 2 };
+
+function escapeHtml(s: string): string {
+  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}
+
+function renderAuditEmail(opts: {
+  url: string;
+  score: number;
+  total: number;
+  issues: Array<{ rule: string; severity: string; count: number; wcag_ref?: string; fix_hint?: string }>;
+}) {
+  const { url, score, total, issues } = opts;
+  const rows = issues
+    .map(
+      (i) =>
+        `<li style="margin-bottom:14px;font-size:14px;line-height:1.5">
+          <strong>${escapeHtml(i.rule)}</strong>
+          <span style="color:#64748b;font-size:12px;text-transform:uppercase"> (${escapeHtml(i.severity)}, ${i.count}x)</span>
+          ${i.wcag_ref ? `<br/><span style="color:#94a3b8;font-size:12px">${escapeHtml(i.wcag_ref)}</span>` : ""}
+          ${i.fix_hint ? `<br/><span style="color:#475569">Fix: ${escapeHtml(i.fix_hint)}</span>` : ""}
+        </li>`,
+    )
+    .join("");
+
+  const html = `<div style="font-family:Inter,Arial,sans-serif;max-width:600px;color:#0f172a;font-size:14px;line-height:1.55">
+  <p>Thanks for your purchase. Here is your WCAG 2.1 AA audit for <strong>${escapeHtml(url)}</strong>.</p>
+  <p style="font-size:18px"><strong>Automated score: ${score}/100</strong> — ${total} issue${total === 1 ? "" : "s"} detected.</p>
+  <p>Prioritized findings (most lawsuit-cited first):</p>
+  <ol style="padding-left:18px">${rows}</ol>
+  <p style="margin-top:20px;padding:12px;background:#fffbeb;border:1px solid #fcd34d;border-radius:6px;font-size:13px;color:#78350f">
+    <strong>Scope + honest limits:</strong> this is an automated WCAG 2.1 AA scan. Automated checks reliably
+    catch roughly 30-40% of WCAG issues (the mechanical ones: missing alt text, contrast, labels, structure).
+    They cannot judge whether alt text is meaningful or whether a custom widget makes sense to a screen reader.
+    A clean automated result is a documented good-faith starting point, not a certificate of compliance, and
+    full conformance still requires manual testing with a screen reader. This report does not constitute legal advice.
+  </p>
+  <p style="margin-top:16px">Reply to this email if you want help prioritizing the fixes, or a re-scan after you remediate. A re-scan to document your improved score is included.</p>
+  <p style="color:#64748b;font-size:12px;margin-top:20px;border-top:1px solid #e2e8f0;padding-top:12px">
+    Alejandro, Pipo Labs LLC<br/>accessiscan.piposlab.com
+  </p>
+</div>`;
+
+  const text = `Thanks for your purchase. WCAG 2.1 AA audit for ${url}.
+
+Automated score: ${score}/100 — ${total} issues detected.
+
+Prioritized findings:
+${issues.map((i, n) => `${n + 1}. ${i.rule} (${i.severity}, ${i.count}x)${i.wcag_ref ? ` [${i.wcag_ref}]` : ""}${i.fix_hint ? `\n   Fix: ${i.fix_hint}` : ""}`).join("\n\n")}
+
+SCOPE + HONEST LIMITS: this is an automated WCAG 2.1 AA scan. Automated checks catch roughly 30-40% of WCAG issues. A clean result is a documented good-faith starting point, not a certificate of compliance; full conformance requires manual screen-reader testing. This is not legal advice.
+
+Reply if you want help prioritizing fixes or a re-scan after remediation.
+
+Alejandro, Pipo Labs LLC
+accessiscan.piposlab.com`;
+
+  return { html, text };
+}
+
+export async function fulfilPaidAudit({ sessionId, email, targetUrl }: FulfilArgs): Promise<void> {
+  const db = createAdminClient() as unknown as {
+    from: (t: string) => {
+      update: (v: unknown) => { eq: (c: string, val: string) => Promise<{ error: unknown }> };
+    };
+  };
+  const setStatus = (patch: Record<string, unknown>) =>
+    db.from("paid_audits").update(patch).eq("stripe_session_id", sessionId);
+
+  await setStatus({ status: "scanning" });
+
+  try {
+    const report = await scanUrlLite(targetUrl);
+    const issues = [...(report.issues ?? [])].sort(
+      (a, b) => (SEVERITY_ORDER[a.severity] ?? 9) - (SEVERITY_ORDER[b.severity] ?? 9),
+    );
+    const score = report.health_score ?? 0;
+    const total = report.total_issue_count ?? issues.length;
+
+    const { html, text } = renderAuditEmail({ url: targetUrl, score, total, issues });
+
+    let resendId: string | undefined;
+    try {
+      const resend = new Resend(process.env.RESEND_API_KEY);
+      const res = await resend.emails.send({
+        from: process.env.RESEND_FROM_EMAIL || "AccessiScan <no-reply@piposlab.com>",
+        replyTo: "alex@piposlab.com",
+        to: email,
+        subject: `Your automated WCAG audit of ${targetUrl} — ${score}/100`,
+        html,
+        text,
+      });
+      resendId = res.data?.id;
+    } catch (e) {
+      // Email failed but the scan succeeded + is persisted. Mark delivered=false
+      // path so an operator can re-send. Do NOT throw — the payment is captured.
+      console.error("[audit/fulfill] resend send failed", e);
+      await setStatus({ status: "failed", scan_score: score, scan_issue_count: total, error_detail: "email_send_failed" });
+      return;
+    }
+
+    await setStatus({
+      status: "delivered",
+      scan_score: score,
+      scan_issue_count: total,
+      resend_message_id: resendId ?? null,
+      delivered_at: new Date().toISOString(),
+    });
+  } catch (e) {
+    console.error("[audit/fulfill] scan failed", e);
+    await setStatus({ status: "failed", error_detail: e instanceof Error ? e.message.slice(0, 300) : "scan_failed" });
+  }
+}
