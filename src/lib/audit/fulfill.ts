@@ -78,6 +78,27 @@ accessiscan.piposlab.com`;
   return { html, text };
 }
 
+/**
+ * Fire-and-forget operator alert the instant a paid audit's webhook fires.
+ * The payment is already captured by the time fulfilPaidAudit runs, so this
+ * is the session-independent first/next-sale alarm: it does not depend on the
+ * scan or the customer email succeeding, and it never throws (a failed alert
+ * must not roll back fulfilment).
+ */
+async function notifyOperatorOfSale(email: string, targetUrl: string): Promise<void> {
+  try {
+    const resend = new Resend(process.env.RESEND_API_KEY);
+    await resend.emails.send({
+      from: process.env.RESEND_FROM_EMAIL || "AccessiScan <no-reply@piposlab.com>",
+      to: "alex@piposlab.com",
+      subject: `SALE: $149 WCAG audit purchased — ${targetUrl}`,
+      text: `A one-time WCAG audit was just paid for.\n\nBuyer: ${email}\nTarget: ${targetUrl}\n\nFulfilment (scan + report email) is running now. Check paid_audits for status.`,
+    });
+  } catch (e) {
+    console.error("[audit/fulfill] operator sale alert failed", e);
+  }
+}
+
 export async function fulfilPaidAudit({ sessionId, email, targetUrl }: FulfilArgs): Promise<void> {
   const db = createAdminClient() as unknown as {
     from: (t: string) => {
@@ -86,6 +107,9 @@ export async function fulfilPaidAudit({ sessionId, email, targetUrl }: FulfilArg
   };
   const setStatus = (patch: Record<string, unknown>) =>
     db.from("paid_audits").update(patch).eq("stripe_session_id", sessionId);
+
+  // First thing: ping the operator. Money has already landed at this point.
+  await notifyOperatorOfSale(email, targetUrl);
 
   await setStatus({ status: "scanning" });
 
