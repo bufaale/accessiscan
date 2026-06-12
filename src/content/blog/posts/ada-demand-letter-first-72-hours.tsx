@@ -94,8 +94,9 @@ export default function AdaDemandLetterFirst72Hours() {
         mechanical issues); full conformance requires manual testing with a screen
         reader. This documents your conformance status and good-faith effort. It is
         not a certificate of compliance and it is not legal advice. Anyone who
-        promises a scan or a widget makes you &quot;ADA compliant&quot; or
-        &quot;lawsuit-proof&quot; is not telling you the truth.
+        promises that a scan or a widget instantly solves this for you — with no
+        manual work and no ongoing effort — is overselling. Real remediation
+        means fixing the issues, not buying a badge.
       </p>
       <p>
         <a href="/audit">Get your timestamped audit + Evidence Pack →</a> Emailed
