@@ -25,20 +25,25 @@ export default function AuditPage() {
         </h1>
         <p className="mt-4 text-base text-slate-600">
           For when you have an ADA demand letter on your desk, a procurement form
-          asking for a VPAT, or a DOJ Title II deadline coming. You enter your
-          URL, pay once, and we email you a prioritized audit you can act on or
-          hand to your attorney. No account, no monthly fee.
+          asking for a VPAT, or a DOJ Title II deadline coming. When a demand
+          letter arrives, what matters is whether you can prove you acted — so
+          every audit ships as a timestamped, independently verifiable record of
+          the day you did. You enter your URL, pay once, and we email you a
+          Legal Evidence Pack you can act on or hand to your attorney. No
+          account, no monthly fee.
         </p>
       </header>
 
       <section className="mt-10 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h2 className="text-lg font-semibold text-[#0b1f3a]">What you get</h2>
+        <h2 className="text-lg font-semibold text-[#0b1f3a]">What you get — the Legal Evidence Pack</h2>
         <ul className="mt-3 space-y-2 text-sm text-slate-700">
-          <li>• An automated WCAG 2.1 AA scan of your page</li>
-          <li>• A prioritized fix list, most lawsuit-cited issues first, with the WCAG reference and a concrete fix for each</li>
+          <li>• An automated WCAG 2.1 AA scan of your page, with a prioritized fix list — most lawsuit-cited issues first, each with the WCAG reference and a concrete fix</li>
+          <li>• A <strong>timestamped, SHA-256 hash-signed record</strong> of your audit, with a public verification page — a dated, third-party-verifiable record of the day you took action (the question opposing counsel always asks)</li>
+          <li>• A <strong>30 / 60 / 90-day remediation plan</strong> pre-filled with the exact issues found</li>
+          <li>• A draft <strong>accessibility statement</strong> you can publish, and a <strong>demand-letter response template</strong> your attorney can adapt</li>
           <li>• A VPAT-style conformance summary you can hand to procurement or counsel</li>
           <li>• A free re-scan after you remediate, to document your improved score</li>
-          <li>• Emailed to you, usually within an hour</li>
+          <li>• Emailed to you, usually within an hour, plus a durable link to view and print the full pack</li>
         </ul>
       </section>
 
