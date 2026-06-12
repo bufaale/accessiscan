@@ -1,6 +1,9 @@
+import { randomBytes } from "node:crypto";
 import { Resend } from "resend";
 import { scanUrlLite } from "@/lib/free-scan/lite-scanner";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { insertBaseline } from "@/lib/audit/baseline-store";
+import { buildEvidencePack } from "@/lib/audit/evidence-pack-content";
 
 /**
  * Fulfil a paid one-time WCAG audit: run the scan, persist results, and email
@@ -29,8 +32,9 @@ function renderAuditEmail(opts: {
   score: number;
   total: number;
   issues: Array<{ rule: string; severity: string; count: number; wcag_ref?: string; fix_hint?: string }>;
+  evidence?: { html: string; text: string };
 }) {
-  const { url, score, total, issues } = opts;
+  const { url, score, total, issues, evidence } = opts;
   const rows = issues
     .map(
       (i) =>
@@ -48,13 +52,13 @@ function renderAuditEmail(opts: {
   <p style="font-size:18px"><strong>Automated score: ${score}/100</strong> — ${total} issue${total === 1 ? "" : "s"} detected.</p>
   <p>Prioritized findings (most lawsuit-cited first):</p>
   <ol style="padding-left:18px">${rows}</ol>
-  <p style="margin-top:20px;padding:12px;background:#fffbeb;border:1px solid #fcd34d;border-radius:6px;font-size:13px;color:#78350f">
+  ${evidence ? evidence.html : `<p style="margin-top:20px;padding:12px;background:#fffbeb;border:1px solid #fcd34d;border-radius:6px;font-size:13px;color:#78350f">
     <strong>Scope + honest limits:</strong> this is an automated WCAG 2.1 AA scan. Automated checks reliably
     catch roughly 30-40% of WCAG issues (the mechanical ones: missing alt text, contrast, labels, structure).
     They cannot judge whether alt text is meaningful or whether a custom widget makes sense to a screen reader.
     A clean automated result is a documented good-faith starting point, not a certificate of compliance, and
     full conformance still requires manual testing with a screen reader. This report does not constitute legal advice.
-  </p>
+  </p>`}
   <p style="margin-top:16px">Reply to this email if you want help prioritizing the fixes, or a re-scan after you remediate. A re-scan to document your improved score is included.</p>
   <p style="color:#64748b;font-size:12px;margin-top:20px;border-top:1px solid #e2e8f0;padding-top:12px">
     Alejandro, Pipo Labs LLC<br/>accessiscan.piposlab.com
@@ -68,7 +72,7 @@ Automated score: ${score}/100 — ${total} issues detected.
 Prioritized findings:
 ${issues.map((i, n) => `${n + 1}. ${i.rule} (${i.severity}, ${i.count}x)${i.wcag_ref ? ` [${i.wcag_ref}]` : ""}${i.fix_hint ? `\n   Fix: ${i.fix_hint}` : ""}`).join("\n\n")}
 
-SCOPE + HONEST LIMITS: this is an automated WCAG 2.1 AA scan. Automated checks catch roughly 30-40% of WCAG issues. A clean result is a documented good-faith starting point, not a certificate of compliance; full conformance requires manual screen-reader testing. This is not legal advice.
+${evidence ? evidence.text : "SCOPE + HONEST LIMITS: this is an automated WCAG 2.1 AA scan. Automated checks catch roughly 30-40% of WCAG issues. A clean result is a documented good-faith starting point, not a certificate of compliance; full conformance requires manual screen-reader testing. This is not legal advice."}
 
 Reply if you want help prioritizing fixes or a re-scan after remediation.
 
@@ -121,7 +125,39 @@ export async function fulfilPaidAudit({ sessionId, email, targetUrl }: FulfilArg
     const score = report.health_score ?? 0;
     const total = report.total_issue_count ?? issues.length;
 
-    const { html, text } = renderAuditEmail({ url: targetUrl, score, total, issues });
+    // Legal Evidence Pack: persist an immutable, hash-signed baseline and build
+    // the verifiable record + 30/60/90 plan + accessibility statement + demand-
+    // letter template. Best-effort — a failure here must never block delivery.
+    let evidence: { html: string; text: string } | undefined;
+    let baselineId: string | null = null;
+    let evidenceToken: string | null = null;
+    try {
+      const adb = createAdminClient();
+      const { data: paidRow } = await adb
+        .from("paid_audits")
+        .select("id")
+        .eq("stripe_session_id", sessionId)
+        .single();
+      const auditId = (paidRow as { id?: string } | null)?.id;
+      if (auditId) {
+        const scannedAt = new Date().toISOString();
+        const inserted = await insertBaseline({ paidAuditId: auditId, targetUrl, scannedAt, issues });
+        if (inserted) {
+          baselineId = inserted.baselineId;
+          evidenceToken = randomBytes(24).toString("base64url");
+          const base = process.env.NEXT_PUBLIC_APP_URL || "https://accessiscan.piposlab.com";
+          const verifyUrl = `${base}/verify/${auditId}`;
+          evidence = buildEvidencePack(
+            { url: targetUrl, scannedAtUtc: scannedAt, hash: inserted.record.violationsHash, verifyUrl },
+            issues,
+          );
+        }
+      }
+    } catch (e) {
+      console.error("[audit/fulfill] evidence pack build failed", e);
+    }
+
+    const { html, text } = renderAuditEmail({ url: targetUrl, score, total, issues, evidence });
 
     let resendId: string | undefined;
     try {
@@ -149,6 +185,8 @@ export async function fulfilPaidAudit({ sessionId, email, targetUrl }: FulfilArg
       scan_issue_count: total,
       resend_message_id: resendId ?? null,
       delivered_at: new Date().toISOString(),
+      ...(baselineId ? { baseline_id: baselineId } : {}),
+      ...(evidenceToken ? { evidence_token: evidenceToken } : {}),
     });
   } catch (e) {
     console.error("[audit/fulfill] scan failed", e);
