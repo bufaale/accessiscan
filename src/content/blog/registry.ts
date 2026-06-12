@@ -31,8 +31,22 @@ import WcagCostComparison from "./posts/wcag-audit-cost-comparison";
 import EnForbIds from "./posts/en-301-549-forbidden-ids";
 import DojTitleIiRunway from "./posts/doj-title-ii-runway";
 import AccessibeLessons from "./posts/accessibe-ftc-lessons";
+import AdaDemandLetterFirst72Hours from "./posts/ada-demand-letter-first-72-hours";
 
 export const POSTS: BlogPost[] = [
+  {
+    slug: "ada-demand-letter-first-72-hours",
+    title: "Got an ADA Website Demand Letter? Your First 72 Hours",
+    description:
+      "An ADA website demand letter just landed? Here's the practical first-72-hours sequence — and the dated, verifiable audit record that changes how these cases resolve.",
+    date: "2026-06-12",
+    readMinutes: 8,
+    keyword: "ada demand letter website",
+    category: "how-to",
+    excerpt:
+      "Before you panic-pay a settlement or panic-buy an overlay, here's what matters in the first 72 hours after an ADA website demand letter — and the one thing that changes how these cases tend to resolve: proving the day you started fixing it.",
+    Component: AdaDemandLetterFirst72Hours,
+  },
   {
     slug: "overlay-lawsuit-guide",
     title: "The 2026 Accessibility Overlay Lawsuit Guide",
