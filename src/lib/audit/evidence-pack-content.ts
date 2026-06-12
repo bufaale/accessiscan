@@ -13,6 +13,7 @@ export interface EvidenceMeta {
   hash: string; // SHA-256 hex
   verifyUrl: string;
   packUrl?: string; // durable, printable Evidence Pack page (token-gated)
+  rescanUrl?: string; // self-serve before/after re-scan (token-gated)
 }
 
 const esc = (s: string) =>
@@ -56,6 +57,7 @@ export function buildEvidencePack(meta: EvidenceMeta, issues: WcagFreeIssue[]): 
   <div>SHA-256: <code style="font-size:11px;word-break:break-all">${esc(meta.hash)}</code></div>
   <div>Verify independently: <a href="${esc(meta.verifyUrl)}">${esc(meta.verifyUrl)}</a></div>
   ${meta.packUrl ? `<div style="margin-top:6px">View / print your full Evidence Pack (save as PDF, attach to your attorney's response): <a href="${esc(meta.packUrl)}">${esc(meta.packUrl)}</a></div>` : ""}
+  ${meta.rescanUrl ? `<div style="margin-top:6px">After you remediate, document your progress (free): <a href="${esc(meta.rescanUrl)}">re-scan &amp; compare to this baseline</a></div>` : ""}
   <div style="margin-top:8px;color:#64748b;font-size:12px">This record confirms the audit file was generated on the date shown and has not been altered since. It does not confirm that the website meets WCAG 2.1 AA, satisfies ADA Title III, or is free from accessibility barriers.</div>
 </div>
 
