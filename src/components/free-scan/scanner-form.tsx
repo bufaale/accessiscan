@@ -299,11 +299,13 @@ export function FreeScannerForm() {
                   data-testid="scan-unlock-audit"
                   className="inline-flex items-center gap-1.5 rounded-md border border-white/40 px-4 py-2 text-sm font-semibold text-white hover:bg-white/10"
                 >
-                  Or get a done-for-you audit + VPAT ($149)
+                  Get the Legal Evidence Pack ($149)
                 </Link>
               </div>
               <p className="mt-2 text-xs text-white/55">
-                DIY free, or skip the work: we email you the full audit + VPAT for $149. No account.
+                Got a demand letter? Skip the DIY: $149 gets you a timestamped, independently verifiable
+                audit record (proof of the day you acted), a 30/60/90 fix plan, a VPAT-style report, and a
+                demand-letter response template for your attorney. Emailed within the hour. No account.
               </p>
             </div>
           ) : null}
