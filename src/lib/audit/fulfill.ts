@@ -147,8 +147,9 @@ export async function fulfilPaidAudit({ sessionId, email, targetUrl }: FulfilArg
           evidenceToken = randomBytes(24).toString("base64url");
           const base = process.env.NEXT_PUBLIC_APP_URL || "https://accessiscan.piposlab.com";
           const verifyUrl = `${base}/verify/${auditId}`;
+          const packUrl = `${base}/audit/${auditId}/pack?token=${evidenceToken}`;
           evidence = buildEvidencePack(
-            { url: targetUrl, scannedAtUtc: scannedAt, hash: inserted.record.violationsHash, verifyUrl },
+            { url: targetUrl, scannedAtUtc: scannedAt, hash: inserted.record.violationsHash, verifyUrl, packUrl },
             issues,
           );
         }
