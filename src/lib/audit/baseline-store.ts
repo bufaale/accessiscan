@@ -57,6 +57,53 @@ export async function insertBaseline(args: {
   }
 }
 
+export interface FullBaseline extends BaselineRecord {
+  issues: import("@/lib/free-scan/lite-scanner").WcagFreeIssue[];
+}
+
+/**
+ * Token-gated full baseline read (includes violation detail) for the buyer's
+ * downloadable Evidence Pack page. Validates the random access token against
+ * paid_audits.evidence_token before returning anything.
+ */
+export async function getBaselineFull(auditUuid: string, token: string): Promise<FullBaseline | null> {
+  if (!token) return null;
+  try {
+    const db = createAdminClient();
+    const { data: paid } = await db
+      .from("paid_audits")
+      .select("evidence_token")
+      .eq("id", auditUuid)
+      .single();
+    const expected = (paid as { evidence_token?: string } | null)?.evidence_token;
+    if (!expected || expected !== token) return null;
+    const { data, error } = await db
+      .from("audit_baselines")
+      .select("audit_uuid, target_url, scanned_at, engine_version, violations_hash, violations_json")
+      .eq("audit_uuid", auditUuid)
+      .single();
+    if (error || !data) return null;
+    const row = data as {
+      audit_uuid: string;
+      target_url: string;
+      scanned_at: string;
+      engine_version: string;
+      violations_hash: string;
+      violations_json: import("@/lib/free-scan/lite-scanner").WcagFreeIssue[];
+    };
+    return {
+      auditUuid: row.audit_uuid,
+      targetUrl: row.target_url,
+      scannedAt: row.scanned_at,
+      engineVersion: row.engine_version,
+      violationsHash: row.violations_hash,
+      issues: Array.isArray(row.violations_json) ? row.violations_json : [],
+    };
+  } catch {
+    return null;
+  }
+}
+
 /** Public-safe baseline lookup (no violation detail) for the /verify page. */
 export async function getBaselinePublic(auditUuid: string): Promise<BaselineRecord | null> {
   try {
