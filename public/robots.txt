@@ -1,6 +1,6 @@
 # AccessiScan robots.txt
-# Disallow protected/auth routes from being indexed by search engines.
-# Allow the rest (landing, pricing, free scanner, blog, etc.).
+# Disallow protected/auth routes from being indexed.
+# Allow everything else (landing, pricing, free scanner, blog, etc.).
 
 User-agent: *
 Disallow: /dashboard
@@ -14,18 +14,45 @@ Disallow: /scan-result-v2-preview
 Disallow: /signup-v2-preview
 Allow: /
 
-# AI scrapers — opt out of training, opt in to indexing
+# AI assistants / answer engines are WELCOME to read and cite our public pages.
+# We want to appear when buyers ask ChatGPT, Claude, Gemini and Perplexity for
+# accessibility tools, so we explicitly allow the AI crawlers (training and
+# retrieval) on everything except the protected routes above.
 User-agent: GPTBot
-Disallow: /
+Allow: /
+Disallow: /dashboard
+Disallow: /settings
+Disallow: /admin
+Disallow: /api
+Disallow: /auth
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
 
 User-agent: ClaudeBot
-Disallow: /
+Allow: /
+Disallow: /dashboard
+Disallow: /settings
+Disallow: /admin
+Disallow: /api
+Disallow: /auth
 
 User-agent: anthropic-ai
-Disallow: /
+Allow: /
 
-User-agent: CCBot
-Disallow: /
+User-agent: Claude-Web
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
 
 User-agent: Google-Extended
-Disallow: /
+Allow: /
+
+User-agent: CCBot
+Allow: /
+
+Sitemap: https://accessiscan.piposlab.com/sitemap.xml
