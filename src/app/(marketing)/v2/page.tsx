@@ -712,12 +712,67 @@ function Footer() {
 // page with its own <Navbar> and <Footer>, so v2's own Navbar/Footer were
 // rendering as a duplicate set with placeholder anchors. Render only the
 // content sections here; the layout owns global chrome.
+function EvidencePack() {
+  return (
+    <section
+      id="evidence-pack"
+      style={{ background: "#0b1f3a", color: "#fff", padding: "88px 32px", fontFamily: FONT_INTER, position: "relative", overflow: "hidden" }}
+    >
+      <div style={{ position: "absolute", inset: 0, opacity: 0.06, backgroundImage: "linear-gradient(#fff 1px,transparent 1px),linear-gradient(90deg,#fff 1px,transparent 1px)", backgroundSize: "56px 56px" }} />
+      <div style={{ position: "relative", maxWidth: 1320, margin: "0 auto", display: "grid", gridTemplateColumns: "1.05fr 1fr", gap: 64, alignItems: "center" }}>
+        <div>
+          <Eyebrow color="cyan-pill">Got an ADA demand letter?</Eyebrow>
+          <h2 style={{ marginTop: 20, fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 48, lineHeight: 1.06, letterSpacing: "-0.02em" }}>
+            Get dated proof you acted —{" "}
+            <span style={{ color: "#0e7490" }}>today.</span>
+          </h2>
+          <p style={{ marginTop: 20, maxWidth: 540, fontSize: 17, lineHeight: 1.55, color: "rgba(255,255,255,0.72)" }}>
+            The question that decides these cases is simple: <em>when did you know, and what did you do about it?</em> Our one-time audit ships a Legal Evidence Pack — the documented, verifiable answer your attorney will ask for.
+          </p>
+          <ul style={{ marginTop: 26, padding: 0, listStyle: "none", display: "flex", flexDirection: "column", gap: 12 }}>
+            {[
+              "A timestamped, SHA-256 hash-signed audit record with a public verification page",
+              "A 30 / 60 / 90-day remediation plan, pre-filled with your actual issues",
+              "A draft accessibility statement, ready to publish",
+              "A demand-letter response template for your attorney to adapt",
+              "Emailed within the hour — no account required",
+            ].map((t) => (
+              <li key={t} style={{ display: "flex", gap: 10, fontSize: 15, color: "rgba(255,255,255,0.85)" }}>
+                <IconCheck size={18} style={{ color: "#0e7490", flexShrink: 0, marginTop: 2 }} />
+                {t}
+              </li>
+            ))}
+          </ul>
+          <div style={{ marginTop: 32, display: "flex", gap: 12, flexWrap: "wrap" }}>
+            <Btn variant="white" href="/audit">Get the $149 audit + Evidence Pack →</Btn>
+            <Btn variant="outline-dark" href="/blog/ada-demand-letter-first-72-hours">Your first 72 hours</Btn>
+          </div>
+          <div style={{ marginTop: 16, fontSize: 13, color: "rgba(255,255,255,0.55)", maxWidth: 540 }}>
+            Documents your good-faith effort. Automated checks cover roughly 30–40% of WCAG 2.1 AA; this is not a certificate of compliance and not legal advice.
+          </div>
+        </div>
+        <div style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 14, padding: 28, fontFamily: FONT_MONO, fontSize: 13, lineHeight: 1.7, color: "rgba(255,255,255,0.82)" }}>
+          <div style={{ color: "#0e7490", fontWeight: 700 }}>BASELINE ESTABLISHED</div>
+          <div style={{ marginTop: 10 }}>scanned: 2026-06-14T18:22:07Z (UTC)</div>
+          <div style={{ wordBreak: "break-all" }}>sha-256: 9f2c…a41e</div>
+          <div>verify: accessiscan.piposlab.com/verify/…</div>
+          <div style={{ marginTop: 14, color: "rgba(255,255,255,0.55)" }}>
+            Confirms the audit existed on this date and is unaltered. It does not
+            confirm the site meets WCAG 2.1 AA or the ADA.
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 export default function V2LandingPage() {
   return (
     <div data-screen-label="AccessiScan Landing v2" style={{ background: "#fff", color: "#0b1f3a" }}>
       <DojBannerLive />
       <Hero />
       <StatsStrip />
+      <EvidencePack />
       <Comparison />
       <FeatureTriplet />
       <AutoFixPr />
