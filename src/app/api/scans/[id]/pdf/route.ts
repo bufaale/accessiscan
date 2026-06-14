@@ -29,8 +29,19 @@ export async function GET(
     .eq("scan_id", id)
     .order("position", { ascending: true });
 
+  // White-label: apply the agency's branding if they've set it (only Agency-tier
+  // users can save branding — gated at the /api/settings/branding endpoint).
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("branding")
+    .eq("id", user.id)
+    .single();
+  const branding = (profile?.branding ?? undefined) as
+    | { agencyName?: string; accent?: string }
+    | undefined;
+
   const buffer = await renderToBuffer(
-    CompliancePDFReport({ scan, issues: issues ?? [] }),
+    CompliancePDFReport({ scan, issues: issues ?? [], branding }),
   );
 
   return new NextResponse(new Uint8Array(buffer), {

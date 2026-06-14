@@ -14,6 +14,7 @@ import {
   FileText,
   Github,
   Key,
+  Palette,
 } from "lucide-react";
 import {
   Sidebar,
@@ -42,6 +43,7 @@ const settingsNav = [
   { title: "Profile", href: "/settings/profile", icon: User },
   { title: "Billing", href: "/settings/billing", icon: CreditCard },
   { title: "GitHub Auto-Fix", href: "/settings/github", icon: Github },
+  { title: "Branding", href: "/settings/branding", icon: Palette },
   { title: "API Keys", href: "/settings/api-keys", icon: Key },
 ];
 
