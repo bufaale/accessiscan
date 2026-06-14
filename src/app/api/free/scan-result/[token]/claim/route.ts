@@ -160,16 +160,43 @@ export async function POST(
     );
   }
 
-  // Persist the email capture
+  // Persist the email capture + stamp the claim time (used by the cap below).
   const { error: updateErr } = await db
     .from("public_scan_results")
-    .update({ email_captured: email })
+    .update({ email_captured: email, claimed_at: new Date().toISOString() })
     .eq("id", token);
   if (updateErr) {
     return NextResponse.json(
       { ok: false, error: "persist_failed", message: updateErr.message },
       { status: 500 },
     );
+  }
+
+  // SECURITY — email-bomb circuit breaker. This endpoint sends mail from our
+  // Resend domain to a caller-supplied address; the per-IP limiter above is
+  // in-memory and does NOT hold across Vercel's distributed instances, so an
+  // attacker could loop scan->claim with arbitrary recipients and get
+  // piposlab.com flagged (killing ALL portfolio email). Bound the blast radius
+  // with a shared, DB-backed global daily cap: past the cap we still capture
+  // the email (no UX break) but skip the send. Cap is far above real volume.
+  const GLOBAL_DAILY_CLAIM_SEND_CAP = 300;
+  let overGlobalCap = false;
+  try {
+    const since = new Date(Date.now() - 86_400_000).toISOString();
+    const { count } = await db
+      .from("public_scan_results")
+      .select("id", { count: "exact", head: true })
+      .gte("claimed_at", since);
+    if (typeof count === "number" && count > GLOBAL_DAILY_CLAIM_SEND_CAP) {
+      overGlobalCap = true;
+      console.warn(`[claim] global daily send cap hit (${count}); skipping send`);
+    }
+  } catch (e) {
+    overGlobalCap = true; // fail SAFE — protecting the sender domain wins
+    console.error("[claim] cap check failed, skipping send", e);
+  }
+  if (overGlobalCap) {
+    return NextResponse.json({ ok: true, claimed: true, emailed: false });
   }
 
   // Build + send the email
