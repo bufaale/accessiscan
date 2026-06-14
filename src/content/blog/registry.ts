@@ -32,8 +32,36 @@ import EnForbIds from "./posts/en-301-549-forbidden-ids";
 import DojTitleIiRunway from "./posts/doj-title-ii-runway";
 import AccessibeLessons from "./posts/accessibe-ftc-lessons";
 import AdaDemandLetterFirst72Hours from "./posts/ada-demand-letter-first-72-hours";
+import BestWcagScanners2026 from "./posts/best-wcag-scanners-2026";
+import AccessiScanVsSiteimprove from "./posts/accessiscan-vs-siteimprove";
 
 export const POSTS: BlogPost[] = [
+  {
+    slug: "best-wcag-scanners-2026",
+    title: "The Best WCAG Accessibility Scanners Compared (2026)",
+    description:
+      "An honest 2026 comparison of WCAG accessibility scanners — Siteimprove, Level Access, Deque axe, WAVE, overlays, and AccessiScan — with real prices and trade-offs.",
+    date: "2026-06-13",
+    readMinutes: 9,
+    keyword: "best WCAG accessibility scanner",
+    category: "comparisons",
+    excerpt:
+      "Enterprise vendors won't show a price; overlay companies promise one-click compliance. Neither is what most small teams need. Here's an honest comparison of the real WCAG scanners in 2026 — what each is good at, what it costs, and where it falls short, including ours.",
+    Component: BestWcagScanners2026,
+  },
+  {
+    slug: "accessiscan-vs-siteimprove",
+    title: "AccessiScan vs Siteimprove: An Honest Comparison (2026)",
+    description:
+      "Siteimprove is the big-brand accessibility platform; AccessiScan is the affordable audit. An honest, side-by-side comparison of price, scope, and speed so you pick the right fit.",
+    date: "2026-06-13",
+    readMinutes: 6,
+    keyword: "AccessiScan vs Siteimprove",
+    category: "comparisons",
+    excerpt:
+      "Siteimprove is a strong platform priced for large organizations — which is why small businesses and agencies bounce off it. Here's a fair side-by-side with AccessiScan on price, what you actually get, and speed to a usable result.",
+    Component: AccessiScanVsSiteimprove,
+  },
   {
     slug: "ada-demand-letter-first-72-hours",
     title: "Got an ADA Website Demand Letter? Your First 72 Hours",
