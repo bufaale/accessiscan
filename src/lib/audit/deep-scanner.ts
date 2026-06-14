@@ -12,8 +12,10 @@
  * duplicate ids, lang, titles — runs for real.
  */
 
-import { JSDOM, VirtualConsole } from "jsdom";
-import axe from "axe-core";
+// jsdom + axe-core are imported DYNAMICALLY inside axeScan(): a top-level import
+// crashes the whole route module at load time if Vercel's bundler doesn't fully
+// trace jsdom's dynamic requires. Lazy-importing keeps the module loadable and
+// makes any load failure catchable (and only pays the cost when actually scanning).
 import { validateResolvedIP } from "@/lib/security/url-validator";
 import { detectPlatform, type WcagFreeIssue, type WcagFreeReport, type WcagSeverity } from "@/lib/free-scan/lite-scanner";
 
@@ -92,6 +94,9 @@ interface AxeViolation { id: string; impact?: string | null; help: string; helpU
 
 /** Run axe-core against one HTML document inside jsdom. */
 async function axeScan(html: string, url: string): Promise<{ violations: AxeViolation[]; incomplete: string[] }> {
+  const { JSDOM, VirtualConsole } = await import("jsdom");
+  const axeMod = await import("axe-core");
+  const axe = ((axeMod as unknown as { default?: { source: string } }).default ?? axeMod) as unknown as { source: string };
   const virtualConsole = new VirtualConsole(); // swallow jsdom page errors
   const dom = new JSDOM(html, { url, runScripts: "outside-only", pretendToBeVisual: true, virtualConsole });
   try {
