@@ -14,7 +14,59 @@ export interface EvidenceMeta {
   verifyUrl: string;
   packUrl?: string; // durable, printable Evidence Pack page (token-gated)
   rescanUrl?: string; // self-serve before/after re-scan (token-gated)
+  platform?: string; // detected CMS (shopify/wordpress/webflow/wix/squarespace/other)
 }
+
+/**
+ * Platform-specific remediation guidance + owner-vs-platform triage. The #1
+ * thing real users ask for is "how do I fix this in my CMS" and "which issues
+ * are mine vs the platform's". Honest framing throughout — you remain
+ * responsible for your theme + content even where the platform controls chrome.
+ */
+const PLATFORM_GUIDANCE: Record<string, { label: string; whereToFix: string; triage: string }> = {
+  shopify: {
+    label: "Shopify",
+    whereToFix:
+      "Alt text: edit it on each product/collection image and in your theme's image blocks. Headings, labels, link names and landmark structure: in your theme files (Online Store → Themes → Edit code, the Liquid templates + sections). Contrast: theme settings or the theme's CSS. Many themes ship with accessibility gaps you can override.",
+    triage:
+      "On Shopify, the checkout and some Shopify-hosted flows are partly platform-controlled — you cannot fully edit them on non-Plus plans. Note those in your good-faith record. Everything in your theme, content, product data, and apps is YOUR responsibility and is where the bulk of these findings live.",
+  },
+  wordpress: {
+    label: "WordPress",
+    whereToFix:
+      "Alt text: the Media Library (each image has an Alt Text field) and the block editor. Headings: use the editor's heading blocks in order (don't skip levels). Form labels: your forms plugin (Gravity Forms, Contact Form 7, etc.). Contrast + focus styles: the theme Customizer or your child-theme CSS.",
+    triage:
+      "On WordPress nearly everything is owner-controlled through your theme, plugins, and content — so most findings are yours to fix. Third-party plugins that inject markup can be the exception; flag any you can't edit.",
+  },
+  webflow: {
+    label: "Webflow",
+    whereToFix:
+      "Alt text: set it on each asset in the Designer (or the asset settings). Headings: use the Designer's H1–H6 tags in order. Form labels: bind a <label> to each field. Contrast + focus states: the Style panel. Webflow gives you full structural control in the Designer.",
+    triage:
+      "Webflow is almost entirely owner-controlled via the Designer, so these findings are yours to fix directly — there's little platform-locked surface.",
+  },
+  wix: {
+    label: "Wix",
+    whereToFix:
+      "Alt text: each image's settings panel. Headings: apply the editor's heading styles (Heading 1/2/3), not just bigger text. Contrast: the site's theme/design panel. Labels: form element settings.",
+    triage:
+      "Wix controls more of the rendered markup than open platforms, so some structural fixes are constrained by the editor — note where the editor won't let you change a landmark or heading level. Content, images, and form setup remain your responsibility.",
+  },
+  squarespace: {
+    label: "Squarespace",
+    whereToFix:
+      "Alt text: each image block's settings. Headings: use the built-in heading formats in order. Contrast + focus: site styles / custom CSS. Labels: form block field settings.",
+    triage:
+      "Squarespace controls template chrome, so some structural elements are constrained — note those. Your content, images, headings, and forms are yours to fix.",
+  },
+  other: {
+    label: "your site",
+    whereToFix:
+      "Alt text: add meaningful alt to every meaningful image (alt=\"\" for decorative). Headings: one H1, then H2/H3 in order. Labels: associate a <label> with every input. Contrast: meet 4.5:1 for body text. Landmarks + a visible focus state help everyone.",
+    triage:
+      "Identify which findings live in code/content you control vs. any third-party embed or hosted flow you don't — fix what's yours and document the rest in your good-faith record.",
+  },
+};
 
 const esc = (s: string) =>
   String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
@@ -40,6 +92,7 @@ export function buildEvidencePack(meta: EvidenceMeta, issues: WcagFreeIssue[]): 
   const { d30, d60, d90 } = remediationBuckets(issues);
   const org = domainOf(meta.url);
   const dateOnly = meta.scannedAtUtc.slice(0, 10);
+  const pg = PLATFORM_GUIDANCE[meta.platform ?? "other"] ?? PLATFORM_GUIDANCE.other;
 
   const bucketHtml = (title: string, list: WcagFreeIssue[]) =>
     `<p style="margin:10px 0 4px"><strong>${esc(title)}</strong></p>` +
@@ -65,6 +118,12 @@ export function buildEvidencePack(meta: EvidenceMeta, issues: WcagFreeIssue[]): 
 ${bucketHtml("First 30 days — critical issues", d30)}
 ${bucketHtml("By 60 days — serious issues", d60)}
 ${bucketHtml("By 90 days — moderate issues", d90)}
+
+<h2 style="font-size:16px;margin:22px 0 4px">How to fix this on ${esc(pg.label)}</h2>
+<div style="font-size:13px;color:#334155;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:12px;line-height:1.6">
+  <p style="margin:0 0 8px">${esc(pg.whereToFix)}</p>
+  <p style="margin:0"><strong>What's yours vs the platform's:</strong> ${esc(pg.triage)}</p>
+</div>
 
 <h2 style="font-size:16px;margin:22px 0 4px">Draft accessibility statement (publish at ${esc(org)}/accessibility)</h2>
 <div style="font-size:13px;color:#334155;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:12px;line-height:1.55">
@@ -99,6 +158,10 @@ Verify independently: ${meta.verifyUrl}
 First 30 days (critical): ${d30.map((i) => `${i.rule} (${i.count}x)`).join("; ") || "none"}
 By 60 days (serious): ${d60.map((i) => `${i.rule} (${i.count}x)`).join("; ") || "none"}
 By 90 days (moderate/minor): ${d90.map((i) => `${i.rule} (${i.count}x)`).join("; ") || "none"}
+
+--- HOW TO FIX THIS ON ${pg.label.toUpperCase()} ---
+${pg.whereToFix}
+WHAT'S YOURS VS THE PLATFORM'S: ${pg.triage}
 
 --- DRAFT ACCESSIBILITY STATEMENT (publish at ${org}/accessibility) ---
 ${org} is committed to digital accessibility and to continuously improving ${meta.url}. We conducted an automated WCAG 2.1 AA scan on ${dateOnly}; automated tools identify a portion of barriers and full evaluation also needs manual testing. We are remediating with 30/60/90-day milestones. Feedback: [CONTACT_EMAIL]. This statement does not declare full WCAG 2.1 AA conformance at this time.

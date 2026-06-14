@@ -28,6 +28,14 @@ export interface WcagFreeIssue {
   fix_hint: string;
 }
 
+export type PlatformId =
+  | "shopify"
+  | "wordpress"
+  | "webflow"
+  | "wix"
+  | "squarespace"
+  | "other";
+
 export interface WcagFreeReport {
   url: string;
   fetched_status: number | null;
@@ -35,7 +43,20 @@ export interface WcagFreeReport {
   total_issue_count: number;
   health_score: number; // 0–100
   notes: string[];
+  platform?: PlatformId; // detected CMS/host — drives platform-specific fix guidance
   error?: string;
+}
+
+/** Detect the site's CMS/platform from HTML signatures, so the report can give
+ * "how to fix this in <platform>" guidance — the #1 thing users ask for. */
+export function detectPlatform(html: string): PlatformId {
+  const h = html.toLowerCase();
+  if (/cdn\.shopify\.com|shopify\.theme|x-shopify|window\.shopify/.test(h)) return "shopify";
+  if (/wp-content\/|wp-includes\/|\/wp-json\b|name="generator"\s+content="wordpress/.test(h)) return "wordpress";
+  if (/\.wixsite\.com|static\.wixstatic\.com|x-wix-|wix\.com/.test(h)) return "wix";
+  if (/assets\.squarespace\.com|static1\.squarespace\.com|squarespace\.com/.test(h)) return "squarespace";
+  if (/assets\.website-files\.com|webflow\.js|data-wf-/.test(h)) return "webflow";
+  return "other";
 }
 
 export async function scanUrlLite(url: string): Promise<WcagFreeReport> {
@@ -118,6 +139,7 @@ export async function scanUrlLite(url: string): Promise<WcagFreeReport> {
   out.issues = analyzeHtml(html);
   out.total_issue_count = out.issues.reduce((acc, i) => acc + i.count, 0);
   out.health_score = computeHealthScore(out.issues);
+  out.platform = detectPlatform(html);
   return out;
 }
 

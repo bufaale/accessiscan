@@ -150,7 +150,7 @@ export async function fulfilPaidAudit({ sessionId, email, targetUrl }: FulfilArg
           const packUrl = `${base}/audit/${auditId}/pack?token=${evidenceToken}`;
           const rescanUrl = `${base}/audit/${auditId}/rescan?token=${evidenceToken}`;
           evidence = buildEvidencePack(
-            { url: targetUrl, scannedAtUtc: scannedAt, hash: inserted.record.violationsHash, verifyUrl, packUrl, rescanUrl },
+            { url: targetUrl, scannedAtUtc: scannedAt, hash: inserted.record.violationsHash, verifyUrl, packUrl, rescanUrl, platform: report.platform },
             issues,
           );
         }
