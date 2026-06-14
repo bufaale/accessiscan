@@ -15,9 +15,6 @@ export async function POST(req: Request, { params }: { params: Promise<{ auditId
     return NextResponse.json({ success: true, ...result });
   } catch (e) {
     console.error("[rescan] failed", e);
-    return NextResponse.json(
-      { error: "Rescan failed", detail: e instanceof Error ? `${e.name}: ${e.message}` : String(e) },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: "Rescan failed. Please try again." }, { status: 500 });
   }
 }
