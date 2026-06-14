@@ -1,6 +1,6 @@
 import { randomBytes } from "node:crypto";
 import { Resend } from "resend";
-import { scanUrlLite } from "@/lib/free-scan/lite-scanner";
+import { scanUrlDeep } from "@/lib/audit/deep-scanner";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { insertBaseline } from "@/lib/audit/baseline-store";
 import { buildEvidencePack } from "@/lib/audit/evidence-pack-content";
@@ -118,7 +118,9 @@ export async function fulfilPaidAudit({ sessionId, email, targetUrl }: FulfilArg
   await setStatus({ status: "scanning" });
 
   try {
-    const report = await scanUrlLite(targetUrl);
+    // Paid audit uses the REAL engine (axe-core in jsdom, multi-page) — far
+    // deeper than the free tool's single-page regex scan.
+    const report = await scanUrlDeep(targetUrl);
     const issues = [...(report.issues ?? [])].sort(
       (a, b) => (SEVERITY_ORDER[a.severity] ?? 9) - (SEVERITY_ORDER[b.severity] ?? 9),
     );

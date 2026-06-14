@@ -1,4 +1,4 @@
-import { scanUrlLite } from "@/lib/free-scan/lite-scanner";
+import { scanUrlDeep } from "@/lib/audit/deep-scanner";
 import type { WcagFreeIssue } from "@/lib/free-scan/lite-scanner";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getBaselineFull } from "@/lib/audit/baseline-store";
@@ -21,7 +21,8 @@ export async function runRescan(auditId: string, token: string): Promise<RescanR
   const baseline = await getBaselineFull(auditId, token);
   if (!baseline) return null;
 
-  const report = await scanUrlLite(baseline.targetUrl);
+  // Must use the SAME engine as the baseline (deep axe) so the diff is real.
+  const report = await scanUrlDeep(baseline.targetUrl);
   const newIssuesAll = [...(report.issues ?? [])];
   const baseRules = new Set(baseline.issues.map((i) => i.rule));
   const newRules = new Set(newIssuesAll.map((i) => i.rule));

@@ -2,6 +2,9 @@ import type { NextConfig } from "next";
 import { withSentryConfig } from "@sentry/nextjs";
 
 const nextConfig: NextConfig = {
+  // jsdom (deep audit scanner) has dynamic requires that break when bundled —
+  // keep it external so it loads as a normal node module at runtime.
+  serverExternalPackages: ["jsdom"],
   images: {
     remotePatterns: [
       { protocol: "https", hostname: "*.supabase.co" },

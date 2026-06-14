@@ -14,6 +14,11 @@ function getPlanIdFromSubscription(subscription: Stripe.Subscription): string {
   return plan?.id || "free";
 }
 
+// One-time-audit fulfilment runs the deep multi-page axe scan inline, so give
+// the handler room. Stripe events are deduped (stripe_events_processed), so a
+// retry on a slow response can't double-fulfil.
+export const maxDuration = 60;
+
 export async function POST(req: Request) {
   const body = await req.text();
   const headersList = await headers();
