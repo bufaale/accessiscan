@@ -4,6 +4,7 @@ import { z } from "zod";
 import { scanUrlLite } from "@/lib/free-scan/lite-scanner";
 import { urlInputSchema, validateResolvedIP } from "@/lib/security/url-validator";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { rlAllowed, clientIpKey } from "@/lib/security/supabase-rate-limit";
 
 export const maxDuration = 30;
 
@@ -21,6 +22,14 @@ const bodySchema = z.object({
  * rate limit — relies on the global middleware.
  */
 export async function POST(req: NextRequest) {
+  // Cross-instance rate limit (the Upstash middleware is off in prod). 6/min/IP.
+  if (!(await rlAllowed(clientIpKey(req, "freescan"), 6, 60))) {
+    return NextResponse.json(
+      { error: "Too many scans — please wait a minute and try again." },
+      { status: 429 },
+    );
+  }
+
   let body: unknown;
   try {
     body = await req.json();

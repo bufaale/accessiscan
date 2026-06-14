@@ -1,6 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
+import { rlAllowed, clientIpKey } from "@/lib/security/supabase-rate-limit";
 
 export async function POST(request: NextRequest) {
+  // Unauthenticated outbound-webhook amplifier — throttle it. 10/min/IP.
+  if (!(await rlAllowed(clientIpKey(request, "reporterr"), 10, 60))) {
+    return NextResponse.json({ error: "rate_limited" }, { status: 429 });
+  }
+
   const url = process.env.PILOTDECK_ERROR_WEBHOOK_URL;
   const secret = process.env.PILOTDECK_ERROR_SECRET;
   if (!url || !secret) {

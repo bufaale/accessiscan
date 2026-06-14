@@ -179,7 +179,7 @@ function XIcon({ size = 16, color = "#cbd5e1", sw = 2 }: { size?: number; color?
 
 function Hero() {
   const trust = [
-    "SOC 2 Type II in progress",
+    "SOC 2 on roadmap",
     "Section 508",
     "EN 301 549",
     "WCAG 2.1 AA · 2.2 AA",
@@ -828,7 +828,7 @@ function WhatsIncluded() {
         "EN 301 549 self-assessment (EAA-aligned)",
         "ACAA mapping (federal contractors)",
         "Audit-trail database export (CSV / JSON / SIEM-ready)",
-        "Custom certifications upon request (SOC 2 in progress)",
+        "Security questionnaires (CAIQ / SIG) on request; SOC 2 on roadmap",
       ],
     },
   ];
@@ -1244,11 +1244,13 @@ function EnterpriseFaq() {
       q: "Are you SOC 2 certified?",
       a: (
         <>
-          SOC 2 Type II is in progress; report expected Q3 2026. In the
-          meantime we share our SOC 2 Type I audit, our internal security
-          policies, our pen-test results, and we complete vendor security
-          questionnaires (CAIQ, SIG, custom) on request. For HIPAA-eligible
-          workloads we sign a BAA today.
+          Not yet — we won&apos;t claim a certification we don&apos;t hold. We
+          follow standard security practices (encryption in transit and at rest,
+          least-privilege access, RLS-isolated tenant data), we can share our
+          internal security policies, and we complete vendor security
+          questionnaires (CAIQ, SIG, custom) on request. A formal SOC 2 audit is
+          on our roadmap; we&apos;ll share the report once it&apos;s complete
+          rather than promise a date we can&apos;t guarantee.
         </>
       ),
     },

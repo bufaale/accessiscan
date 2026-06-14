@@ -10,7 +10,10 @@
  * with a CTA to sign up for the full scan.
  */
 
+import { validateResolvedIP } from "@/lib/security/url-validator";
+
 const FETCH_TIMEOUT_MS = 8_000;
+const MAX_REDIRECTS = 5;
 const UA = "AccessiScan-FreeTool/1.0";
 const MAX_HTML_BYTES = 2_000_000; // 2MB cap
 
@@ -51,11 +54,38 @@ export async function scanUrlLite(url: string): Promise<WcagFreeReport> {
     const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
     let res: Response;
     try {
-      res = await fetch(url, {
-        headers: { "User-Agent": UA, Accept: "text/html" },
-        signal: controller.signal,
-        redirect: "follow",
-      });
+      // Follow redirects MANUALLY so each hop's destination is re-validated
+      // against SSRF (a public host can 302 to an internal IP; redirect:"follow"
+      // would chase it without re-checking). Preserves legit http->https/www
+      // redirects while blocking redirect-to-private-IP.
+      let currentUrl = url;
+      let hops = 0;
+      for (;;) {
+        res = await fetch(currentUrl, {
+          headers: { "User-Agent": UA, Accept: "text/html" },
+          signal: controller.signal,
+          redirect: "manual",
+        });
+        if (res.status >= 300 && res.status < 400 && hops < MAX_REDIRECTS) {
+          const loc = res.headers.get("location");
+          if (!loc) break;
+          const next = new URL(loc, currentUrl);
+          if (next.protocol !== "http:" && next.protocol !== "https:") {
+            out.error = "Unsupported redirect protocol";
+            out.health_score = 0;
+            return out;
+          }
+          if (!(await validateResolvedIP(next.hostname))) {
+            out.error = "Redirect resolves to a private or unresolvable address";
+            out.health_score = 0;
+            return out;
+          }
+          currentUrl = next.toString();
+          hops += 1;
+          continue;
+        }
+        break;
+      }
     } finally {
       clearTimeout(timer);
     }
