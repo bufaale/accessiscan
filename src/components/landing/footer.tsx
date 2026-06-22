@@ -9,6 +9,8 @@ const COLUMNS = [
     title: "Product",
     links: [
       { label: "Free WCAG scanner", href: "/free/wcag-scanner" },
+      { label: "VPAT / Section 508 report", href: "/vpat" },
+      { label: "WCAG audit ($149)", href: "/audit" },
       { label: "Overlay detector", href: "/overlay-detector" },
       { label: "Enterprise", href: "/enterprise" },
       { label: "Pricing", href: "/pricing" },
