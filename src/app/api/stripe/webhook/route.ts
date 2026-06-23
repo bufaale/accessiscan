@@ -5,6 +5,7 @@ import { createAdminClient } from "@/lib/supabase/server";
 import { getPlanByPriceId } from "@/lib/stripe/plans";
 import { logAuditEvent } from "@/lib/audit/log";
 import { fulfilPaidAudit } from "@/lib/audit/fulfill";
+import { fulfilSnapshot } from "@/lib/audit/fulfill-snapshot";
 import type Stripe from "stripe";
 
 function getPlanIdFromSubscription(subscription: Stripe.Subscription): string {
@@ -56,6 +57,18 @@ export async function POST(req: Request) {
           await fulfilPaidAudit({ sessionId: session.id, email: auditEmail, targetUrl });
         } else {
           console.error("[webhook] one_time_audit missing url/email", session.id);
+        }
+        break;
+      }
+
+      // One-time $39 WCAG Snapshot (no-account purchase). Isolated lighter flow.
+      if (session.mode === "payment" && session.metadata?.kind === "snapshot") {
+        const targetUrl = session.metadata.target_url;
+        const snapEmail = session.metadata.audit_email || session.customer_details?.email || session.customer_email;
+        if (targetUrl && snapEmail) {
+          await fulfilSnapshot({ sessionId: session.id, email: snapEmail, targetUrl });
+        } else {
+          console.error("[webhook] snapshot missing url/email", session.id);
         }
         break;
       }

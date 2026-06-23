@@ -14,6 +14,7 @@ const STATIC_ROUTES: Array<{
   { path: "/vpat", priority: 0.9, changeFreq: "monthly" },
   { path: "/agencies", priority: 0.85, changeFreq: "monthly" },
   { path: "/audit", priority: 0.9, changeFreq: "monthly" },
+  { path: "/snapshot", priority: 0.85, changeFreq: "monthly" },
   { path: "/free/wcag-scanner", priority: 0.9, changeFreq: "weekly" },
   { path: "/scorecards", priority: 0.85, changeFreq: "daily" },
   { path: "/trust", priority: 0.8, changeFreq: "weekly" },
