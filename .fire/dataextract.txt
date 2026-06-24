@@ -1,0 +1,7 @@
+Extracting company information from an online directory into a clean spreadsheet is a direct fit for the scrapers I run on Apify: structured-data-extractor (turns directory pages into clean records) plus website-contact-extractor and email-verifier-finder for any contact fields. I operate this scrape, structure and validate pipeline today, so it is a run, not a build.
+
+You would get a deduped CSV/Excel: every field you need per company, with source URLs.
+
+Before you commit the $180, I will send a free sample, 20-30 rows from the directory, so you can check accuracy and format first.
+
+One question: what is the directory URL, and the exact columns you need per company?

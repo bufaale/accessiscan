@@ -1,0 +1,7 @@
+Hi. Your project is a direct match for two scrapers I run on Apify: website-contact-extractor (pulls business emails, phones and socials from sites at scale) and email-verifier-finder (validates deliverability before anything ships to you). Scraping 50k medspas and cleaning the list is a pipeline I operate today, not a build from scratch.
+
+At that volume the actors run in parallel batches, auto-dedupe, and output a clean CSV: business name, email, phone, city, source URL. Emails get deliverability-checked so you are not paying for a list that bounces.
+
+Before you commit, I will send a free sample of ~200 verified medspa rows so you can judge quality yourself.
+
+One question to scope it: what is your preferred source, Google Maps, a specific directory, or particular states first?

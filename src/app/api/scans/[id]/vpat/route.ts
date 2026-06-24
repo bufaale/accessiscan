@@ -17,16 +17,24 @@ export async function GET(
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  // VPAT is a premium feature (government / agency buyers).
+  // VPAT is a fenced deliverable. To keep the one-time $149 audit's core moat
+  // (the VPAT + hash-signed Evidence Pack) non-arbitrageable, on-demand VPAT
+  // generation is gated to the Business tier and up on the recurring side — NOT
+  // Pro/Agency. (One-time $149 audit buyers get their VPAT via fulfilment, not
+  // this route.) Closes the "subscribe to Pro, generate a VPAT, cancel" hole.
   const { data: profile } = await supabase
     .from("profiles")
     .select("subscription_plan, full_name, email")
     .eq("id", user.id)
     .single();
 
-  if (!profile || profile.subscription_plan === "free") {
+  const VPAT_TIERS = ["business", "team"];
+  if (!profile || !VPAT_TIERS.includes(profile.subscription_plan)) {
     return NextResponse.json(
-      { error: "VPAT generation requires the Pro plan or higher." },
+      {
+        error:
+          "On-demand VPAT generation is available on the Business plan. For a one-time VPAT, see the $149 WCAG Audit + Evidence Pack at /audit.",
+      },
       { status: 402 },
     );
   }

@@ -1,0 +1,5 @@
+Web scraping at scale is what I do, I publish 10 live Apify actors (website-contact-extractor, structured-data-extractor, email-verifier-finder and more). For tougher targets, JS-rendered, anti-bot, pagination, login-gated, I use Playwright with stealth fingerprinting, rotating proxies and retry logic, output as clean JSON or CSV.
+
+Before you commit, I will run a live proof pull on your hardest target so you see the output first.
+
+One question to get started: what is the site or target, what data do you need, and is it a one-time extract or an ongoing feed?

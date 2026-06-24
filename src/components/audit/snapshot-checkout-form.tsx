@@ -43,8 +43,8 @@ export function SnapshotCheckoutForm() {
   return (
     <form onSubmit={onSubmit} className="rounded-xl border-2 border-[#0b1f3a] bg-[#0b1f3a] p-6 text-white">
       <div className="flex items-baseline justify-between">
-        <h2 className="text-lg font-semibold">Get your snapshot</h2>
-        <span className="text-2xl font-bold">$39</span>
+        <h2 className="text-lg font-semibold">Get your automated report</h2>
+        <span className="text-2xl font-bold">$79</span>
       </div>
       <p className="mt-1 text-sm text-white/70">One-time. No account, no subscription.</p>
 

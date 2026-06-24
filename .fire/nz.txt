@@ -1,0 +1,7 @@
+Compiling New Zealand trade-business leads is a direct fit for two scrapers I run on Apify: website-contact-extractor (business name, email, phone, socials at scale) and email-verifier-finder (validates each email so the list is not full of bounces). It is a scrape, enrich and validate run I operate today.
+
+You would get a clean, deduped CSV: business, contact, email, phone, region, source URL.
+
+Before any commitment, I will send a free sample, 15-20 verified NZ trade leads, so you can judge quality first.
+
+One question: which trades and regions, and do you have a starting source (a directory, Google Maps) or should I compile the company list from scratch too?

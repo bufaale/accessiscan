@@ -1,0 +1,7 @@
+Delivering fresh, clean, structured data every week is exactly what my Apify actors are built for: website-contact-extractor and email-verifier-finder run on a schedule, auto-dedupe, and output a clean CSV so you get validated rows with no manual work on either side.
+
+Since you want it ongoing, I would set it as a weekly scheduled run, not a one-off build, so quality and cadence stay consistent week to week.
+
+Before committing, I will send a free sample batch so you can check the format.
+
+One question: what records do you need (fields plus source), and what defines a valid row for you?

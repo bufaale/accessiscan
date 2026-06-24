@@ -1,0 +1,7 @@
+You already track AI citations weekly across ChatGPT, Perplexity, Gemini and Claude — that is exactly the layer I work in. I publish the Apify actor that runs that kind of measurement (apify.com/piposlab/ai-visibility-audit), so I plug into your system rather than rebuild it.
+
+For your blog library I would audit each post for AEO + SEO (which buyer prompts it should win, where a competitor gets cited instead, the exact sources AI quotes for the query), then ship the per-post fixes — answer-first restructuring, schema and FAQ via Rank Math, and the entity and internal-link coverage that actually gets a post cited.
+
+Before you commit, pick 2-3 posts and I will send back their current AI-citation status and the specific AEO fixes I would make — free, so you see how I work.
+
+One question: roughly how many posts are in scope, and is the priority getting NEW posts cited or lifting ones already ranking?

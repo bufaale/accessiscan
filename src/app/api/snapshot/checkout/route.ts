@@ -8,7 +8,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 export const maxDuration = 20;
 
 /**
- * Public checkout for the one-time $39 "WCAG Snapshot" (no account required).
+ * Public checkout for the one-time $79 "Automated Report" (no account required).
  * Isolated clone of /api/audit/checkout so it can never affect the live $149
  * audit flow. Single fixed server-side price (STRIPE_SNAPSHOT_PRICE_ID), no
  * user-supplied priceId (no price-enumeration). SSRF-validated target URL.

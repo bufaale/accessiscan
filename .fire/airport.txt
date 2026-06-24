@@ -1,0 +1,7 @@
+Hi. Your directory project maps directly to what our actors already do. We run three published Apify scrapers, a website contact extractor, a structured data extractor, and an email verifier, and building a nationwide airport contractor list is exactly the scrape, structure and validate pipeline they were built for.
+
+You would get clean, deduplicated records: contractor name, company, email, phone, location, source URL, formatted for direct import into your directory.
+
+Before you commit the $250, I will send a free sample, 25-50 verified records from 2-3 states, so you can judge the schema and quality first.
+
+One question to scope it: where should the records originate, FAA registers, airport authority sites, trade association directories, or a mix? And what is the complete field list you need per record?
