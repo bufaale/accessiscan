@@ -41,7 +41,7 @@ export default function WcagCostComparison() {
           <tr>
             <td>SMB scanners + fix code</td>
             <td>AccessiScan, Pope Tech, Sa11y</td>
-            <td>$19-199/month</td>
+            <td>$39-199/month</td>
             <td>30-40% automated + VPAT + real fix code</td>
           </tr>
           <tr>
@@ -89,7 +89,7 @@ export default function WcagCostComparison() {
 
       <h3>SMB scanners sit between the two</h3>
       <p>
-        The $19-199/month tier pairs automated scanning with concrete fix
+        The $39-199/month tier pairs automated scanning with concrete fix
         code per violation and a procurement-ready VPAT. You trade
         expert-driven remediation coaching for much lower price and more
         frequent re-scans. This is the tier most effective for
@@ -157,7 +157,7 @@ export default function WcagCostComparison() {
         cycle, not forever.
       </p>
       <p>
-        AccessiScan sits at $19-199/month with VPAT 2.5 export, EN 301 549
+        AccessiScan sits at $39-199/month with VPAT 2.5 export, EN 301 549
         export, continuous monitoring on the Business tier, and a free
         overlay detector. Try a{" "}
         <a href="/signup">free scan</a> before committing to any vendor.

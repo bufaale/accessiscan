@@ -85,7 +85,7 @@ export default function BestWcagScanners2026() {
         Full disclosure: this is us. AccessiScan is built for the gap the list
         above leaves open — a real WCAG 2.1 AA scan and audit at a price a small
         business or agency can actually pay. The free scanner needs no account;
-        Pro starts at $19/month; a one-time audit with a{" "}
+        Pro starts at $39/month; a one-time audit with a{" "}
         <a href="/audit">Legal Evidence Pack</a> is $149. The Evidence Pack is
         the part the others don&apos;t offer: a timestamped, SHA-256 hash-signed
         audit record with a public verification page, a 30/60/90-day remediation
@@ -98,7 +98,7 @@ export default function BestWcagScanners2026() {
       <h2>Price, side by side</h2>
       <ul>
         <li>WAVE / Lighthouse — <strong>free</strong> (per-page, developer artifact)</li>
-        <li>AccessiScan — <strong>free scanner; $19/mo Pro; $149 one-time audit + Evidence Pack</strong></li>
+        <li>AccessiScan — <strong>free scanner; $39/mo Pro; $149 one-time audit + Evidence Pack</strong></li>
         <li>Deque axe DevTools — <strong>~$45/user/month</strong></li>
         <li>Siteimprove / Level Access — <strong>~$15,000–$50,000/year</strong></li>
       </ul>

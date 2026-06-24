@@ -161,7 +161,7 @@ export default function WhyNotOverlaysPage() {
           </h2>
           <p className="mx-auto mt-4 max-w-xl text-muted-foreground">
             AccessiScan finds the actual WCAG issues in your source code and
-            generates fix code — no overlay band-aids. Starting at $19/mo.
+            generates fix code — no overlay band-aids. Starting at $39/mo.
           </p>
           <div className="mt-8 flex items-center justify-center gap-4">
             <Button size="lg" asChild>

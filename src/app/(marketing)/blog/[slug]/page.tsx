@@ -68,7 +68,7 @@ export default async function BlogPostPage({
             Free WCAG scan + VPAT in 60 seconds
           </p>
           <p className="mt-2 text-sm text-slate-700">
-            No credit card. From $19/month when you need deep scans, continuous
+            No credit card. From $39/month when you need deep scans, continuous
             monitoring, and an EN 301 549 Conformance Report.
           </p>
           <Link

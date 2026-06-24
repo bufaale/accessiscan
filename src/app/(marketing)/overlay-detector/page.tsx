@@ -117,7 +117,7 @@ export default function OverlayDetectorPage() {
               <p className="mt-5 text-base leading-relaxed text-slate-700">
                 AccessiScan ships actual fix code per violation, a VPAT 2.5 export for
                 procurement, an EN 301 549 report for EU buyers, and a GitHub Action
-                that blocks merges on critical issues. From $19/mo — cheaper than most
+                that blocks merges on critical issues. From $39/mo — cheaper than most
                 overlays, and defensible when a demand letter arrives.
               </p>
               <div className="mt-7 flex flex-wrap gap-3">

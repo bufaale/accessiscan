@@ -10,7 +10,7 @@ const COLUMNS = [
     links: [
       { label: "Free WCAG scanner", href: "/free/wcag-scanner" },
       { label: "VPAT / Section 508 report", href: "/vpat" },
-      { label: "WCAG Snapshot ($39)", href: "/snapshot" },
+      { label: "Automated report ($79)", href: "/snapshot" },
       { label: "WCAG audit ($149)", href: "/audit" },
       { label: "For agencies (white-label)", href: "/agencies" },
       { label: "Overlay detector", href: "/overlay-detector" },

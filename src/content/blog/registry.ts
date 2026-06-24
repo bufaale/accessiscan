@@ -98,7 +98,7 @@ export const POSTS: BlogPost[] = [
     keyword: "wcag audit cost",
     category: "procurement",
     excerpt:
-      "Siteimprove and Level Access quote $15-50K per year. Deque axe DevTools runs $45/user/month. TestParty starts at $12K/year. Pope Tech from $25/month. AccessiScan from $19/month. What do you actually get at each tier?",
+      "Siteimprove and Level Access quote $15-50K per year. Deque axe DevTools runs $45/user/month. TestParty starts at $12K/year. Pope Tech from $25/month. AccessiScan from $39/month. What do you actually get at each tier?",
     Component: WcagCostComparison,
   },
   {

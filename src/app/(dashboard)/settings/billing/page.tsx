@@ -22,11 +22,11 @@ const SLATE_700 = "#334155";
 
 const PLAN_PRICING: Record<string, { price: string; tagline: string }> = {
   pro: {
-    price: "$19/mo",
-    tagline: "30 scans · VPAT 2.5 export · CI/CD action · priority email support.",
+    price: "$39/mo",
+    tagline: "Weekly re-scans · regression alerts · score history · CI/CD action · priority email support.",
   },
   agency: {
-    price: "$49/mo",
+    price: "$99/mo",
     tagline: "Unlimited scans · white-label PDFs · API access · multi-site portfolios.",
   },
   business: {
@@ -400,8 +400,8 @@ export default async function BillingPage() {
         >
           {[
             { tier: "Free", desc: "2 scans / mo · WCAG 2.1 AA" },
-            { tier: "Pro · $19/mo", desc: "30 scans · VPAT 2.5 · CI/CD action" },
-            { tier: "Agency · $49/mo", desc: "Unlimited · white-label · API" },
+            { tier: "Pro · $39/mo", desc: "monitoring · CI/CD action" },
+            { tier: "Agency · $99/mo", desc: "Unlimited · white-label · API" },
             { tier: "Business · $299/mo", desc: "Auto-Fix PRs · continuous monitoring" },
             { tier: "Team · $599/mo", desc: "SSO · audit log · org-wide policy" },
           ].map((row) => (

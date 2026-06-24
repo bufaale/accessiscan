@@ -2,7 +2,7 @@ const STATS = [
   { value: "5,100+", label: "Federal ADA lawsuits 2025", accent: false },
   { value: "+37%", label: "Year-over-year increase", accent: false },
   { value: "$15K/yr", label: "What Siteimprove costs", accent: false },
-  { value: "$19/mo", label: "What AccessiScan costs", accent: true },
+  { value: "$39/mo", label: "What AccessiScan costs", accent: true },
 ];
 
 export function Stats() {

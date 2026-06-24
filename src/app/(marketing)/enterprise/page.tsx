@@ -439,7 +439,7 @@ function Hero() {
             >
               /pricing
             </Link>{" "}
-            (Free → Team, $19–599/mo).
+            (Free → Team, $39–599/mo).
           </div>
         </aside>
       </div>
@@ -1154,7 +1154,7 @@ function PricingTransparency() {
           >
             We don&apos;t publish enterprise pricing on this page because
             anchoring a number ahead of scope is misleading on both sides:
-            the SMB tier our /pricing page lists ($19–599/mo) doesn&apos;t
+            the SMB tier our /pricing page lists ($39–599/mo) doesn&apos;t
             describe the value at enterprise scope, and a five-figure
             enterprise number scares off SMBs that genuinely fit /pricing.
           </p>

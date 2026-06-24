@@ -21,7 +21,7 @@ const testimonials = [
     role: "Freelance Developer",
     initials: "JW",
     quote:
-      "I offer accessibility audits as a service now. At $19/mo I can scan client sites, generate PDF reports, and deliver fix suggestions — all branded with my agency logo. It pays for itself with one client.",
+      "I offer accessibility audits as a service now. At $39/mo I can scan client sites, generate PDF reports, and deliver fix suggestions — all branded with my agency logo. It pays for itself with one client.",
   },
 ];
 

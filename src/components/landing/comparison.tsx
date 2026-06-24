@@ -10,7 +10,7 @@ interface Row {
 }
 
 const ROWS: Row[] = [
-  { tool: "AccessiScan", price: "$19/mo", aiFix: "yes", vpat: "yes", ci: "yes", highlight: true },
+  { tool: "AccessiScan", price: "$39/mo", aiFix: "yes", vpat: "yes", ci: "yes", highlight: true },
   { tool: "accessiBe", price: "$49/mo", aiFix: "no", vpat: "no", ci: "no" },
   { tool: "UserWay", price: "$49/mo", aiFix: "no", vpat: "no", ci: "no" },
   { tool: "Siteimprove", price: "$15,000/yr", aiFix: "partial", vpat: "yes", ci: "no" },

@@ -54,7 +54,7 @@ export default function FreeWcagScannerPage() {
           For a full WCAG 2.1 AA + 2.2 audit with Playwright rendering, AI-generated
           fix code, VPAT export, and a GitHub Action, see{" "}
           <a href="/" className="text-[#0b1f3a] underline">
-            AccessiScan starting at $19/mo
+            AccessiScan starting at $39/mo
           </a>
           .
         </p>

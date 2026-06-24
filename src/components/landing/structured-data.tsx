@@ -37,7 +37,7 @@ const softwareApplication = {
   offers: [
     { "@type": "Offer", name: "Free scanner", price: "0", priceCurrency: "USD", description: "Scan a URL for WCAG issues, no account required." },
     { "@type": "Offer", name: "One-time audit + Legal Evidence Pack", price: "149", priceCurrency: "USD", url: `${SITE}/audit` },
-    { "@type": "Offer", name: "Pro (monthly)", price: "19", priceCurrency: "USD", description: "Recurring scans, VPAT report, CI/CD checks." },
+    { "@type": "Offer", name: "Pro (monthly)", price: "39", priceCurrency: "USD", description: "Weekly re-scans, regression alerts, CI/CD checks." },
   ],
   publisher: { "@id": `${SITE}/#organization` },
 };
@@ -59,7 +59,7 @@ const faqPage = {
       name: "How much does AccessiScan cost?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "There is a free scanner that needs no account. Pro plans start at $19/month. A one-time WCAG audit plus the Legal Evidence Pack is $149. That is a fraction of enterprise platforms like Siteimprove or Level Access, which typically run $15,000-$60,000 per year.",
+        text: "There is a free scanner that needs no account. Pro plans start at $39/month. A one-time WCAG audit plus the Legal Evidence Pack is $149. That is a fraction of enterprise platforms like Siteimprove or Level Access, which typically run $15,000-$60,000 per year.",
       },
     },
     {

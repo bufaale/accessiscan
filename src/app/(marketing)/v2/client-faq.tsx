@@ -25,7 +25,7 @@ const ITEMS = [
   },
   {
     q: "How is this different from Siteimprove or Deque axe?",
-    a: "Siteimprove starts at $15,000/yr and is an enterprise audit dashboard — no fix code, no PRs. Deque axe is a great open-source rule engine (we use it), but it's a library, not a workflow. AccessiScan is the workflow on top: scan → fix code → VPAT → CI gate, from $19/mo.",
+    a: "Siteimprove starts at $15,000/yr and is an enterprise audit dashboard — no fix code, no PRs. Deque axe is a great open-source rule engine (we use it), but it's a library, not a workflow. AccessiScan is the workflow on top: scan → fix code → VPAT → CI gate, from $39/mo.",
   },
   {
     q: "Is AccessiScan suitable for a public entity under Title II?",

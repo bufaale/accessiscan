@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * AccessiScan ROI Calculator — "How much does an ADA lawsuit cost vs $19/mo?"
+ * AccessiScan ROI Calculator — "How much does an ADA lawsuit cost vs $39/mo?"
  *
  * Anchor for the buyer's mental math: average ADA Title III demand-letter
  * settlement is $20k-$50k (Seyfarth Shaw 2024 report). One avoided lawsuit

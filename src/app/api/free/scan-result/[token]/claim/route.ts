@@ -77,7 +77,7 @@ function renderClaimEmail(opts: { url: string; score: number; permalink: string;
   <p>Thanks for running an AccessiScan WCAG scan against <strong>${escapeHtml(url)}</strong>.</p>
   <p>Your score: <strong style="font-size:18px">${score}/100</strong> — <a href="${permalink}">view the full scorecard</a></p>
   ${topIssues.length ? `<p>Top issues + remediation hints:</p>${issueListHtml}` : ""}
-  <p style="margin-top:24px">For a full Playwright-based scan that runs ~80 more rules (color contrast, focus order, JS-rendered content), plus VPAT 2.5 export and Auto-Fix PRs against your repo, see <a href="https://accessiscan.piposlab.com/pricing">AccessiScan plans</a> from $19/mo.</p>
+  <p style="margin-top:24px">For a full Playwright-based scan that runs ~80 more rules (color contrast, focus order, JS-rendered content), plus Auto-Fix PRs against your repo, see <a href="https://accessiscan.piposlab.com/pricing">AccessiScan plans</a> from $39/mo; VPAT 2.5 comes with the $149 audit.</p>
   <p style="color:#64748b;font-size:12px;margin-top:24px;border-top:1px solid #e2e8f0;padding-top:12px">DOJ Title II web-accessibility deadline: April 2027. ADA Title III lawsuits keep landing — start the remediation conversation now.</p>
   <p style="color:#64748b;font-size:12px">— Alejandro<br/>Pipo&apos;s Lab LLC · <a href="https://accessiscan.piposlab.com">accessiscan.piposlab.com</a></p>
 </div>`;
@@ -88,7 +88,7 @@ Thanks for running an AccessiScan WCAG scan against ${url}.
 
 Your score: ${score}/100 — view the full scorecard: ${permalink}
 
-${issueListText ? `Top issues + remediation hints:\n\n${issueListText}\n\n` : ""}For a full Playwright-based scan that runs ~80 more rules (color contrast, focus order, JS-rendered content), plus VPAT 2.5 export and Auto-Fix PRs against your repo, see AccessiScan plans from $19/mo:
+${issueListText ? `Top issues + remediation hints:\n\n${issueListText}\n\n` : ""}For a full Playwright-based scan that runs ~80 more rules (color contrast, focus order, JS-rendered content), plus Auto-Fix PRs against your repo, see AccessiScan plans from $39/mo; VPAT 2.5 comes with the $149 audit:
 https://accessiscan.piposlab.com/pricing
 
 DOJ Title II web-accessibility deadline: April 2027.

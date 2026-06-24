@@ -111,7 +111,7 @@ export function ApiKeysClient({ canUseApiKeys }: { canUseApiKeys: boolean }) {
           API access starts on the Agency plan
         </div>
         <p style={{ fontSize: 13.5, color: SLATE_500, margin: 0, lineHeight: 1.55, maxWidth: 540 }}>
-          Programmatic access is included on Agency ($49/mo), Business ($299/mo), and Team ($599/mo). Keys work for CI pipelines, GitHub Actions, or your own tools.
+          Programmatic access is included on Agency ($99/mo), Business ($299/mo), and Team ($599/mo). Keys work for CI pipelines, GitHub Actions, or your own tools.
         </p>
         <Link
           href="/settings/billing"

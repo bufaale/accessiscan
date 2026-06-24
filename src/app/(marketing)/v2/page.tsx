@@ -6,7 +6,7 @@ import { Faq } from "./client-faq";
 export const metadata: Metadata = {
   title: "AccessiScan — Real WCAG 2.1 AA compliance, not an overlay band-aid",
   description:
-    "AI-powered WCAG 2.1 AA scanner that ships actual fix code as GitHub PRs, plus VPAT 2.5 export and a CI/CD action. Built for the DOJ Title II deadline. From $19/mo.",
+    "AI-powered WCAG 2.1 AA scanner that ships actual fix code as GitHub PRs, plus VPAT 2.5 export and a CI/CD action. Built for the DOJ Title II deadline. From $39/mo.",
 };
 
 const FONT_INTER = "var(--font-inter), sans-serif";
@@ -256,7 +256,7 @@ function Hero() {
           </h1>
           <p style={{ marginTop: 20, maxWidth: 560, fontSize: 18, lineHeight: 1.55, color: "rgba(255,255,255,0.7)" }}>
             22.6% of ADA lawsuits target overlay users. AccessiScan ships actual fix code, a VPAT 2.5 export, and a CI/CD action — from{" "}
-            <span style={{ color: "#fff", fontWeight: 600 }}>$19/mo</span>.
+            <span style={{ color: "#fff", fontWeight: 600 }}>$39/mo</span>.
           </p>
           <figure style={{ marginTop: 28, maxWidth: 560, borderRadius: 8, border: "1px solid rgba(255,255,255,0.10)", background: "rgba(255,255,255,0.05)", padding: 22, display: "flex", gap: 16, alignItems: "flex-start" }}>
             <span style={{ fontFamily: FONT_DISPLAY, fontSize: 48, fontWeight: 700, lineHeight: 1, color: "#0e7490" }} aria-hidden>“</span>
@@ -295,7 +295,7 @@ function StatsStrip() {
     ["5,100+", "Federal ADA suits 2025", "navy"],
     ["+37%", "YoY increase", "navy"],
     ["$15K/yr", "What Siteimprove costs", "navy"],
-    ["$19/mo", "What AccessiScan costs", "cy"],
+    ["$39/mo", "What AccessiScan costs", "cy"],
   ];
   return (
     <section style={{ background: "#fff", padding: "48px 32px", fontFamily: FONT_INTER }}>
@@ -322,7 +322,7 @@ function Cell({ v }: { v: CellValue }) {
 
 function Comparison() {
   const rows: Array<{ tool: string; price: string; aiFix: CellValue; vpat: CellValue; ci: CellValue; us?: boolean }> = [
-    { tool: "AccessiScan", price: "$19/mo", aiFix: "yes", vpat: "yes", ci: "yes", us: true },
+    { tool: "AccessiScan", price: "$39/mo", aiFix: "yes", vpat: "yes", ci: "yes", us: true },
     { tool: "accessiBe", price: "$49/mo", aiFix: "no", vpat: "no", ci: "no" },
     { tool: "UserWay", price: "$49/mo", aiFix: "no", vpat: "no", ci: "no" },
     { tool: "Siteimprove", price: "$15,000/yr", aiFix: "partial", vpat: "yes", ci: "no" },
@@ -587,19 +587,19 @@ function Pricing() {
     },
     {
       name: "Pro",
-      price: "$19",
+      price: "$39",
       per: "/mo",
-      desc: "For developers and contractors filing VPATs.",
-      features: ["30 scans/month · multi-site", "WCAG 2.1 + 2.2 A/AA + deep scan", "VPAT 2.5 + EN 301 549 export", "AI-powered fix suggestions", "GitHub Action for CI/CD"],
+      desc: "Ongoing monitoring for developers and contractors.",
+      features: ["Weekly re-scans · multi-site", "WCAG 2.1 + 2.2 A/AA + deep scan", "Regression alerts + score history", "AI-powered fix suggestions", "GitHub Action for CI/CD"],
       cta: "Start free — upgrade anytime",
       popular: true,
     },
     {
       name: "Agency",
-      price: "$49",
+      price: "$99",
       per: "/mo",
-      desc: "For agencies and multi-site operators.",
-      features: ["Unlimited scans across clients", "White-label PDF + VPAT reports", "API access + team collaboration", "Custom branding", "SLA guarantee"],
+      desc: "White-label monitoring for client portfolios.",
+      features: ["Unlimited scans across clients", "White-label PDF reports", "API access + team collaboration", "Custom branding", "SLA guarantee"],
       cta: "Start free — upgrade anytime",
       popular: false,
     },

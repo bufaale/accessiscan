@@ -187,8 +187,9 @@ export default async function PublicScanResultPage({
         <h2 className="text-2xl font-bold mb-3">Run the full scan with auto-fix PRs</h2>
         <p className="text-slate-300 mb-6 max-w-prose">
           This is the lite scan. The paid plan adds: Playwright crawl of up to 250
-          pages, VPAT 2.5 export for procurement, and auto-fix pull requests
-          generated directly against your GitHub repo. Pricing starts at $19/mo.
+          pages, continuous monitoring, and auto-fix pull requests
+          generated directly against your GitHub repo. Pricing starts at $39/mo;
+          a VPAT 2.5 export for procurement comes with the $149 audit.
         </p>
         <div className="flex flex-wrap gap-3">
           <Link

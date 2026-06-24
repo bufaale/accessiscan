@@ -17,7 +17,7 @@ const reasons = [
     icon: DollarSign,
     title: "10-50x Cheaper Than Enterprise",
     description:
-      "Siteimprove charges $15,000/yr. Deque axe Monitor costs $27,000/yr. Level Access starts at $15,000/yr. We start at $19/mo with the same AI fix capabilities.",
+      "Siteimprove charges $15,000/yr. Deque axe Monitor costs $27,000/yr. Level Access starts at $15,000/yr. We start at $39/mo with the same AI fix capabilities.",
   },
   {
     icon: FileCode,

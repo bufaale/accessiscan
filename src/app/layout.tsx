@@ -28,7 +28,7 @@ export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL ?? "https://accessiscan.piposlab.com"),
   title: "AccessiScan — WCAG 2.1 AA Compliance + VPAT 2.5 + CI/CD",
   description:
-    "Real WCAG 2.1 AA scanning with AI-generated fix code, VPAT 2.5 export, and a GitHub Action for CI/CD. Built for the DOJ Title II deadline. From $19/mo.",
+    "Real WCAG 2.1 AA scanning with AI-generated fix code, VPAT 2.5 export, and a GitHub Action for CI/CD. Built for the DOJ Title II deadline. From $39/mo.",
   openGraph: {
     title: "AccessiScan — WCAG 2.1 AA + VPAT 2.5",
     description:

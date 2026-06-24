@@ -37,7 +37,7 @@ export default function AccessiScanVsSiteimprove() {
         This is the biggest practical difference. Siteimprove uses
         enterprise contracts that typically land in the
         $15,000–$50,000/year range, quoted through sales. AccessiScan is
-        self-serve: a free scanner with no account, Pro from $19/month, and a
+        self-serve: a free scanner with no account, Pro from $39/month, and a
         one-time audit plus <a href="/audit">Legal Evidence Pack</a> for $149.
         For a team that needs to scan a site and fix it — not run a company-wide
         governance program — that&apos;s the difference between a card payment and

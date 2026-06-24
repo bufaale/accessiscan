@@ -80,7 +80,7 @@ function buildBody(opts: {
     <li>Did the report surface anything actionable for your team?</li>
     <li>Would you like a 20-minute walkthrough of the full Playwright-based scan (color contrast, focus order, JS-rendered content, ~80 more rules)? We can run it against ${escapeHtml(url)} live on the call and you get the recording + VPAT 2.5 export to share with procurement.</li>
   </ol>
-  <p>Reply to this email if interested — happy to find a time. No newsletter, no automated drip after this. If you&apos;d rather just try the full scan yourself, <a href="https://accessiscan.piposlab.com/pricing">plans start at $19/mo</a>.</p>
+  <p>Reply to this email if interested — happy to find a time. No newsletter, no automated drip after this. If you&apos;d rather just try the full scan yourself, <a href="https://accessiscan.piposlab.com/pricing">plans start at $39/mo</a>.</p>
   <p style="color:#64748b;font-size:12px;margin-top:24px;border-top:1px solid #e2e8f0;padding-top:12px">— Alejandro · Pipo&apos;s Lab LLC<br/>DOJ Title II web-accessibility deadline: April 2027. ADA Title III lawsuits keep landing.</p>
 </div>`;
 
@@ -102,7 +102,7 @@ Two questions:
 
 Reply to this email if interested — happy to find a time. No newsletter,
 no automated drip after this. If you'd rather just try the full scan
-yourself, plans start at $19/mo:
+yourself, plans start at $39/mo:
 https://accessiscan.piposlab.com/pricing
 
 — Alejandro

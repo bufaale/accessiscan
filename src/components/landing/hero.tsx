@@ -32,7 +32,7 @@ export function Hero() {
           <p className="mt-6 max-w-xl text-lg leading-relaxed text-white/70">
             22.6% of ADA lawsuits target overlay users. AccessiScan ships actual
             fix code, a VPAT 2.5 export, and a CI/CD action — from{" "}
-            <span className="font-semibold text-white">$19/mo</span>.
+            <span className="font-semibold text-white">$39/mo</span>.
           </p>
 
           {/* Pull quote: FTC $1M fine — editorial treatment */}

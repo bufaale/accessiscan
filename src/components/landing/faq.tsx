@@ -14,7 +14,7 @@ const faqItems = [
   {
     question: "How is AccessiScan different from enterprise tools?",
     answer:
-      "Siteimprove charges $15,000-63,000/year. Deque axe Monitor costs $27,000+/year. AccessiScan provides AI-generated fix code at $19/mo — the same capability that enterprise tools charge 50x more for. We focus on actionable fixes, not just issue reports.",
+      "Siteimprove charges $15,000-63,000/year. Deque axe Monitor costs $27,000+/year. AccessiScan provides AI-generated fix code at $39/mo — the same capability that enterprise tools charge 50x more for. We focus on actionable fixes, not just issue reports.",
   },
   {
     question: "What is WCAG 2.1?",

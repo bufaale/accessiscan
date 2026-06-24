@@ -156,7 +156,7 @@ function Results({ result }: { result: OverlayDetectionResult }) {
         </p>
         <p className="mt-2 text-sm text-white/70">
           Get a real audit — actual fix code, VPAT 2.5 export, GitHub Action.
-          Ship from $19/mo. Remove the overlay once the underlying issues are
+          Ship from $39/mo. Remove the overlay once the underlying issues are
           resolved — that removes the liability.
         </p>
         <Link

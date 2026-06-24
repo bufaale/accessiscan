@@ -8,7 +8,7 @@ import { RoiCalculator } from "@/components/marketing/roi-calculator";
 export const metadata: Metadata = {
   title: "AccessiScan Pricing — Start free, scale to government",
   description:
-    "Transparent pricing for the AccessiScan WCAG 2.1 AA scanner. Free forever tier, Pro from $19/mo, Agency from $49/mo, Business from $299/mo, Team from $599/mo. VPAT 2.5 exports + GitHub Action CI/CD on every paid plan; Auto-Fix PRs against your repo on Business and Team.",
+    "Transparent pricing for the AccessiScan WCAG 2.1 AA scanner. Free forever tier, Pro from $39/mo, Agency from $99/mo, Business from $299/mo, Team from $599/mo. GitHub Action CI/CD on every paid plan; VPAT 2.5 on the $149 audit and Business+. Auto-Fix PRs against your repo on Business and Team.",
 };
 
 const FONT_DISPLAY = "var(--font-display), sans-serif";
@@ -219,7 +219,7 @@ function VendorComparison() {
     {
       title: "Pricing & terms",
       rows: [
-        { label: "Starting price", values: ["$19/mo", "$49/mo", "$49/mo", "$15,000/yr", "$45/user/mo"] },
+        { label: "Starting price", values: ["$39/mo", "$49/mo", "$49/mo", "$15,000/yr", "$45/user/mo"] },
         { label: "Monthly billing", values: ["yes", "yes", "yes", "no", "yes"] },
         { label: "Free tier", values: ["yes", "no", "no", "no", "partial"] },
         { label: "30-day money back", values: ["yes", "no", "no", "no", "no"] },
