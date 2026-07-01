@@ -149,6 +149,57 @@ export default function WcagCostComparison() {
         <li>How many times per month/year can we re-scan?</li>
       </ol>
 
+      <h2>Frequently asked questions</h2>
+
+      <h3>Is an automated scan enough for ADA compliance?</h3>
+      <p>
+        No. Automated tools catch roughly 30-40% of WCAG issues — the
+        machine-detectable ones like contrast, alt text, and label
+        associations. The rest needs human judgment: keyboard navigation,
+        screen-reader behavior, whether alt text is actually meaningful, and
+        interactive components. A clean automated report is a floor, not a
+        ceiling, and calling a site &quot;compliant&quot; on a scan alone is an
+        overclaim.
+      </p>
+
+      <h3>Will a WCAG audit make me lawsuit-proof?</h3>
+      <p>
+        No audit makes a site lawsuit-proof. What a documented audit does is
+        establish a record of good-faith effort — the standard courts and
+        regulators actually apply in practice. A site with a recent audit, an
+        accessibility statement, and an active remediation plan is in a very
+        different position than one that never addressed the issue.
+      </p>
+
+      <h3>What&apos;s the difference between a $99 scan and a $5,000 audit?</h3>
+      <p>
+        Mostly manual testing and who signs the output. A productized
+        automated-plus-review report gives you a structured document and an
+        evidence trail. A $5,000 engagement adds a specialist&apos;s manual
+        review across your full site, assistive-technology testing (JAWS,
+        NVDA, VoiceOver), and a report that stands up to expert scrutiny. Small
+        sites and nonprofits usually need the former; complex SaaS with
+        enterprise customers needs the latter.
+      </p>
+
+      <h3>How often do I need to re-audit?</h3>
+      <p>
+        Any time significant content or functionality changes, your previous
+        audit no longer covers the new material. For sites that update
+        regularly, scheduled automated monitoring plus a manual review of new
+        features is more practical than an annual full audit. Monthly or
+        quarterly scans catch regressions before they pile up.
+      </p>
+
+      <h3>What does ADA Title II require right now?</h3>
+      <p>
+        The DOJ&apos;s 2024 final rule under Title II requires state and local
+        government entities to meet WCAG 2.1 Level AA, with deadlines ranging
+        from April 2026 for larger entities to April 2027 for smaller ones. The
+        rule requires actual conformance, not just effort — but documented
+        good-faith effort still matters enormously in any enforcement context.
+      </p>
+
       <h2>Our take</h2>
       <p>
         Start with an SMB scanner that exports a VPAT and ships actual fix
