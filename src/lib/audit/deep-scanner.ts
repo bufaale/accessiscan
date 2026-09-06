@@ -141,14 +141,16 @@ export async function scanUrlDeep(url: string, opts?: { maxPages?: number }): Pr
   const started = Date.now();
   const maxPages = opts?.maxPages ?? DEFAULT_MAX_PAGES;
   const out: DeepScanReport = {
-    url, fetched_status: null, issues: [], total_issue_count: 0, health_score: 100,
+    url, fetched_status: null, outcome: "ok", issues: [], total_issue_count: 0, health_score: 100,
     notes: [], pages_scanned: 0, pages: [], engine: "axe-core/jsdom", needs_manual_review: [],
   };
 
   const home = await safeFetchHtml(url.startsWith("http") ? url : `https://${url}`);
   if (!home) {
+    // Nothing was measured — say so rather than scoring the site 0/100.
     out.error = "Could not fetch the target URL (blocked, unreachable, or too large).";
-    out.health_score = 0;
+    out.outcome = "blocked";
+    out.health_score = null;
     return out;
   }
   out.fetched_status = 200;
@@ -199,7 +201,8 @@ export async function scanUrlDeep(url: string, opts?: { maxPages?: number }): Pr
 
   if (out.pages_scanned === 0) {
     out.error = "The site could be fetched but no page could be analyzed.";
-    out.health_score = 0;
+    out.outcome = "failed";
+    out.health_score = null;
     return out;
   }
 

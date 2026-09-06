@@ -9,7 +9,11 @@
  *   POST-result + persists to public_scan_results.email_captured + fires
  *   a Resend email with the scan permalink + top remediation tips.
  *
- * Body: { email: string }
+ * Also writes an `email_captured` row to `free_tool_events` — funnel step 2,
+ * carrying the same UTM attribution as the scan so a campaign can be measured
+ * end to end. That row never contains the email.
+ *
+ * Body: { email: string, utm_source?, utm_medium?, utm_campaign? }
  * Auth: none (public — same as /api/free/wcag-scan). IP rate-limit 4/min.
  *
  * Returns 200 on success, 400 on bad input, 404 on bogus token, 409 if
@@ -19,6 +23,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { Resend } from "resend";
+import { deriveScanOutcome, displayHealthScore } from "@/lib/free-scan/outcome";
+import { parseAttribution } from "@/lib/free/attribution";
+import { countBySeverity, logFreeToolEvent } from "@/lib/free/funnel-events";
 
 export const maxDuration = 15;
 
@@ -49,13 +56,31 @@ function sanitizeEmail(raw: unknown): string | null {
 
 interface ScanReport {
   url: string;
-  health_score?: number;
+  outcome?: "ok" | "blocked" | "failed";
+  fetched_status?: number | null;
+  error?: string;
+  health_score?: number | null;
   total_issue_count?: number;
-  issues?: Array<{ rule?: string; severity?: string; fix_hint?: string }>;
+  issues?: Array<{ rule?: string; severity?: string; count?: number; fix_hint?: string }>;
 }
 
-function renderClaimEmail(opts: { url: string; score: number; permalink: string; topIssues: Array<{ rule: string; severity: string; fix_hint: string }> }) {
+/**
+ * `score: null` means the scan measured NOTHING — the host blocked us, or the
+ * page was unreachable. The email must say that instead of claiming "0/100",
+ * which would land in the recipient's inbox as a false accusation about their
+ * own site. The UI does not offer the capture form in that state; this branch
+ * exists because the endpoint is public and can be called directly.
+ */
+function renderClaimEmail(opts: { url: string; score: number | null; permalink: string; topIssues: Array<{ rule: string; severity: string; fix_hint: string }> }) {
   const { url, score, permalink, topIssues } = opts;
+  const scoreLineHtml =
+    score === null
+      ? `<p>We couldn't complete the scan: the site didn't return a page to our lite scanner, so there is no score and no issue list. That says nothing about the site's accessibility either way — the full scan drives a real Chromium browser and usually gets through.</p>`
+      : `<p>Your score: <strong style="font-size:18px">${score}/100</strong> — <a href="${permalink}">view the full scorecard</a></p>`;
+  const scoreLineText =
+    score === null
+      ? `We couldn't complete the scan: the site didn't return a page to our lite scanner, so there is no score and no issue list. That says nothing about the site's accessibility either way — the full scan drives a real Chromium browser and usually gets through.`
+      : `Your score: ${score}/100 — view the full scorecard: ${permalink}`;
   const issueListHtml = topIssues.length
     ? `<ol style="padding-left:18px;margin:12px 0;">${topIssues
         .map(
@@ -75,7 +100,7 @@ function renderClaimEmail(opts: { url: string; score: number; permalink: string;
   const html = `<div style="font-family:Inter,Arial,sans-serif;max-width:560px;color:#0f172a;font-size:14px;line-height:1.55">
   <p>Hi,</p>
   <p>Thanks for running an AccessiScan WCAG scan against <strong>${escapeHtml(url)}</strong>.</p>
-  <p>Your score: <strong style="font-size:18px">${score}/100</strong> — <a href="${permalink}">view the full scorecard</a></p>
+  ${scoreLineHtml}
   ${topIssues.length ? `<p>Top issues + remediation hints:</p>${issueListHtml}` : ""}
   <p style="margin-top:24px">For a full Playwright-based scan that runs ~80 more rules (color contrast, focus order, JS-rendered content), plus Auto-Fix PRs against your repo, see <a href="https://accessiscan.piposlab.com/pricing">AccessiScan plans</a> from $39/mo; VPAT 2.5 comes with the $149 audit.</p>
   <p style="color:#64748b;font-size:12px;margin-top:24px;border-top:1px solid #e2e8f0;padding-top:12px">DOJ Title II web-accessibility deadline: April 2027. ADA Title III lawsuits keep landing — start the remediation conversation now.</p>
@@ -86,7 +111,7 @@ function renderClaimEmail(opts: { url: string; score: number; permalink: string;
 
 Thanks for running an AccessiScan WCAG scan against ${url}.
 
-Your score: ${score}/100 — view the full scorecard: ${permalink}
+${scoreLineText}
 
 ${issueListText ? `Top issues + remediation hints:\n\n${issueListText}\n\n` : ""}For a full Playwright-based scan that runs ~80 more rules (color contrast, focus order, JS-rendered content), plus Auto-Fix PRs against your repo, see AccessiScan plans from $39/mo; VPAT 2.5 comes with the $149 audit:
 https://accessiscan.piposlab.com/pricing
@@ -117,7 +142,7 @@ export async function POST(
     return NextResponse.json({ ok: false, error: "rate_limited" }, { status: 429 });
   }
 
-  let body: { email?: unknown };
+  let body: { email?: unknown } & Record<string, unknown>;
   try {
     body = (await req.json()) as typeof body;
   } catch {
@@ -172,6 +197,23 @@ export async function POST(
     );
   }
 
+  // Funnel step 2. Aggregate only — the email stays in public_scan_results and
+  // is deliberately NOT copied into free_tool_events. Logged here, right after
+  // the capture is persisted, so it is recorded even when the send is later
+  // skipped by the global cap below.
+  {
+    const claimed = (row.report ?? {}) as ScanReport;
+    logFreeToolEvent({
+      event: "email_captured",
+      outcome: deriveScanOutcome(claimed),
+      attribution: parseAttribution(body),
+      referer: req.headers.get("referer"),
+      healthScore: displayHealthScore(claimed),
+      issueCount: claimed.total_issue_count ?? null,
+      criticalCount: countBySeverity(claimed.issues, "critical"),
+    });
+  }
+
   // SECURITY — email-bomb circuit breaker. This endpoint sends mail from our
   // Resend domain to a caller-supplied address; the per-IP limiter above is
   // in-memory and does NOT hold across Vercel's distributed instances, so an
@@ -201,7 +243,8 @@ export async function POST(
 
   // Build + send the email
   const report = (row.report ?? {}) as ScanReport;
-  const score = typeof report.health_score === "number" ? report.health_score : 0;
+  // null when the scan measured nothing — never coerced to 0 (see renderClaimEmail).
+  const score = displayHealthScore(report);
   const topIssues = (Array.isArray(report.issues) ? report.issues : [])
     .slice(0, 5)
     .map((i) => ({
@@ -219,7 +262,10 @@ export async function POST(
       from: process.env.RESEND_FROM_EMAIL || "AccessiScan <no-reply@piposlab.com>",
       replyTo: "alex@piposlab.com",
       to: email,
-      subject: `Your WCAG scan of ${row.url} — score ${score}/100`,
+      subject:
+        score === null
+          ? `Your WCAG scan of ${row.url} — we couldn't reach the site`
+          : `Your WCAG scan of ${row.url} — score ${score}/100`,
       html,
       text,
     });

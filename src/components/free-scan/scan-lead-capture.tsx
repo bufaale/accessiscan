@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useAttribution } from "@/lib/free/use-attribution";
 
 interface Props {
   token: string;
@@ -11,6 +12,9 @@ interface Props {
 type Status = "idle" | "sending" | "sent" | "already" | "error";
 
 export function ScanLeadCapture({ token, url, score }: Props) {
+  // Ad attribution for this visit, so an email captured from a shared permalink
+  // is still credited to the campaign that produced the original click.
+  const attribution = useAttribution();
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState<Status>("idle");
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -24,7 +28,7 @@ export function ScanLeadCapture({ token, url, score }: Props) {
       const res = await fetch(`/api/free/scan-result/${token}/claim`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email, ...attribution }),
       });
       const data = await res.json();
       if (res.status === 409) {

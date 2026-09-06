@@ -3,6 +3,11 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { ScanLeadCapture } from "@/components/free-scan/scan-lead-capture";
+import {
+  deriveScanOutcome,
+  displayHealthScore,
+  unmeasuredHeadline,
+} from "@/lib/free-scan/outcome";
 
 // Freemium gate: diagnosis (rule + count + WCAG ref) stays free + shareable;
 // remediation (fix steps) gated after the first one to create a signup reason.
@@ -22,9 +27,13 @@ interface ScanIssue {
 interface ScanReport {
   url: string;
   fetched_status?: number;
+  /** Absent on rows written before the outcome contract existed. */
+  outcome?: "ok" | "blocked" | "failed";
+  error?: string;
   issues: ScanIssue[];
   total_issue_count: number;
-  health_score: number;
+  /** null (or a legacy 0 alongside an error) when nothing was measured. */
+  health_score: number | null;
   notes?: string[];
 }
 
@@ -64,11 +73,28 @@ export async function generateMetadata({
   if (!row) {
     return { title: "Scan not found · AccessiScan" };
   }
+  const score = displayHealthScore(row.report);
+  if (score === null) {
+    // Nothing was measured. A title claiming "0/100" would follow this page
+    // into every Slack/Twitter/Google preview as a false accusation.
+    const headline = unmeasuredHeadline(deriveScanOutcome(row.report));
+    return {
+      title: `${row.report.url} · not scanned · AccessiScan`,
+      description: `${headline}, so AccessiScan's lite scan produced no score for ${row.report.url}.`,
+      // Nothing to index: an unmeasured page is not a scorecard.
+      robots: { index: false, follow: true },
+      openGraph: {
+        title: `${row.report.url} — no scan result`,
+        description: headline,
+        type: "article",
+      },
+    };
+  }
   return {
-    title: `${row.report.url} · WCAG ${row.report.health_score}/100 · AccessiScan`,
+    title: `${row.report.url} · WCAG ${score}/100 · AccessiScan`,
     description: `Public WCAG 2.1 AA scan of ${row.report.url}. Found ${row.report.total_issue_count} issues.`,
     openGraph: {
-      title: `${row.report.url} scored ${row.report.health_score}/100`,
+      title: `${row.report.url} scored ${score}/100`,
       description: `${row.report.total_issue_count} WCAG 2.1 AA violations found by AccessiScan.`,
       type: "article",
     },
@@ -105,6 +131,39 @@ function ScoreCard({ score, totalIssues }: { score: number; totalIssues: number 
   );
 }
 
+/**
+ * The scan never read the page (bot protection, 404, DNS). Show that plainly.
+ *
+ * Rendering `ScoreCard` here — 0/100, "0 WCAG violations" — is a public,
+ * shareable, Google-indexable claim about a site we never looked at. This
+ * replaces it.
+ */
+function UnmeasuredCard({ report }: { report: ScanReport }) {
+  const outcome = deriveScanOutcome(report);
+  return (
+    <div
+      className="rounded-2xl border-2 border-amber-300 bg-amber-50 p-6"
+      data-testid={outcome === "blocked" ? "scan-blocked" : "scan-failed"}
+    >
+      <div className="text-2xl font-semibold text-amber-950">
+        {unmeasuredHeadline(outcome)}
+      </div>
+      <p className="mt-2 text-sm text-amber-900">
+        There is no score and no issue list for this scan: the lite scanner never
+        received the page, so there was nothing to grade. This is not a finding
+        about the site&apos;s accessibility — in either direction.
+      </p>
+      <p className="mt-3 text-sm text-amber-900/90">
+        {outcome === "blocked"
+          ? `The server answered ${report.fetched_status ?? "with a refusal"}, which normally means a CDN or WAF turned away the plain server-to-server request the lite scanner makes.`
+          : report.error
+            ? `The request ended with: ${report.error}.`
+            : "The request didn't complete."}
+      </p>
+    </div>
+  );
+}
+
 export default async function PublicScanResultPage({
   params,
 }: {
@@ -115,6 +174,9 @@ export default async function PublicScanResultPage({
   if (!row) notFound();
   const report = row.report;
   const dateStr = new Date(row.created_at).toISOString().slice(0, 10);
+  // null = nothing was measured (blocked / unreachable), including on legacy
+  // rows that were persisted with a literal health_score of 0.
+  const score = displayHealthScore(report);
 
   return (
     <main className="mx-auto max-w-3xl px-6 py-12">
@@ -130,11 +192,19 @@ export default async function PublicScanResultPage({
       </h1>
       <div className="text-slate-600 mb-8">WCAG 2.1 AA conformance scan · AccessiScan</div>
 
-      <ScoreCard score={report.health_score} totalIssues={report.total_issue_count} />
+      {score === null ? (
+        <UnmeasuredCard report={report} />
+      ) : (
+        <ScoreCard score={score} totalIssues={report.total_issue_count} />
+      )}
 
-      <ScanLeadCapture token={token} url={report.url} score={report.health_score} />
+      {/* No email capture on an unmeasured scan — there is no scorecard to
+          send, and promising one would be a lie. */}
+      {score === null ? null : (
+        <ScanLeadCapture token={token} url={report.url} score={score} />
+      )}
 
-      {report.issues && report.issues.length > 0 ? (
+      {score !== null && report.issues && report.issues.length > 0 ? (
         <section className="mt-10">
           <h2 className="text-xl font-semibold text-slate-900 mb-4">Top findings</h2>
           <div className="space-y-4">
@@ -170,6 +240,9 @@ export default async function PublicScanResultPage({
             })}
           </div>
         </section>
+      ) : score === null ? (
+        // Unmeasured: "no violations found" would be the same lie as 0/100.
+        null
       ) : (
         <section className="mt-10 rounded-lg border bg-green-50 p-6">
           <h2 className="text-xl font-semibold text-green-900 mb-2">

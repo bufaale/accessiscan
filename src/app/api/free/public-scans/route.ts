@@ -14,10 +14,14 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { deriveScanOutcome, displayHealthScore } from "@/lib/free-scan/outcome";
 
 interface ScanReport {
   url: string;
-  health_score?: number;
+  outcome?: "ok" | "blocked" | "failed";
+  fetched_status?: number | null;
+  error?: string;
+  health_score?: number | null;
   total_issue_count?: number;
   issues?: Array<{ severity?: string }>;
 }
@@ -56,12 +60,18 @@ export async function GET(req: NextRequest) {
     }
     const issues = Array.isArray(row.report?.issues) ? row.report.issues : [];
     const criticalCount = issues.filter((i) => i?.severity === "critical").length;
+    // `outcome` tells consumers whether this row is a real measurement.
+    // enrich-from-scans must not turn a blocked scan into a "lead scored 0" —
+    // and `health_score` is null rather than 0 for exactly the same reason.
+    const outcome = deriveScanOutcome(row.report);
     return {
       token: row.id,
       permalink: `https://accessiscan.piposlab.com/scan-result/${row.id}`,
       url: row.url,
       domain,
-      health_score: row.report?.health_score ?? null,
+      outcome,
+      blocked: outcome === "blocked",
+      health_score: displayHealthScore(row.report),
       total_issue_count: row.report?.total_issue_count ?? issues.length,
       critical_count: criticalCount,
       created_at: row.created_at,

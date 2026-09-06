@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { displayHealthScore } from "@/lib/free-scan/outcome";
 
 export const metadata: Metadata = {
   title: "Trust Center · AccessiScan",
@@ -44,11 +45,22 @@ async function fetchScans(): Promise<PortfolioEntry[]> {
       .limit(1)
       .maybeSingle();
     if (!data) continue;
-    type ReportShape = { health_score?: number; total_issue_count?: number };
+    type ReportShape = {
+      outcome?: "ok" | "blocked" | "failed";
+      fetched_status?: number | null;
+      error?: string;
+      health_score?: number | null;
+      total_issue_count?: number;
+    };
     const report = (data.report ?? {}) as ReportShape;
+    // A scan that measured nothing is not a 0. Publishing our own property as
+    // "0/100" on the Trust Center because a CDN turned the scanner away would
+    // be exactly the dishonesty this page exists to disprove — omit it instead.
+    const score = displayHealthScore(report);
+    if (score === null) continue;
     out.push({
       ...p,
-      score: report.health_score ?? 0,
+      score,
       total_issues: report.total_issue_count ?? 0,
       share_token: data.id,
       scanned_at: data.created_at,

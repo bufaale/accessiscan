@@ -1,8 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { Loader2, Search, AlertTriangle, CheckCircle, ArrowRight, Copy, Check, Lock } from "lucide-react";
+import { Loader2, Search, AlertTriangle, CheckCircle, ArrowRight, Copy, Check, Lock, ShieldAlert } from "lucide-react";
 import Link from "next/link";
+import { useAttribution } from "@/lib/free/use-attribution";
+import { deriveScanOutcome, unmeasuredHeadline } from "@/lib/free-scan/outcome";
 
 // Number of fix recommendations shown free as a teaser. The rest are
 // gated behind a free signup — the diagnosis (what's wrong) stays open
@@ -18,6 +20,8 @@ interface FreeScanResponse {
   report: {
     url: string;
     fetched_status: number | null;
+    /** Absent on responses from a deployment older than this component. */
+    outcome?: "ok" | "blocked" | "failed";
     issues: Array<{
       rule: string;
       severity: "critical" | "serious" | "moderate";
@@ -27,11 +31,14 @@ interface FreeScanResponse {
       fix_hint: string;
     }>;
     total_issue_count: number;
-    health_score: number;
+    /** null when nothing was measured. NEVER render null as 0. */
+    health_score: number | null;
     error?: string;
   };
-  share_token?: string;
-  share_url?: string;
+  scan_status?: "ok" | "blocked" | "failed";
+  blocked?: boolean;
+  share_token?: string | null;
+  share_url?: string | null;
   email_captured?: boolean;
 }
 
@@ -42,6 +49,10 @@ const SEVERITY_COLOR: Record<string, string> = {
 };
 
 export function FreeScannerForm() {
+  // Ad attribution for this visit, captured on whichever page the visitor
+  // landed on. Rides along with the scan + claim POSTs so the server can log
+  // which campaign produced them. Never affects what the user sees.
+  const attribution = useAttribution();
   const [url, setUrl] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -85,7 +96,7 @@ export function FreeScannerForm() {
       const res = await fetch("/api/free/wcag-scan", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url }),
+        body: JSON.stringify({ url, ...attribution }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -109,7 +120,7 @@ export function FreeScannerForm() {
       const r = await fetch(`/api/free/scan-result/${result.share_token}/claim`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: claimEmail }),
+        body: JSON.stringify({ email: claimEmail, ...attribution }),
       });
       const data = await r.json();
       if (r.status === 409) {
@@ -173,43 +184,81 @@ export function FreeScannerForm() {
         </div>
       )}
 
-      {result && (
-        <div className="mt-8 space-y-4" data-testid="scan-result">
-          {result.report.error ? (
-            // Fetch failed (403 / 404 / timeout / DNS). Don't show 0/100
-            // because the user would think the site has zero accessibility.
-            // Show an explicit blocked-by-host message + the option to try
-            // the full Playwright-based scan which uses a real browser UA.
-            <div className="rounded-lg border border-amber-200 bg-amber-50 p-5 text-sm text-amber-900" data-testid="scan-blocked">
+      {result && (() => {
+        // The scan may not have measured anything at all. `outcome` is the one
+        // thing to branch on: "blocked" (the host refused an automated request)
+        // and "failed" (404 / DNS / timeout) both mean NO measurement exists.
+        // Showing 0/100 with an empty issue list in that case reads as "your
+        // site is catastrophically inaccessible" — the opposite of the truth,
+        // and the fastest way to lose a visitor's trust in the tool.
+        const outcome = result.scan_status ?? deriveScanOutcome(result.report);
+        const measured = outcome === "ok";
+        const score = measured ? result.report.health_score : null;
+
+        return (
+        <div className="mt-8 space-y-4" data-testid="scan-result" data-scan-status={outcome}>
+          {!measured ? (
+            <div
+              className="rounded-lg border border-amber-200 bg-amber-50 p-5 text-sm text-amber-900"
+              data-testid={outcome === "blocked" ? "scan-blocked" : "scan-failed"}
+              role="status"
+            >
               <div className="flex items-center gap-2 text-base font-semibold">
-                <AlertTriangle className="h-5 w-5" />
-                Couldn't scan this site
+                {outcome === "blocked" ? (
+                  <ShieldAlert className="h-5 w-5" />
+                ) : (
+                  <AlertTriangle className="h-5 w-5" />
+                )}
+                {unmeasuredHeadline(outcome)}
               </div>
               <p className="mt-2 break-all text-xs text-amber-800/80">{result.report.url}</p>
-              <p className="mt-3">
-                <span className="font-medium">{result.report.error}</span> — usually
-                the site has a CDN (Cloudflare / Akamai / AWS WAF) that blocks
-                automated requests. The lite scanner uses a server-to-server fetch
-                that some sites reject.
+              <p className="mt-3 font-medium">
+                No score and no issue list — we never got the page, so there is
+                nothing to grade.
               </p>
+              {outcome === "blocked" ? (
+                <p className="mt-3">
+                  The server answered{" "}
+                  <span className="font-medium">
+                    {result.report.fetched_status ?? "with a refusal"}
+                  </span>
+                  . That is normally a CDN or WAF (Cloudflare, Akamai, AWS) turning
+                  away the plain server-to-server request this lite scanner makes.
+                  It says nothing about the site&apos;s accessibility either way.
+                </p>
+              ) : (
+                <p className="mt-3">
+                  {result.report.error
+                    ? `The request ended with: ${result.report.error}.`
+                    : "The request didn't complete."}{" "}
+                  Check the URL (including https:// and any redirect), then try again.
+                </p>
+              )}
               <p className="mt-3">
-                The full scan uses a real Chromium browser with a standard user
-                agent and clears these blocks &gt;95% of the time.
+                The full scan drives a real Chromium browser with a standard user
+                agent, which gets past most of these blocks.
               </p>
+              <Link
+                href={SIGNUP_UTM}
+                data-testid="scan-blocked-cta"
+                className="mt-4 inline-flex items-center gap-1.5 rounded-md bg-[#0b1f3a] px-4 py-2 text-sm font-semibold text-white hover:bg-[#071428]"
+              >
+                Try the full browser-based scan <ArrowRight className="h-4 w-4" />
+              </Link>
             </div>
           ) : (
             <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
               <div className="flex items-baseline justify-between">
                 <p className="text-xs uppercase tracking-wide text-slate-500">Accessibility health</p>
                 <p className="font-display text-3xl font-semibold text-[#0b1f3a]">
-                  {result.report.health_score}/100
+                  {score}/100
                 </p>
               </div>
               <p className="mt-2 break-all text-xs text-slate-500">{result.report.url}</p>
             </div>
           )}
 
-          {result.report.issues.length === 0 && !result.report.error ? (
+          {!measured ? null : result.report.issues.length === 0 ? (
             <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-5 text-sm text-emerald-900">
               <CheckCircle className="mb-2 h-5 w-5" />
               No top-5 WCAG failures detected on the initial HTML response. The full
@@ -267,8 +316,7 @@ export function FreeScannerForm() {
 
           {/* Single prominent gate card after the issue list — the main
               conversion CTA. Only shown when there are gated fixes. */}
-          {!result.report.error &&
-          result.report.issues.length > FREE_FIX_COUNT ? (
+          {measured && result.report.issues.length > FREE_FIX_COUNT ? (
             <div
               className="rounded-lg border-2 border-[#0b1f3a] bg-[#0b1f3a] p-5 text-white"
               data-testid="scan-unlock-cta"
@@ -312,8 +360,13 @@ export function FreeScannerForm() {
 
           {/* PUBLIC PERMALINK — the viral wedge. Surfaces the public URL
               so the visitor can share their score with their team / boss /
-              consultant. Public, no signup required to view. */}
-          {result.share_token ? (
+              consultant. Public, no signup required to view.
+
+              Guarded on `measured`: the API already withholds a share token for
+              a blocked / failed scan, but a shareable "0/100" scorecard about a
+              site we never read would be the single most damaging thing this
+              tool could publish, so the client refuses to offer one too. */}
+          {measured && result.share_token ? (
             <div
               className="rounded-lg border border-sky-200 bg-sky-50 p-5"
               data-testid="scan-permalink-share"
@@ -349,7 +402,7 @@ export function FreeScannerForm() {
               </div>
               <div className="mt-3 flex flex-wrap gap-2">
                 <a
-                  href={`https://twitter.com/intent/tweet?url=${encodeURIComponent(publicPermalink(result.share_token))}&text=${encodeURIComponent(`Just scanned ${result.report.url} for WCAG 2.1 AA compliance. Score: ${result.report.health_score}/100, ${result.report.total_issue_count} issues found.`)}`}
+                  href={`https://twitter.com/intent/tweet?url=${encodeURIComponent(publicPermalink(result.share_token))}&text=${encodeURIComponent(`Just scanned ${result.report.url} for WCAG 2.1 AA compliance. Score: ${score}/100, ${result.report.total_issue_count} issues found.`)}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-1.5 rounded-md border border-sky-300 bg-white px-3 py-2 text-xs font-medium text-sky-900 hover:bg-sky-100"
@@ -379,7 +432,7 @@ export function FreeScannerForm() {
 
           {/* POST-RESULT EMAIL CAPTURE — moved here from pre-result form.
               Visitors now see their score before being asked for email. */}
-          {result.share_token && claimStatus !== "sent" ? (
+          {measured && result.share_token && claimStatus !== "sent" ? (
             <div
               className="rounded-lg border border-amber-200 bg-amber-50 p-5"
               data-testid="scan-claim-prompt"
@@ -436,6 +489,8 @@ export function FreeScannerForm() {
             </div>
           ) : null}
 
+          {/* The full-scan CTA stays on every outcome — a blocked site is
+              exactly the case where the browser-based scan is worth it. */}
           <Link
             href="/signup"
             className="inline-flex items-center gap-1 rounded-md bg-[#0b1f3a] px-4 py-2 text-sm font-medium text-white hover:bg-[#071428]"
@@ -443,7 +498,8 @@ export function FreeScannerForm() {
             Run the full scan with VPAT export <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
-      )}
+        );
+      })()}
     </div>
   );
 }

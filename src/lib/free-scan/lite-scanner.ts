@@ -8,9 +8,16 @@
  * NOT a substitute for the real Playwright-based scanner — this exists to
  * give visitors a "did you know your site has accessibility issues?" hook
  * with a CTA to sign up for the full scan.
+ *
+ * CONTRACT: every report carries an `outcome`. A scan that never read the
+ * page (bot protection, 404, DNS failure) reports `outcome: "blocked" |
+ * "failed"` with `health_score: null` and no issues. It does NOT report a
+ * score of 0 — that would tell the visitor their site is catastrophically
+ * inaccessible when in truth we measured nothing.
  */
 
 import { validateResolvedIP } from "@/lib/security/url-validator";
+import { isBlockingHttpStatus, type ScanOutcome } from "./outcome";
 
 const FETCH_TIMEOUT_MS = 8_000;
 const MAX_REDIRECTS = 5;
@@ -18,6 +25,17 @@ const UA = "AccessiScan-FreeTool/1.0";
 const MAX_HTML_BYTES = 2_000_000; // 2MB cap
 
 export type WcagSeverity = "critical" | "serious" | "moderate";
+
+// The outcome contract lives in ./outcome so client components and the
+// edge-runtime OG image can import it without dragging node:dns in.
+export {
+  BLOCKING_HTTP_STATUSES,
+  deriveScanOutcome,
+  displayHealthScore,
+  isBlockingHttpStatus,
+  unmeasuredHeadline,
+  type ScanOutcome,
+} from "./outcome";
 
 export interface WcagFreeIssue {
   rule: string;
@@ -39,9 +57,16 @@ export type PlatformId =
 export interface WcagFreeReport {
   url: string;
   fetched_status: number | null;
+  /** Whether we actually measured anything. See {@link ScanOutcome}. */
+  outcome: ScanOutcome;
   issues: WcagFreeIssue[];
   total_issue_count: number;
-  health_score: number; // 0–100
+  /**
+   * 0–100 when `outcome === "ok"`. `null` means NOT MEASURED (the page was
+   * blocked or unreachable) — never coerce it to 0 for display: "0/100" reads
+   * as "this site is catastrophically inaccessible", which is a lie.
+   */
+  health_score: number | null;
   notes: string[];
   platform?: PlatformId; // detected CMS/host — drives platform-specific fix guidance
   error?: string;
@@ -63,10 +88,21 @@ export async function scanUrlLite(url: string): Promise<WcagFreeReport> {
   const out: WcagFreeReport = {
     url,
     fetched_status: null,
+    outcome: "ok",
     issues: [],
     total_issue_count: 0,
     health_score: 100,
     notes: [],
+  };
+
+  /** Nothing was measured. Say so explicitly instead of scoring the site 0. */
+  const unmeasured = (outcome: Exclude<ScanOutcome, "ok">, error: string): WcagFreeReport => {
+    out.outcome = outcome;
+    out.error = error;
+    out.health_score = null;
+    out.issues = [];
+    out.total_issue_count = 0;
+    return out;
   };
 
   let html: string;
@@ -92,14 +128,10 @@ export async function scanUrlLite(url: string): Promise<WcagFreeReport> {
           if (!loc) break;
           const next = new URL(loc, currentUrl);
           if (next.protocol !== "http:" && next.protocol !== "https:") {
-            out.error = "Unsupported redirect protocol";
-            out.health_score = 0;
-            return out;
+            return unmeasured("failed", "Unsupported redirect protocol");
           }
           if (!(await validateResolvedIP(next.hostname))) {
-            out.error = "Redirect resolves to a private or unresolvable address";
-            out.health_score = 0;
-            return out;
+            return unmeasured("failed", "Redirect resolves to a private or unresolvable address");
           }
           currentUrl = next.toString();
           hops += 1;
@@ -112,9 +144,12 @@ export async function scanUrlLite(url: string): Promise<WcagFreeReport> {
     }
     out.fetched_status = res.status;
     if (!res.ok) {
-      out.error = `Fetch returned ${res.status}`;
-      out.health_score = 0;
-      return out;
+      // A 403/401/429 is the host refusing a bot, not a broken page. Split the
+      // two so the UI can say "this site blocks automated scanners" instead of
+      // presenting an unmeasured page as a failing one.
+      return isBlockingHttpStatus(res.status)
+        ? unmeasured("blocked", `The site refused our scanner (HTTP ${res.status})`)
+        : unmeasured("failed", `Fetch returned ${res.status}`);
     }
     const reader = res.body?.getReader();
     if (!reader) {
@@ -131,11 +166,10 @@ export async function scanUrlLite(url: string): Promise<WcagFreeReport> {
       html = new TextDecoder("utf-8").decode(concat(chunks));
     }
   } catch (err) {
-    out.error = err instanceof Error ? err.message : "fetch failed";
-    out.health_score = 0;
-    return out;
+    return unmeasured("failed", err instanceof Error ? err.message : "fetch failed");
   }
 
+  out.outcome = "ok";
   out.issues = analyzeHtml(html);
   out.total_issue_count = out.issues.reduce((acc, i) => acc + i.count, 0);
   out.health_score = computeHealthScore(out.issues);

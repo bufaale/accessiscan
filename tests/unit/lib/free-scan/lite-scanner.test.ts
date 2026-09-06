@@ -1,7 +1,8 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, afterEach } from "vitest";
 import {
   analyzeHtml,
   computeHealthScore,
+  scanUrlLite,
   type WcagFreeIssue,
 } from "@/lib/free-scan/lite-scanner";
 
@@ -188,5 +189,69 @@ describe("computeHealthScore", () => {
     ];
     expect(computeHealthScore(moderate)).toBeGreaterThan(computeHealthScore(serious));
     expect(computeHealthScore(serious)).toBeGreaterThan(computeHealthScore(critical));
+  });
+});
+
+describe("scanUrlLite — what happens when we never get the page", () => {
+  const realFetch = globalThis.fetch;
+  afterEach(() => {
+    globalThis.fetch = realFetch;
+  });
+
+  function respondWith(status: number, body = ""): void {
+    globalThis.fetch = (async () =>
+      new Response(body, { status })) as unknown as typeof globalThis.fetch;
+  }
+
+  it("reports a 403 as BLOCKED with no score and no issues (never 0/100)", async () => {
+    respondWith(403, "Forbidden");
+    const report = await scanUrlLite("https://example.gov/");
+
+    expect(report.outcome).toBe("blocked");
+    expect(report.fetched_status).toBe(403);
+    expect(report.health_score).toBeNull();
+    expect(report.issues).toEqual([]);
+    expect(report.total_issue_count).toBe(0);
+    expect(report.error).toContain("403");
+  });
+
+  it("reports 401 and 429 as blocked too", async () => {
+    for (const status of [401, 429]) {
+      respondWith(status);
+      const report = await scanUrlLite("https://example.gov/");
+      expect(report.outcome).toBe("blocked");
+      expect(report.health_score).toBeNull();
+    }
+  });
+
+  it("reports a 404 as FAILED, not blocked", async () => {
+    respondWith(404);
+    const report = await scanUrlLite("https://example.gov/missing");
+    expect(report.outcome).toBe("failed");
+    expect(report.health_score).toBeNull();
+  });
+
+  it("reports a thrown fetch (DNS / timeout) as failed with the real reason", async () => {
+    globalThis.fetch = (async () => {
+      throw new Error("getaddrinfo ENOTFOUND www.notarealdomain.gov");
+    }) as unknown as typeof globalThis.fetch;
+
+    const report = await scanUrlLite("https://www.notarealdomain.gov/");
+    expect(report.outcome).toBe("failed");
+    expect(report.health_score).toBeNull();
+    expect(report.error).toContain("ENOTFOUND");
+  });
+
+  it("still scores a page it actually reads", async () => {
+    respondWith(
+      200,
+      `<!doctype html><html lang="en"><head><meta name="viewport" content="width=device-width">` +
+        `<title>Hi</title></head><body><a href="#main">Skip</a><h1>Hi</h1><img src="a.png"></body></html>`,
+    );
+    const report = await scanUrlLite("https://example.gov/");
+    expect(report.outcome).toBe("ok");
+    expect(typeof report.health_score).toBe("number");
+    expect(report.health_score).toBeLessThan(100);
+    expect(report.issues.length).toBeGreaterThan(0);
   });
 });

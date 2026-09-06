@@ -17,13 +17,17 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { displayHealthScore } from "@/lib/free-scan/outcome";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 300; // 5-min cache for the index
 
 interface ScanReport {
   url: string;
-  health_score?: number;
+  outcome?: "ok" | "blocked" | "failed";
+  fetched_status?: number | null;
+  error?: string;
+  health_score?: number | null;
   total_issue_count?: number;
   issues?: Array<{ severity?: string }>;
 }
@@ -73,7 +77,7 @@ export default async function ScorecardsPage() {
   // Dedupe by domain (keep most recent scan per domain) so the index isn't
   // flooded with duplicate entries when bulk-scan-feed re-scans.
   const seenDomains = new Set<string>();
-  const deduped: Array<ScanRow & { domain: string; criticalCount: number }> = [];
+  const deduped: Array<ScanRow & { domain: string; criticalCount: number; score: number }> = [];
   for (const r of rows) {
     let domain = "";
     try {
@@ -82,24 +86,23 @@ export default async function ScorecardsPage() {
       continue;
     }
     if (seenDomains.has(domain)) continue;
+    // Scans that measured nothing (the host blocked us, or the page was
+    // unreachable) are not scorecards. Publishing them here listed the site as
+    // "0/100 · fail" on an indexed page purely because its WAF turned us away.
+    const score = displayHealthScore(r.report);
+    if (score === null) continue;
     seenDomains.add(domain);
     const criticalCount = Array.isArray(r.report?.issues)
       ? r.report.issues.filter((i) => i?.severity === "critical").length
       : 0;
-    deduped.push({ ...r, domain, criticalCount });
+    deduped.push({ ...r, domain, criticalCount, score });
   }
 
   const stats = {
     total: deduped.length,
-    passing: deduped.filter((r) => (r.report?.health_score ?? 0) >= 90).length,
-    reviewing: deduped.filter((r) => {
-      const s = r.report?.health_score ?? 0;
-      return s >= 75 && s < 90;
-    }).length,
-    failing: deduped.filter((r) => {
-      const s = r.report?.health_score;
-      return s !== undefined && s !== null && s < 75 && s > 0;
-    }).length,
+    passing: deduped.filter((r) => r.score >= 90).length,
+    reviewing: deduped.filter((r) => r.score >= 75 && r.score < 90).length,
+    failing: deduped.filter((r) => r.score < 75).length,
   };
 
   return (
@@ -186,7 +189,7 @@ export default async function ScorecardsPage() {
             </thead>
             <tbody className="divide-y divide-slate-100 bg-white">
               {deduped.map((r) => {
-                const badge = scoreBadgeColor(r.report?.health_score);
+                const badge = scoreBadgeColor(r.score);
                 const dateStr = new Date(r.created_at).toISOString().slice(0, 10);
                 return (
                   <tr key={r.id} className="hover:bg-slate-50">
@@ -203,7 +206,7 @@ export default async function ScorecardsPage() {
                         className="inline-flex items-center gap-2 rounded px-2 py-0.5 text-xs font-medium"
                         style={{ background: badge.bg, color: badge.fg }}
                       >
-                        <span>{r.report?.health_score ?? "—"}/100</span>
+                        <span>{r.score}/100</span>
                         <span className="uppercase">· {badge.label}</span>
                       </span>
                     </td>

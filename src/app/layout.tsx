@@ -4,6 +4,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster } from "@/components/ui/sonner";
 import { PostHogProvider } from "@/components/posthog-provider";
+import { AttributionCapture } from "@/components/free-scan/attribution-capture";
 import "./globals.css";
 
 const inter = Inter({
@@ -58,6 +59,10 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <PostHogProvider>
+            {/* Remembers ad UTM params on whichever page the visitor lands on,
+                so a landing → scanner → permalink hop stays attributed to the
+                campaign. Renders nothing. */}
+            <AttributionCapture />
             <TooltipProvider>
               {children}
             </TooltipProvider>

@@ -26,6 +26,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { Resend } from "resend";
+import { displayHealthScore } from "@/lib/free-scan/outcome";
 
 export const maxDuration = 60;
 
@@ -35,7 +36,10 @@ const MAX_FOLLOWUPS_PER_RUN = 5;
 
 interface ScanReport {
   url: string;
-  health_score?: number;
+  outcome?: "ok" | "blocked" | "failed";
+  fetched_status?: number | null;
+  error?: string;
+  health_score?: number | null;
   total_issue_count?: number;
   issues?: Array<{ severity?: string }>;
 }
@@ -44,6 +48,8 @@ interface FollowupResult {
   candidates: number;
   sent: number;
   failed: number;
+  /** Candidates whose scan measured nothing — no score to follow up about. */
+  skipped_unmeasured: number;
   details: Array<{
     token: string;
     email: string;
@@ -156,6 +162,7 @@ export async function GET(req: NextRequest) {
     candidates: rows.length,
     sent: 0,
     failed: 0,
+    skipped_unmeasured: 0,
     details: [],
   };
 
@@ -164,7 +171,14 @@ export async function GET(req: NextRequest) {
   for (const row of rows) {
     if (result.sent >= MAX_FOLLOWUPS_PER_RUN) break;
 
-    const score = typeof row.report?.health_score === "number" ? row.report.health_score : 0;
+    // The scan measured nothing (blocked host / unreachable page). There is no
+    // score to follow up about, and emailing "0/100" about a site we never read
+    // is the fastest way to lose the lead we are trying to warm.
+    const score = displayHealthScore(row.report);
+    if (score === null) {
+      result.skipped_unmeasured += 1;
+      continue;
+    }
     const issues = Array.isArray(row.report?.issues) ? row.report.issues : [];
     const criticalCount = issues.filter((i) => i?.severity === "critical").length;
     const permalink = `https://accessiscan.piposlab.com/scan-result/${row.id}`;
