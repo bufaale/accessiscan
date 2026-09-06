@@ -192,8 +192,10 @@ export function FreeScannerForm() {
         // site is catastrophically inaccessible" — the opposite of the truth,
         // and the fastest way to lose a visitor's trust in the tool.
         const outcome = result.scan_status ?? deriveScanOutcome(result.report);
-        const measured = outcome === "ok";
-        const score = measured ? result.report.health_score : null;
+        // Derived from the score, not just the outcome, so a response that
+        // claims "ok" without a number can never render "null/100".
+        const score = outcome === "ok" ? result.report.health_score : null;
+        const measured = score !== null;
 
         return (
         <div className="mt-8 space-y-4" data-testid="scan-result" data-scan-status={outcome}>
@@ -234,16 +236,20 @@ export function FreeScannerForm() {
                   Check the URL (including https:// and any redirect), then try again.
                 </p>
               )}
-              <p className="mt-3">
-                The full scan drives a real Chromium browser with a standard user
-                agent, which gets past most of these blocks.
-              </p>
+              {outcome === "blocked" ? (
+                <p className="mt-3">
+                  The full scan drives a real Chromium browser with a standard
+                  user agent instead of this plain server-to-server fetch, so it
+                  is not the request these systems are set up to turn away.
+                </p>
+              ) : null}
               <Link
                 href={SIGNUP_UTM}
                 data-testid="scan-blocked-cta"
                 className="mt-4 inline-flex items-center gap-1.5 rounded-md bg-[#0b1f3a] px-4 py-2 text-sm font-semibold text-white hover:bg-[#071428]"
               >
-                Try the full browser-based scan <ArrowRight className="h-4 w-4" />
+                {outcome === "blocked" ? "Try the full browser-based scan" : "Run the full scan"}{" "}
+                <ArrowRight className="h-4 w-4" />
               </Link>
             </div>
           ) : (
