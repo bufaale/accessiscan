@@ -21,32 +21,52 @@
 
 import { test, expect, request } from "@playwright/test";
 import { createClient } from "@supabase/supabase-js";
+import { displayHealthScore } from "../../src/lib/free-scan/outcome";
 
 const BASE = process.env.TEST_BASE_URL ?? "https://accessiscan.piposlab.com";
 const SUPA_URL = process.env.SUPABASE_URL ?? process.env.APP04_SUPABASE_URL;
 const SUPA_SR_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY ?? process.env.APP04_SUPABASE_SERVICE_ROLE_KEY;
 
+interface ScanRowLite {
+  id: string;
+  report: Parameters<typeof displayHealthScore>[0];
+}
+
+/**
+ * Only a MEASURED scan is a valid subject here. Since 2026-09-06 a scan whose
+ * target blocked us (403 — routine on .gov, and the bulk-scan-feed cron pushes
+ * plenty of them to the top of this table) renders an "unmeasured" card with no
+ * score and deliberately NO lead-capture form: there is no scorecard to email.
+ * Picking the newest row regardless would fail this spec on a product behaviour
+ * that is working as designed.
+ */
 async function getOrCreatePermalinkToken(): Promise<string> {
   // Prefer any existing un-claimed public scan so we don't pollute prod.
   if (!SUPA_URL || !SUPA_SR_KEY) {
     test.skip(true, "SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY required for permalink lookup");
   }
   const admin = createClient(SUPA_URL!, SUPA_SR_KEY!);
+  const measured = (rows: ScanRowLite[] | null) =>
+    (rows ?? []).find((r) => displayHealthScore(r.report) !== null)?.id;
+
   const { data } = await admin
     .from("public_scan_results")
-    .select("id")
+    .select("id, report")
     .is("email_captured", null)
     .order("created_at", { ascending: false })
-    .limit(1);
-  if (data && data.length) return data[0].id as string;
-  // Fall back: just pick any (idempotent claim with same email is harmless).
-  const { data: any } = await admin
+    .limit(25);
+  const unclaimed = measured(data as ScanRowLite[] | null);
+  if (unclaimed) return unclaimed;
+
+  // Fall back: any measured scan (idempotent claim with same email is harmless).
+  const { data: recent } = await admin
     .from("public_scan_results")
-    .select("id")
+    .select("id, report")
     .order("created_at", { ascending: false })
-    .limit(1);
-  if (!any || !any.length) throw new Error("no public_scan_results rows to test against");
-  return any[0].id as string;
+    .limit(50);
+  const anyMeasured = measured(recent as ScanRowLite[] | null);
+  if (!anyMeasured) throw new Error("no MEASURED public_scan_results rows to test against");
+  return anyMeasured;
 }
 
 test.describe("AccessiScan public-permalink leadgen — shipped 2026-05-28", () => {

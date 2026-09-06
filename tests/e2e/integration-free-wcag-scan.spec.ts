@@ -103,6 +103,39 @@ test.describe("Free WCAG scanner — happy path returns scan result shape", () =
     expect(json.report).toHaveProperty("issues");
     expect(Array.isArray(json.report.issues)).toBe(true);
     expect(json).toHaveProperty("upgrade_cta");
+    // Honesty contract (2026-09-06): a measured scan says so explicitly, and
+    // only a measured scan gets a shareable permalink.
+    expect(json.scan_status).toBe("ok");
+    expect(json.blocked).toBe(false);
+    expect(json.report.outcome).toBe("ok");
+    expect(typeof json.share_url === "string" || json.share_url === null).toBe(true);
+  });
+
+  // The regression this contract exists for: before 2026-09-06 a site that
+  // refused the scanner came back as health_score 0 / issues [] / 200, which a
+  // visitor reads as "your site is catastrophically inaccessible".
+  test("a site that blocks the scanner → no score, no issues, no share link", async () => {
+    test.setTimeout(45_000);
+    // httpbin serves a deterministic 403 without any bot-protection flakiness.
+    const res = await fetch(`${BASE_URL}/api/free/wcag-scan`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ url: "https://httpbin.org/status/403" }),
+    });
+    if (res.status !== 200) {
+      test.skip(true, `upstream fixture unavailable (HTTP ${res.status})`);
+      return;
+    }
+    const json = await res.json();
+    expect(json.scan_status).toBe("blocked");
+    expect(json.blocked).toBe(true);
+    expect(json.report.outcome).toBe("blocked");
+    expect(json.report.health_score).toBeNull();
+    expect(json.report.issues).toEqual([]);
+    expect(json.report.total_issue_count).toBe(0);
+    // A blocked scan must not be offered as a public scorecard.
+    expect(json.share_url).toBeNull();
+    expect(json.share_token).toBeNull();
   });
 
   test("scans a known-bad page (no html lang) → flags serious issue", async () => {
