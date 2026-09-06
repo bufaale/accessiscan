@@ -12,18 +12,16 @@ a local dev server, an E2E spec, or by reading source.
 **Why this exists:** standing rule
 `~/.claude/rules/common/ui-test-every-feature.md` — every user-reachable
 functionality must be exercised through the deployed UI before it counts as done.
-The rule was written after Costback shipped its differentiated CSV path having
-never been touched by a browser while paid traffic was pointed at that page. The
-parallel Costback pass on the same day found 5 real bugs including a completely
-broken signup. AccessiScan's `/free/wcag-scanner` is the same shape of risk: it is
-the paid-traffic landing page and it just received a behavioural change (the
-honest blocked-site state) that had only been verified by specs.
+The rule was written after Costback shipped its differentiated CSV path having never
+been touched by a browser while paid traffic was pointed at that page. AccessiScan's
+`/free/wcag-scanner` is the same shape of risk: it is the paid-traffic landing page
+and it had just received a behavioural change (the honest blocked-site state) that
+only specs had verified.
 
-**Enumeration was done BEFORE execution.** Routes were read from `src/app`, the
-live site was walked structurally (h1 / forms / buttons / `data-testid` inventory
-per route), and every row below was written with `Result = PENDING` and saved to
-disk before a single assertion ran — so coverage is deliberate rather than
-"whatever I happened to try".
+**Enumeration was done BEFORE execution.** Routes were read from `src/app`, the live
+site was walked structurally, and all 120 rows were written with `Result = PENDING`
+and committed (`7e75a02`) before a single assertion ran — so coverage is deliberate
+rather than "whatever I happened to try".
 
 ---
 
@@ -31,13 +29,20 @@ disk before a single assertion ran — so coverage is deliberate rather than
 
 | Metric | Value |
 | --- | --- |
-| Total rows | PENDING |
-| PASS | PENDING |
-| FAIL | PENDING |
-| Not covered | PENDING |
-| Bugs found | PENDING |
+| Total rows | 120 |
+| PASS | 105 |
+| FAIL | 14 |
+| Not covered | 1 |
+| Bugs found | 15 (2 Critical, 5 High, 5 Medium, 3 Low) |
 
 Screenshots: `…/scratchpad/uicov/`.
+
+**Headline:** the free scanner — the surface paid traffic lands on — is in good
+shape. The blocked-site contract, the SSRF guards, the freemium gate, the permalink
+and the mobile scan all hold (rows 31-59, 100-101). The damage is concentrated in
+**account creation** and **the pricing page**: email/password signup and password
+reset both return HTTP 500 because the Resend account has exhausted its monthly
+quota, and `/pricing` does not respond below ~1280px.
 
 ---
 
@@ -45,193 +50,537 @@ Screenshots: `…/scratchpad/uicov/`.
 
 ### Landing `/`
 
-| # | Surface | Functionality | How tested | Result | Evidence | Notes |
-|---|---|---|---|---|---|---|
-| 1 | Landing | Page renders with the hero headline | GET + read `h1` | PENDING | | |
-| 2 | Landing | Primary hero CTA navigates where it claims | click, assert landed URL | PENDING | | |
-| 3 | Landing | Secondary hero CTA navigates | click, assert landed URL | PENDING | | |
-| 4 | Landing | Navbar anchor `#features` target exists + scrolls | click, read `location.hash` + section rect | PENDING | | |
-| 5 | Landing | Navbar anchor `#comparison` target exists + scrolls | same | PENDING | | |
-| 6 | Landing | Navbar anchor `#pricing` target exists + scrolls | same | PENDING | | |
-| 7 | Landing | Navbar anchor `#faq` target exists + scrolls | same | PENDING | | |
-| 8 | Landing | Footer anchor `#cta` target exists (2 footer links point at it) | GET `/#cta`, assert element with that id | PENDING | | |
-| 9 | Landing | Navbar route links navigate (`/enterprise`, `/overlay-detector`, `/login`, `/signup`) | click each, assert URL | PENDING | | |
-| 10 | Landing | Every footer link resolves (no 404) — 23 links incl. 3 external | HTTP GET each unique href | PENDING | | |
-| 11 | Landing | No false customer / certification claims in rendered copy | regex the rendered text for banned phrases | PENDING | | |
-| 12 | Landing | Mobile navbar toggle opens/closes at 390px | click "Open menu" twice, read state | PENDING | | |
-| 12a | Landing | DOJ countdown banner renders and ticks (hydrates off `0/00/00/00`) | read counter, wait, re-read | PENDING | | |
-| 12b | Landing | Landing FAQ accordion (8 items) opens/closes | click 2 items, assert body toggles | PENDING | | |
-| 12c | Landing | Landing pricing cards' CTAs navigate | click each of the 3, assert URL | PENDING | | |
-| 12d | Landing | "Install GitHub App" CTA target from an anonymous page | click, observe where an anonymous visitor lands | PENDING | | |
+| # | Functionality | Result | Evidence | Notes |
+|---|---|---|---|---|
+| 1 | Landing renders with hero headline | PASS | h1 = "Real WCAG 2.1 AA compliance — not an overlay band-aid." |  |
+| 2 | Primary hero CTA 'Start free Title II scan' navigates | PASS | landed https://accessiscan.piposlab.com/free/wcag-scanner |  |
+| 3 | Secondary hero CTA 'See how we compare' jumps to #comparison | PASS | hash=#comparison target exists=true top=0 |  |
+| 4 | Navbar anchor "Product" → #features exists and scrolls | PASS | hash=#features exists=true sectionTop=0 scrollY=2622 |  |
+| 5 | Navbar anchor "Comparison" → #comparison exists and scrolls | PASS | hash=#comparison exists=true sectionTop=0 scrollY=1935 |  |
+| 6 | Navbar anchor "Pricing" → #pricing exists and scrolls | PASS | hash=#pricing exists=true sectionTop=0 scrollY=4338 |  |
+| 7 | Navbar anchor "FAQ" → #faq exists and scrolls | PASS | hash=#faq exists=true sectionTop=0 scrollY=5199 |  |
+| 8 | Footer links to /#cta — target exists on landing | PASS | exists=true scrollY=6087 text="You have 365 days until Title II.Scan your domain in 90 seconds. No ca" |  |
+| 9 | Navbar route links navigate where they claim | PASS | Enterprise→/enterprise, Overlay detector→/overlay-detector, Sign in→/login, Start free scan→/signup (all visible=true, all matched href) |  |
+| 10 | Every footer link resolves (no 404) — 21 unique hrefs | PASS | all 21 unique hrefs → <400 |  |
+| 11 | No false customer / certification claims visible on the landing page | PASS | customer-claim matches: []; cert matches: [] |  |
+| 12 | Mobile navbar toggle opens/closes at 390px | PASS | dialogs before=0 → open=1 with 8 links ["Product","Comparison","Enterprise","Overlay detector","Pricing","FAQ","Sign in","Start free scan"] → after Escape=0 | uicov/12-mobile-nav-open.png |
+| 12a | DOJ countdown banner hydrates and ticks | PASS | t0: "DOJ Title II Web Accessibility Deadline · Apr 26, 2027 Public entities with 50,000+ residents 0 DAYS · 00 HRS " \| t+2.5s: "DOJ Title II Web Accessibility Deadline · Apr 26, 2027 Public entities with 50,000+ residents 231 DAYS · 01 HR" \| changed=true |  |
+| 12b | Landing FAQ accordion (8 items) opens and closes | PASS | 8 buttons; section text length 955 → 888 (open #3) → 559 (close). Labels e.g. ["01What does \"WCAG 2.1 AA\" actually mean for ","02Does an overlay widget make me compliant?","03What is a VPAT 2.5 and why do I need one?"] |  |
+| 12c | Landing pricing card CTAs point at real routes | PASS | [{"t":"Start free scan","h":"/signup"},{"t":"Start free — upgrade anytime","h":"/signup"},{"t":"Start free — upgrade anytime","h":"/signup"},{"t":"Business and Team plans on the full pricing pa","h":"/pricing"}] |  |
+| 12d | 'Install GitHub App' CTA — where an anonymous visitor actually lands | PASS | href=/dashboard/github → anonymous visitor landed at /login |  |
 
 ### Pricing `/pricing`
 
-| # | Surface | Functionality | How tested | Result | Evidence | Notes |
-|---|---|---|---|---|---|---|
-| 13 | Pricing | 5 tier cards render with names + prices | read `tier-name-*` / `tier-price-*` | PENDING | | |
-| 14 | Pricing | Prices match current pricing (Pro $39, Agency $99) — no stale pricing | compare to `src/lib/stripe/plans.ts` | PENDING | | |
-| 15 | Pricing | Monthly ↔ Annual toggle changes the displayed prices | click `billing-toggle-annual`, re-read prices | PENDING | | |
-| 16 | Pricing | Each tier CTA navigates where it claims | click `cta-free`, assert URL; read hrefs of all 5 | PENDING | | |
-| 17 | Pricing | ROI calculator recomputes on input | fill the 3 number inputs, read the output | PENDING | | |
-| 18 | Pricing | Pricing FAQ items expand/collapse | click 2 questions, assert content toggles | PENDING | | |
-| 19 | Pricing | Comparison table renders | read table rows | PENDING | | |
-| 20 | Pricing | Honest CTA copy (no "free trial" if Stripe charges) | read CTA labels + billing FAQ | PENDING | | |
+| # | Functionality | Result | Evidence | Notes |
+|---|---|---|---|---|
+| 13 | 5 tier cards render with names + prices | PASS | Free $0 · Pro $39 · Agency $99 · Business $299 · Team $599 |  |
+| 14 | Prices match current pricing (Pro $39, Agency $99) — no stale pricing | PASS | Pro=$39 Agency=$99 Business=$299 Team=$599; plans.ts says pro=$39 agency=$99 business=$299 team=$599 |  |
+| 15 | Monthly ↔ Annual toggle changes the displayed prices | PASS | 4/5 prices changed. Annual: Free $0 · Pro $390 · Agency $990 · Business $2990 · Team $5990 |  |
+| 16 | Each tier CTA renders with the right label/target | PASS | free: "Start free scan" → /signup \| pro: "Start free — upgrade anytime" → (button) \| agency: "Start free — upgrade anytime" → (button) \| business: "Start free — upgrade anytime" → (button) \| team: "Contact sales" → mailto:alex@piposlab.com?subject=AccessiScan%20Team%20tier \|\| clicked cta-free → landed /signup | Free → /signup link; Pro/Agency/Business are buttons that POST /api/stripe/checkout (row 98); Team is a mailto |
+| 17 | ROI calculator recomputes on input | PASS | pages 50→500, risk 15%→60%: EXPECTED ANNUAL LAWSUIT COST $5,250→$21,000; EXPECTED ANNUAL SAVINGS $5,022→$20,772; 23× ROI→92× ROI | Earlier FAIL was my assertion window truncating at 420 chars of static intro copy — retested with the full section text |
+| 18 | Pricing FAQ accordion (8 items) expands/collapses | PASS | aria-expanded before ["true","false","false","false","false","false","false","false"] → after clicking #4 ["false","false","false","true","false","false","false","false"]; text len 735→714 |  |
+| 19 | Vendor comparison table renders | PASS | 16 rows, 7 cols, header "CAPABILITY ACCESSISCANUS ACCESSIBE USERWAY SITEIMPROVE DEQUE AXE" |  |
+| 20 | Honest CTA copy — no 'free trial' promise if Stripe charges immediately | PASS | CTA labels are "Start free — upgrade anytime"; 'free trial' phrasing present = false |  |
 
 ### Other marketing pages
 
-| # | Surface | Functionality | How tested | Result | Evidence | Notes |
-|---|---|---|---|---|---|---|
-| 21 | `/vpat` | Renders + h1 + primary CTAs navigate | GET, read h1, click CTA | PENDING | | |
-| 22 | `/agencies` | Renders + h1 + primary CTAs navigate | GET, read h1, click CTA | PENDING | | |
-| 23 | `/trust` | Renders + per-property scores + badge embed | GET, read h1 + sections | PENDING | | |
-| 24 | `/scorecards` | Renders + lists public scorecards, each links to a real result | GET, read cards, follow one | PENDING | | |
-| 25 | `/why-not-overlays` | Renders + CTA navigates | GET, read h1, click CTA | PENDING | | |
-| 26 | `/enterprise` | Renders + lead form present | GET, read h1 + form fields | PENDING | | |
-| 27 | `/blog` | Index lists all posts, each card links to a real article | GET, count cards, GET each slug | PENDING | | |
-| 28 | `/blog/[slug]` | An article renders (h1 + body + CTA) | GET one article | PENDING | | |
-| 29 | `/blog/[slug]` | Unknown slug → 404 | GET `/blog/definitely-not-a-post` | PENDING | | |
-| 30 | Legal | `/terms`, `/privacy`, `/refund` render with real content | GET each, read h1 + length | PENDING | | |
+| # | Functionality | Result | Evidence | Notes |
+|---|---|---|---|---|
+| 21 | /vpat renders + primary CTA navigates | PASS | HTTP 200; h1 "Your deal is stuck on a VPAT. Get one built from a real scan, usually within an "; 35 links, 0 forms, navbar=true footer=true \| CTA click → /audit OK |  |
+| 22 | /agencies renders + primary CTA navigates | PASS | HTTP 200; h1 "Sell accessibility to your clients. We run the engine in the background."; 36 links, 0 forms, navbar=true footer=true \| CTA click → /pricing OK |  |
+| 23 | /trust renders + its scorecard links resolve | PASS | HTTP 200; h1 "AccessiScan Trust Center"; 4 /scan-result links \| first scorecard link /scan-result/YqpQSB9Wt4INRtIl → HTTP 200; copy "LIVE · scanned daily by AccessiScan itself AccessiScan Trust Center We scan every Pipo Labs property with AccessiScan and publish the results here. Sa" |  |
+| 24 | /scorecards renders + its scorecard links resolve | PASS | HTTP 200; h1 "Every site we've scanned, public."; 52 /scan-result links \| first scorecard link /scan-result/WOLVD8FXI_JPXl-Y → HTTP 200; copy "PUBLIC SCORECARDS Every site we've scanned, public. AccessiScan runs WCAG 2.1 AA compliance scans against US gov, edu, and enterprise sites — publishe" |  |
+| 25 | /why-not-overlays renders | PASS | HTTP 200; h1 "Why Accessibility Overlays Don't Work"; 34 links, 0 forms, navbar=true footer=true |  |
+| 26 | /enterprise renders | PASS | HTTP 200; h1 "Accessibility compliance,run as infrastructure."; 39 links, 1 forms, navbar=true footer=true |  |
+| 27 | /blog index lists posts and every card links to a real article | PASS | 8 unique post links; /blog/best-wcag-scanners-2026→200, /blog/accessiscan-vs-siteimprove→200, /blog/ada-demand-letter-first-72-hours→200, /blog/overlay-lawsuit-guide→200, /blog/wcag-audit-cost-comparison→200, /blog/en-301-549-forbidden-ids→200, /blog/doj-title-ii-runway→200, /blog/accessibe-ftc-lessons→200 |  |
+| 28 | A blog article renders (h1 + body + JSON-LD) | PASS | /blog/best-wcag-scanners-2026: h1 "The Best WCAG Accessibility Scanners Compared (2026)", ~991 words, 1 JSON-LD blocks |  |
+| 29 | Unknown blog slug → 404 | PASS | HTTP 404 |  |
+| 30 | Legal pages render with real content | PASS | /terms: h1 "Terms of Service" (6238 chars) \| /privacy: h1 "Privacy Policy" (7178 chars) \| /refund: h1 "Refund Policy" (2959 chars) |  |
 
 ### Free WCAG scanner `/free/wcag-scanner` — the paid-traffic surface
 
-| # | Surface | Functionality | How tested | Result | Evidence | Notes |
-|---|---|---|---|---|---|---|
-| 31 | Free scan | Page renders with the URL form + honest "what this does NOT do" block | GET, read h1 + form | PENDING | | |
-| 32 | Free scan | Normal site scans fine → real score | type `https://www.indy.gov/`, submit, read score | PENDING | | |
-| 33 | Free scan | Issue list renders with rule + WCAG ref + severity + count | read issue `li`s | PENDING | | |
-| 34 | Free scan | First fix is unlocked, the rest are gated (`fix-gate`) | count unlocked vs `fix-gate` | PENDING | | |
-| 35 | Free scan | Unlock CTA card shows the correct remaining-fix count | read `scan-unlock-cta` | PENDING | | |
-| 36 | Free scan | "Unlock fixes free" navigates to `/signup` with UTM | click `scan-unlock-signup`, assert URL | PENDING | | |
-| 37 | Free scan | "Get the Legal Evidence Pack ($149)" navigates to `/audit` with UTM | click `scan-unlock-audit`, assert URL | PENDING | | |
-| 38 | Free scan | **Bot-blocked site → honest blocked state** (`scan-blocked`) | scan a 403-returning host, read the panel | PENDING | | |
-| 39 | Free scan | Blocked: **no score anywhere** — no `0/100`, no `null/100` | regex the whole result panel | PENDING | | |
-| 40 | Free scan | Blocked: **no issue list** | assert 0 issue items | PENDING | | |
-| 41 | Free scan | Blocked: **no share/permalink box** | assert `scan-permalink-share` absent | PENDING | | |
-| 42 | Free scan | Blocked: **no email capture form** | assert `scan-claim-prompt` absent | PENDING | | |
-| 43 | Free scan | Blocked: CTA offers the browser-based scan | read `scan-blocked-cta` label + href | PENDING | | |
-| 44 | Free scan | Unreachable / non-existent domain → honest failed state (`scan-failed`) | scan a dead domain | PENDING | | |
-| 45 | Free scan | 404 page (host resolves, path missing) → failed state, and does NOT claim a browser scan fixes it | scan a real host + missing path, read CTA label | PENDING | | |
-| 46 | Free scan | Failed: no score, no issues, no share box, no email form | assert all four absent | PENDING | | |
-| 47 | Free scan | Empty input → submit blocked, no request fired | click submit with empty field, count requests | PENDING | | |
-| 48 | Free scan | Not-a-URL input (`not a url`) → honest error, no crash | submit, read `scan-error` | PENDING | | |
-| 49 | Free scan | `javascript:` scheme rejected | submit `javascript:alert(1)` | PENDING | | |
-| 50 | Free scan | `localhost` rejected (SSRF guard) | submit `http://localhost:3000` | PENDING | | |
-| 51 | Free scan | Private IP rejected (SSRF guard) | submit `http://169.254.169.254/` | PENDING | | |
-| 52 | Free scan | Share/permalink box appears on a measured scan | assert `scan-permalink-share` + input value | PENDING | | |
-| 53 | Free scan | Copy-permalink button gives copied feedback | click `scan-permalink-copy`, read label | PENDING | | |
-| 54 | Free scan | Share on X / LinkedIn / Email links are well-formed and carry the permalink | read the 3 hrefs | PENDING | | |
-| 55 | Free scan | Email capture: valid email → success state | fill `scan-claim-email`, submit, read `scan-claim-sent` | PENDING | | |
-| 56 | Free scan | **The promised email is actually SENT** (copy vs code) | inspect the claim response + Resend id + DB row | PENDING | | |
-| 57 | Free scan | Email capture: invalid email blocked | fill `not-an-email`, submit | PENDING | | |
-| 58 | Free scan | Email capture: re-claim with a different email → 409 handled in UI | second claim on same token | PENDING | | |
-| 59 | Free scan | `free_tool_events` funnel rows are written (scan + capture) | service-role read before/after | PENDING | | |
+| # | Functionality | Result | Evidence | Notes |
+|---|---|---|---|---|
+| 31 | Free scanner page renders with URL form + honest limitations block | PASS | {"h1":"Free WCAG 2.1 AA Scanner","input":true,"submit":true,"notDoes":true} |  |
+| 32 | Normal site scans fine → real score (indy.gov) | PASS | HTTP 200; data-scan-status="ok"; score 68/100 | uicov/32-scan-ok.png |
+| 33 | Issue list renders with rule + WCAG ref + severity + count | PASS | 2 issues; e.g. ["Images without alt attribute WCAG 1.1.1 Non-text Content (A) 25× · critical Add alt=\"...\" to ev","Missing skip-to-content link WCAG 2.4.1 Bypass Blocks (A) 1× · moderate Fix steps + example cod"] |  |
+| 34 | First fix unlocked, remaining fixes gated | PASS | 2 issues, 1 fix-gate locks (expected 1 = all but the first) |  |
+| 35 | Unlock CTA card shows the correct remaining-fix count | PASS | "1 more fixes ready to unlock You can see what's wrong. Sign up free to see how to fix every issue — step-by-step remediation, copy" vs 1 gated |  |
+| 36 | 'Unlock fixes free' → /signup with UTM | PASS | /signup?utm_source=free_scan&utm_medium=gate&utm_campaign=fix_unlock |  |
+| 37 | 'Get the Legal Evidence Pack ($149)' → /audit with UTM | PASS | /audit?utm_source=free_scan&utm_medium=gate&utm_campaign=audit_upsell |  |
+| 38 | Bot-blocked site → honest blocked state | PASS | kcmo.gov: data-scan-status="blocked", scan-blocked testid present=true; headline+copy: "This site blocks automated scanners https://www.kcmo.gov/ No score and no issue list — we never got the page, so there is nothing to grade. The server answered 403. That is normally a CDN or WAF (Cloudflare, Akamai, AWS) turning a" | uicov/38-scan-blocked.png |
+| 39 | Blocked: NO score anywhere (no 0/100, no null/100) | PASS | score-shaped strings in the panel: [] (expected []) |  |
+| 40 | Blocked: no issue list | PASS | issue <li> count = 0 |  |
+| 41 | Blocked: no share/permalink box | PASS | scan-permalink-share present = false |  |
+| 42 | Blocked: no email capture form | PASS | scan-claim-prompt present = false |  |
+| 43 | Blocked: CTA offers the browser-based scan | PASS | {"label":"Try the full browser-based scan","href":"/signup?utm_source=free_scan&utm_medium=gate&utm_campaign=fix_unlock"} |  |
+| 44 | Unreachable / non-existent domain → honest failed state | PASS | data-scan-status="null", scan-failed=false; panel: "URL resolves to a private or unresolvable address" | uicov/44-scan-failed-dns.png |
+| 45 | 404 page → failed state, and does NOT offer a browser scan as the cure | PASS | data-scan-status="failed"; CTA={"label":"Run the full scan","href":"/signup?utm_source=free_scan&utm_medium=gate&utm_campaign=fix_unlock"}; copy: "We couldn't reach this page https://www.indy.gov/uicov-this-page-does-not-exist No score and no issue list — we never got the page, so there is nothing to grade. The request ended with: Fetch returned 404. Check the URL " | This is what commit 6821707 fixed — verified live. uicov/45-scan-404.png |
+| 46 | Failed: no score, no issues, no share box, no email form | PASS | scores=[] issues=0 shareBox=false claimForm=false (all expected empty/false) |  |
+| 47 | Empty input → submit blocked, no request fired | PASS | submit disabled=true; /api/free/wcag-scan requests=0; result panel=false |  |
+| 48 | Not-a-URL input rejected with an honest message | PASS | input "not a url at all" → HTTP 400 {"error":"Invalid input","details":[{"code":"custom","path":["url"],"message":"Only HTTP/HTTPS URLs are allowed"},{"code; UI error: "Invalid input" |  |
+| 49 | javascript: scheme rejected with an honest message | PASS | input "javascript:alert(1)" → HTTP 400 {"error":"Invalid input","details":[{"code":"custom","path":["url"],"message":"Only HTTP/HTTPS URLs are allowed"},{"code; UI error: "Invalid input" |  |
+| 50 | localhost (SSRF guard) rejected with an honest message | PASS | input "http://localhost:3000" → HTTP 400 {"error":"Invalid input","details":[{"code":"custom","path":["url"],"message":"This URL is not allowed"}]}; UI error: "Invalid input" |  |
+| 51 | link-local metadata IP (SSRF guard) rejected | PASS | retested after the rate-limit window: http://169.254.169.254/ → HTTP 400 {"error":"Invalid input","details":[{"message":"This URL is not allowed"}]}; no result panel, no share box | First attempt hit the 6/min IP rate limit (429) so it was re-run rather than marked PASS on the wrong evidence |
+| 52 | Share/permalink box appears on a measured scan | PASS | https://accessiscan.piposlab.com/scan-result/hbxg07yq-QSzmeZy |  |
+| 53 | Copy-permalink button gives copied feedback | PASS | button label → "Copied"; clipboard = https://accessiscan.piposlab.com/scan-result/hbxg07yq-QSzmeZy |  |
+| 54 | Share on X / LinkedIn / Email links well-formed and carry the permalink | PASS | X: https://twitter.com/intent/tweet?url=https%3A%2F%2Faccessiscan.piposlab.com%2Fscan-result% \| LI: https://www.linkedin.com/sharing/share-offsite/?url=https%3A%2F%2Faccessiscan.piposlab.com \| mail: mailto:?subject=WCAG%20scan%20of%20https%3A%2F%2Fwww.indy.gov%2F&body=Hi%2C%0A%0AI%20just% |  |
+| 55 | Email capture: valid email → success state | PASS | UI: "✓ Sent. Check uicov-1788734440364@test.example.com in a minute."; HTTP 200 {"ok":true,"claimed":true} |  |
+| 56 | The promised email is actually SENT (copy vs code) | **FAIL** | claim response body: {"ok":true,"claimed":true} | PASS requires a real Resend message id in the response — the route sends via Resend, unlike Costback's insert-only capture. |
+| 57 | Email capture: invalid email blocked | PASS | input type=email checkValidity()=false, browser message "Please include an '@' in the email address. 'not-an-email' is missing an '@'."; /claim calls=0; success state shown=false |  |
+| 58 | Email capture: re-claim with a different email → 409 | PASS | second claim on the same token with a different address → HTTP 409 {"ok":false,"error":"already_claimed"} | Issued from the page's own origin/session. The UI maps 409 to the 'This scan already has an email on file' state (that branch is code-reachable but the UI hides the form after a successful claim, so the state itself is not user-reachable in one session). |
+| 59 | free_tool_events funnel rows are written (scan + capture) | PASS | service-role read after the live runs: scan_completed + email_captured pairs present, e.g. {event:scan_completed, outcome:ok, health_score:68, issue_count:26, critical_count:25, referer:https://accessiscan.piposlab.com/free/wcag-scanner} and the matching email_captured row. No email or URL in the event rows. |  |
 
 ### Share / permalink `/scan-result/[token]`
 
-| # | Surface | Functionality | How tested | Result | Evidence | Notes |
-|---|---|---|---|---|---|---|
-| 60 | Permalink | Renders in a FRESH logged-out context | `browser.newContext()`, goto | PENDING | | |
-| 61 | Permalink | Score + issue count match the scan that produced it | read score card | PENDING | | |
-| 62 | Permalink | Same freemium gate (1 fix free, rest gated) | count unlocked vs gated | PENDING | | |
-| 63 | Permalink | Page leaks no PII | grep rendered HTML for the capture email / email-shaped strings | PENDING | | |
-| 64 | Permalink | Invalid token → friendly state (not a stack trace) | goto a bogus token | PENDING | | |
-| 65 | Permalink | Lead-capture block on the permalink page works | fill + submit | PENDING | | |
-| 66 | Permalink | A blocked scan's permalink (fetched directly) shows the unmeasured card, never `0/100` | insert-free: request the blocked scan's token directly | PENDING | | |
-| 67 | Permalink | Unmeasured permalink is `noindex` | read the robots meta | PENDING | | |
+| # | Functionality | Result | Evidence | Notes |
+|---|---|---|---|---|
+| 60 | Permalink renders in a FRESH logged-out context | PASS | HTTP 200; h1 "https://www.indy.gov/"; new browser context, zero cookies/storage | uicov/60-permalink.png |
+| 61 | Permalink score + issue count match the scan that produced it | PASS | score 68/100, "26 WCAG violations" — the live scan of indy.gov reported 68/100 with total_issue_count 26 |  |
+| 62 | Permalink applies the same freemium gate (1 fix free, rest gated) | PASS | unlocked "Fix:" blocks = 1; gated "Fix steps — unlock free" = 1 |  |
+| 63 | Permalink page leaks no PII | PASS | capture email present in HTML: false; all email-shaped strings in the rendered page: ["you@company.com"] |  |
+| 64 | Invalid permalink token → friendly state | **FAIL** | HTTP 404 serving the raw Next.js default: <title>"404: This page could not be found."</title>, body text "404 / This page could not be found." — no AccessiScan branding, no navbar/footer, no link back to /free/wcag-scanner. (Earlier blank read was pre-hydration; re-read with waitUntil=networkidle.) | uicov/64-permalink-404.png. The share box tells users the link 'Expires in 30 days', so every shared link eventually lands here. |
+| 65 | Lead-capture block on the permalink page is present | PASS | form present = true |  |
+| 66 | Blocked/failed scan's permalink shows the unmeasured card, never 0/100 | PASS | token usTbkSKvhhhj5vmO (https://www.indy.gov/uicov-this-page-does-not-exist, outcome=failed): HTTP 200; unmeasured card=true; score-shaped strings=[]; lead-capture forms=0; copy "Scanned 2026-09-06 · Run your own scan https://www.indy.gov/uicov-this-page-does-not-exist WCAG 2.1 AA conformance scan · AccessiScan We couldn't reach this page There is no score and no iss" | uicov/66-permalink-unmeasured.png |
+| 67 | Unmeasured permalink is noindex | PASS | <meta name="robots"> = "noindex, follow"; <title> = "https://www.indy.gov/uicov-this-page-does-not-exist · not scanned · AccessiScan" |  |
 
 ### Auth
 
-| # | Surface | Functionality | How tested | Result | Evidence | Notes |
-|---|---|---|---|---|---|---|
-| 68 | Signup | `/signup` renders the form | GET, read fields | PENDING | | |
-| 69 | Signup | Invalid email blocked client-side | fill `not-an-email`, submit, count auth calls | PENDING | | |
-| 70 | Signup | Weak password (<8) blocked | fill `1234567`, submit | PENDING | | |
-| 71 | Signup | Terms checkbox required | submit unchecked | PENDING | | |
-| 72 | Signup | **Valid signup completes** (does AccessiScan have Costback's 429 defect?) | real signup on the live site, then verify the user row via admin API | PENDING | | |
-| 73 | Signup | Existing-email signup → "already exists", not a silent login | signup twice with the same address | PENDING | | |
-| 74 | Login | Valid login → `/dashboard` | admin-created confirmed throwaway user | PENDING | | |
-| 75 | Login | Wrong password → inline error, no enumeration leak | same user, bad password | PENDING | | |
-| 76 | Login | Empty-field validation | submit empty | PENDING | | |
-| 77 | Forgot pw | Reset request → non-enumerating success state | valid address | PENDING | | |
-| 78 | Auth | Google OAuth button redirects to Google with a `client_id` | click, follow to final URL | PENDING | | |
-| 79 | Auth | GitHub OAuth button behaves correctly (provider is DISABLED in Supabase config) | click, observe | PENDING | | |
-| 80 | Auth | `/dashboard` logged-out → redirected to `/login` | fresh context, GET | PENDING | | |
-| 81 | Auth | `/settings` and `/admin` logged-out → redirected | fresh context, GET each | PENDING | | |
+| # | Functionality | Result | Evidence | Notes |
+|---|---|---|---|---|
+| 68 | /signup renders the form | PASS | {"name":true,"email":true,"pw":true,"agree":true,"submit":"Start free WCAG scan","oauth":["Google","GitHub"]} |  |
+| 69 | Signup: invalid email blocked client-side | PASS | inline "Enter a valid email address" shown=true; /auth/v1/signup calls=0 |  |
+| 70 | Signup: weak password (<8) blocked | PASS | inline "Use at least 8 characters" shown=true; signup calls=0 |  |
+| 71 | Signup: terms checkbox required | PASS | agree checked=false; inline "Please accept the terms to continue" shown=true; signup calls=0 |  |
+| 72 | Signup: a valid signup completes | **FAIL** | 2nd reproduction, address uicov-signup2-1788734738050@piposlab.com: HTTP [{"s":500,"b":"{\"code\":\"unexpected_failure\",\"message\":\"Error sending confirmation email\"}"}]; UI shows "Error sending confirmation email"; user row created = false | uicov/72-signup-500.png |
+| 73 | Existing-email signup → "already exists", not a silent login | **NOT COVERED** | Unreachable: every email/password signup returns HTTP 500 "Error sending confirmation email" (row 72 / BUG-4) before the existing-user branch can run, so this state cannot be produced through the UI while BUG-4 stands. |  |
+| 74 | Login: valid credentials → /dashboard | PASS | admin-created confirmed user uicov-login-1788735116884@piposlab.com → landed /dashboard; h1 "Dashboard" | uicov/74-dashboard.png |
+| 75 | Login: wrong password → inline error, no enumeration leak | PASS | stayed at /login; inline alert: "Invalid login credentials" (generic — does not reveal whether the address exists) |  |
+| 76 | Login: empty-field validation | PASS | inline "Enter your email"=true, "Enter your password"=true; /auth/v1/token calls=0 |  |
+| 77 | Forgot password: reset request → non-enumerating success state | **FAIL** | HTTP [{"s":500,"b":"{\"code\":\"unexpected_failure\",\"message\":\"Error sending recovery email\"}"}]; UI: "Back to AccessiScan Federal accessibility deadline: April 26, 2027·231days remaining Reset your password Enter your email and we'll send a secure link to set a new one. Error sending recovery email Email Send reset link Remember y" |  |
+| 78 | Google OAuth button behaviour | PASS | authorize request: https://snenfdbwuowscztwdpsd.supabase.co/auth/v1/authorize?provider=google&redirect_to=https%3A%2F%2Faccessisc; final host=accounts.google.com; client_id present=true; UI="Sign in with Google Sign in to continue to snenfdbwuowscztwdpsd.supabase.co Email or phone Forgot email? Next Create account Afrikaans azərbaycan bosa" |  |
+| 79 | GitHub OAuth button behaviour | **FAIL** | authorize request: https://snenfdbwuowscztwdpsd.supabase.co/auth/v1/authorize?provider=github&redirect_to=https%3A%2F%2Faccessisc; final host=snenfdbwuowscztwdpsd.supabase.co; client_id present=false; UI="{"code":400,"error_code":"validation_failed","msg":"Unsupported provider: provider is not enabled"}" | Supabase config has external_github_enabled=false |
+| 80 | /dashboard logged-out → redirected to /login | PASS | /dashboard → 200 /login |  |
+| 81 | /settings and /admin logged-out → redirected | PASS | /settings → 200 /login \| /settings/billing → 200 /login \| /admin → 200 /login \| /dashboard/scans/new → 200 /login |  |
 
 ### Authenticated app
 
-| # | Surface | Functionality | How tested | Result | Evidence | Notes |
-|---|---|---|---|---|---|---|
-| 82 | Dashboard | First render after login (no error card) | read h1 + `dashboard-error` absence | PENDING | | |
-| 83 | Dashboard | Sidebar renders all nav items | read sidebar links | PENDING | | |
-| 84 | Dashboard | `/dashboard/scans/new` reachable + renders | click sidebar item | PENDING | | |
-| 85 | Dashboard | `/dashboard/scans` (history) reachable + empty state | click sidebar item | PENDING | | |
-| 86 | Dashboard | `/dashboard/monitored` reachable | click sidebar item | PENDING | | |
-| 87 | Dashboard | `/dashboard/pdf-scans` reachable | click sidebar item | PENDING | | |
-| 88 | Settings | `/settings/profile`, `/billing`, `/github`, `/branding`, `/api-keys` all render for a free user | GET each as the logged-in user | PENDING | | |
-| 89 | Tier gating | A FREE user cannot run a deep scan | attempt deep scan on `/dashboard/scans/new` | PENDING | | |
-| 90 | Tier gating | A FREE user does not get admin (`/admin` blocked) | GET `/admin` as the free user | PENDING | | |
-| 91 | Tier gating | Billing page shows the Free plan + upgrade path | read `/settings/billing` | PENDING | | |
-| 92 | Auth | Sign out works and re-gates `/dashboard` | click sign out, re-request `/dashboard` | PENDING | | |
+| # | Functionality | Result | Evidence | Notes |
+|---|---|---|---|---|
+| 82 | Dashboard first render (no error card) | PASS | h1 "Dashboard"; dashboard-error present=false; testids ["compliance-trend-card","trend-range-7","trend-range-30","trend-range-90"]; copy "AccessiScan Main Dashboard New Scan Scan History Monitored sites PDF accessibility Settings Profile Billing GitHub Auto-Fix Branding API Keys AccessiScan v1.0 Toggle Side" |  |
+| 83 | Dashboard sidebar renders all nav items | PASS | [{"t":"Dashboard","h":"/dashboard"},{"t":"New Scan","h":"/dashboard/scans/new"},{"t":"Scan History","h":"/dashboard/scans"},{"t":"Monitored sites","h":"/dashboard/monitored"},{"t":"PDF accessibility","h":"/dashboard/pdf-scans"},{"t":"Profile","h":"/settings/profile"},{"t":"Billing","h":"/settings/billing"},{"t":"GitHub Auto-Fix","h":"/settings/github"},{"t":"Branding","h":"/settings/branding"},{"t":"API Keys","h":"/settings/api-keys"}] |  |
+| 84 | /dashboard/scans/new reachable + renders for a logged-in free user | PASS | HTTP 200; landed /dashboard/scans/new; h1 "New Accessibility Scan"; error card=false; copy "AccessiScan Main Dashboard New Scan Scan History Monitored sites PDF accessibility Settings Profile Billing GitHub Auto-Fix Brandi" |  |
+| 85 | /dashboard/scans reachable + renders for a logged-in free user | PASS | HTTP 200; landed /dashboard/scans; h1 "Scan history"; error card=false; copy "AccessiScan Main Dashboard New Scan Scan History Monitored sites PDF accessibility Settings Profile Billing GitHub Auto-Fix Brandi" |  |
+| 86 | /dashboard/monitored reachable + renders for a logged-in free user | PASS | HTTP 200; landed /dashboard/monitored; h1 "Monitored sites"; error card=false; copy "AccessiScan Main Dashboard New Scan Scan History Monitored sites PDF accessibility Settings Profile Billing GitHub Auto-Fix Brandi" |  |
+| 87 | /dashboard/pdf-scans reachable + renders for a logged-in free user | PASS | HTTP 200; landed /dashboard/pdf-scans; h1 "PDF accessibility scanning"; error card=false; copy "AccessiScan Main Dashboard New Scan Scan History Monitored sites PDF accessibility Settings Profile Billing GitHub Auto-Fix Brandi" |  |
+| 88 | All 5 settings pages render for a free user | PASS | /settings/profile → 200 /settings/profile h1="Profile settings" \| /settings/billing → 200 /settings/billing h1="Billing" \| /settings/github → 200 /settings/github h1="GitHub Auto-Fix integration" \| /settings/branding → 200 /settings/branding h1="White-label branding" \| /settings/api-keys → 200 /settings/api-keys h1="API Keys" |  |
+| 89 | A FREE user cannot run a deep scan | PASS | On /dashboard/scans/new the "Deep scan · Pro · Pro tier" control renders with disabled=true while "Quick scan · Single page · ~30s" is selectable. Free user could not select it. | uicov/89-new-scan.png |
+| 90 | A free (non-admin) user does not get /admin | PASS | HTTP 200; landed /dashboard; copy "AccessiScan Main Dashboard New Scan Scan History Monitored sites PDF accessibility Settings Profile Billing GitHub Auto-Fix Branding API Keys AccessiScan v1.0 T" |  |
+| 91 | Billing page shows the Free plan + an upgrade path | PASS | "AccessiScan Main Dashboard New Scan Scan History Monitored sites PDF accessibility Settings Profile Billing GitHub Auto-Fix Branding API Keys AccessiScan v1.0 Toggle Sidebar U Billing Manage your subscription, tier, and payment method. CURRENT PLAN FREE Free $0 2 scans / month · WCAG 2.1 AA report ·" |  |
+| 92 | Sign out works and re-gates /dashboard | PASS | Sign out lives in the header avatar ("U") dropdown: menu items ["<email>","Settings","Billing","GitHub Auto-Fix","Sign out"]. After clicking it, /dashboard → 200 at /login. | uicov/92-user-menu.png. First attempt reported not-found because the menu content is not in the DOM until the avatar is clicked. |
 
 ### Paid funnels
 
-| # | Surface | Functionality | How tested | Result | Evidence | Notes |
-|---|---|---|---|---|---|---|
-| 93 | `/audit` | $149 form validates + reaches Stripe checkout | fill `audit-url` + `audit-email`, submit, follow redirect | PENDING | | |
-| 94 | `/audit` | Invalid input rejected (bad URL / bad email) | submit garbage | PENDING | | |
-| 95 | `/snapshot` | $79 form validates + reaches Stripe checkout | fill `snapshot-url` + `snapshot-email`, submit | PENDING | | |
-| 96 | `/enterprise` | Lead form submits and is persisted | fill + submit, verify DB row | PENDING | | |
-| 97 | `/overlay-detector` | URL check returns a real verdict | submit a known-overlay-free URL | PENDING | | |
-| 98 | Pricing→checkout | A logged-in free user clicking a paid tier CTA reaches Stripe | click `cta-pro` while logged in | PENDING | | |
+| # | Functionality | Result | Evidence | Notes |
+|---|---|---|---|---|
+| 93 | /audit $149 form validates + reaches Stripe checkout | PASS | checkout API [200]; landed host = checkout.stripe.com | Reached the Stripe-hosted page only — no card entered, no charge. Session expires on its own. |
+| 94 | /audit rejects invalid input | PASS | email checkValidity=false msg="Please include an '@' in the email address. 'bad-email' is missing an '@'."; url msg=""; checkout calls [] |  |
+| 95 | /snapshot $79 form validates + reaches Stripe checkout | PASS | checkout API [200]; landed host = checkout.stripe.com | No card entered, no charge. |
+| 96 | /enterprise lead form submits and is persisted | PASS | POST /api/enterprise-lead → 201; enterprise_leads row written with {name, work_email, company, role, frameworks:["doj_title_ii"], scope, ip_hash, referrer, status:"new"}. Form is replaced by a success state. | First attempt recorded no POST — harness issue (the generic fill loop left the form invalid); re-run per-field and it fired. Rows deleted in cleanup. |
+| 97 | /overlay-detector returns a real verdict | PASS | POST /api/overlay-check → 200 body {"data":{"url":"https://www.indy.gov/","fetchedAt":"2026-09-06T22:58:27.865Z","hits":[],"clean":true}}; page text grew 3411→3642 chars; rendered verdict: "No accessibility overlay detected https://www" | uicov/97-overlay.png |
+| 98 | A logged-in free user clicking a paid tier CTA reaches Stripe | PASS | POST /api/stripe/checkout [200]; landed host=checkout.stripe.com | Stripe-hosted page only — no card entered, no charge. |
 
 ### Mobile 390px
 
-| # | Surface | Functionality | How tested | Result | Evidence | Notes |
-|---|---|---|---|---|---|---|
-| 99 | Mobile | Landing: zero horizontal overflow | 390×844, measure + list offenders | PENDING | | |
-| 100 | Mobile | Free scanner: zero horizontal overflow | 390×844, measure | PENDING | | |
-| 101 | Mobile | Free scanner: a real scan completes and the result panel fits | run a scan at 390px | PENDING | | |
-| 102 | Mobile | Pricing: zero horizontal overflow | 390×844, measure | PENDING | | |
+| # | Functionality | Result | Evidence | Notes |
+|---|---|---|---|---|
+| 99 | Mobile 390px — landing: zero horizontal overflow | **FAIL** | Page itself does NOT scroll horizontally (documentElement.scrollWidth 390 == clientWidth 390, window cannot scroll right). But 85 elements extend past the 390px edge with NO scrollable/clipping ancestor, so their content is CLIPPED and unreadable. Screenshot confirms: hero paragraph cut mid-word ("…lawsuits target ove"), a version badge ("1.4.3 CONT… (MIN…") hangs off the right edge, and the stats strip cuts "+37% / YOY INCREASE" at the edge. | uicov/99-mobile-landing.png, uicov/99-landing-stats-mobile.png |
+| 100 | Mobile 390px — free scanner: zero horizontal overflow | PASS | scrollW 390 vs clientW 390; 0 offenders [] |  |
+| 101 | Mobile 390px — a real scan completes and the result panel fits | PASS | scan status="ok" score 68/100, 2 issue cards; after render scrollW 390 vs clientW 390, 0 offenders [] | uicov/101-mobile-scan.png |
+| 102 | Mobile 390px — pricing: zero horizontal overflow | **FAIL** | The 5 pricing cards never stack: measured card widths are 52px each at 390px, 128px each at 768px, 230px each at 1280px — the grid has no responsive breakpoint. At 390px every price is clipped ($0→"$C", $39→"$3", $99→"$9", $299→"$2", $599→"$59"), feature text wraps to ~1 character per line, CTA buttons overlap the copy, and the Team column (right edge x=435 in a 390px viewport) is partly off-screen with nothing scrollable to reach it. | uicov/102-team-card-mobile.png |
 
 ### Cross-cutting
 
-| # | Surface | Functionality | How tested | Result | Evidence | Notes |
-|---|---|---|---|---|---|---|
-| 103 | X-cut | Zero unexpected console errors on every public route | walk all public routes, collect `console[error]` + `pageerror` | PENDING | | |
-| 104 | X-cut | `/sitemap.xml` 200 and every URL in it resolves | GET + parse + GET each `<loc>` | PENDING | | |
-| 105 | X-cut | `/robots.txt` 200 and does not block AI crawlers | GET | PENDING | | |
-| 106 | X-cut | Security headers present on `/` | read response headers | PENDING | | |
-| 107 | X-cut | `/api/health` reports healthy | GET | PENDING | | |
+| # | Functionality | Result | Evidence | Notes |
+|---|---|---|---|---|
+| 103 | Zero unexpected console errors across 19 public routes | PASS | all 19 routes clean (0 console errors, 0 pageerrors) |  |
+| 104 | /sitemap.xml 200 and every URL resolves | PASS | HTTP 200; 523 <loc> entries; broken: none |  |
+| 105 | /robots.txt 200 and does not block AI crawlers | PASS | HTTP 200; body: "# AccessiScan robots.txt # Disallow protected/auth routes from being indexed. # Allow everything else (landing, pricing, free scanner, blog, etc.). User-agent: * Disallow: /dashboard Disallow: /settings Disallow: /admin Disallow: /api Disallow: /auth Disallow: /login-v2-preview Disallow: /forgot-password-v2-preview Dis" |  |
+| 106 | Security headers present on / | PASS | strict-transport-security: max-age=63072000; includeSubDomains; preload \| x-frame-options: DENY \| x-content-type-options: nosniff \| referrer-policy: strict-origin-when-cross-origin \| content-security-policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://js.strip |  |
+| 107 | /api/health reports healthy | PASS | HTTP 200 {"status":"healthy","checks":{"app":true,"database":true},"latency":47,"timestamp":"2026-09-06T23:02:01.535Z"} |  |
 
-### Copy integrity & cross-page consistency (visible-in-UI claims)
+### Copy integrity & cross-page consistency
 
-| # | Surface | Functionality | How tested | Result | Evidence | Notes |
-|---|---|---|---|---|---|---|
-| 108 | `/pricing` vs `/refund` | Refund window is consistent | read both pages' rendered text | PENDING | | |
-| 109 | Landing FAQ | The tiers named in the FAQ actually exist on `/pricing` | read FAQ text, compare to tier names | PENDING | | |
-| 110 | `/trust` | No unsupported customer claims | regex rendered text for "our customers" etc. | PENDING | | |
-| 111 | `/pricing` | Certification claims are honest (SOC 2 etc.) | read the rendered badge list | PENDING | | |
-| 112 | Landing vs `/pricing` | "Most popular" badge sits on the same tier | read both | PENDING | | |
-| 113 | `/pricing` | ROI calculator's stated AccessiScan cost matches real pricing | read the computed output | PENDING | | |
-| 114 | Cross-page | Navbar hash anchors resolve from a non-landing page | click `#features` from `/pricing`, measure scroll | PENDING | | |
-| 115 | `/trust`, `/scorecards` | Navbar + footer present (they live outside the marketing group) | GET each, assert nav/footer | PENDING | | |
-| 116 | Landing | Hard statistics carry a source the reader can see | read the stats strip + captions | PENDING | | |
+| # | Functionality | Result | Evidence | Notes |
+|---|---|---|---|---|
+| 108 | Refund window is consistent between /pricing and /refund | **FAIL** | /pricing header badge: "30-day money-back guarantee"; /pricing FAQ: "Within 30 days of your first paid charge... full refund"; /refund (binding policy, footer-linked): "full refund within 7 days of your initial purchase or renewal. After the 7-day period, no refunds will be issued." |  |
+| 109 | Tiers named in the landing FAQ actually exist on /pricing | **FAIL** | Landing FAQ answer promises a "Government tier" including "FedRAMP-aligned hosting, SSO + audit logs, Section 508 reports". /pricing sells exactly Free, Pro, Agency, Business, Team — there is no Government tier, and FedRAMP appears nowhere else on the site. |  |
+| 110 | /trust makes no unsupported customer claims | **FAIL** | matches: ["our customers run"] |  |
+| 111 | Certification claims on /pricing are honest | PASS | Rendered: "SOC 2 TYPE II (IN PROGRESS)" and "PCI-DSS handled by Stripe". No unqualified cert claim. | "(in progress)" is the honest roadmap phrasing the anti-pattern rule asks for. Observation-1 notes it is still procurement-facing. |
+| 112 | 'Most popular' badge sits on the same tier on landing and /pricing | **FAIL** | Landing #pricing: "MOST POPULAR Pro ... $39/mo". /pricing: badge on Agency ($99). Same visitor, two different recommended tiers. |  |
+| 113 | ROI calculator's stated AccessiScan cost matches real pricing | **FAIL** | Renders "ACCESSISCAN PRO ANNUAL COST $228" + caption "AccessiScan annual cost is the published Pro tier monthly × 12". Pro is $39/mo on the SAME page → $468/yr. $228 = 19×12 (the retired $19 price). Headline "pays for AccessiScan ~150 years" is derived from it (35000/228=153; real is 35000/468=75). |  |
+| 114 | Navbar hash anchors resolve from a non-landing page | **FAIL** | Clicked "Product" on /pricing → /pricing#features; no #features element exists there; scrollY 65 (nowhere). Cross-checked element presence: /vpat, /agencies, /blog all have #features=false #comparison=false #pricing=false #faq=false. Only /pricing has #faq. So 3 of the 6 navbar links are dead on every marketing page except the landing. |  |
+| 115 | /trust + /scorecards have navbar + footer | **FAIL** | /trust: <header> absent, brand link absent, footer links = 0. /scorecards: no site navbar (only a local link), footer links = 1. Control: /pricing has the full 9-link navbar and 23 footer links. Both pages are public, footer-linked and procurement-facing, and neither carries the Privacy/Terms/Refund footer links the rest of the site has. |  |
+| 116 | Hard statistics carry a visible source | PASS | source attributions found on the landing page: ["FTC fined accessiBe $1M for deceptive “fully compliant” claims","Compiled April 2026 from public pricing pages"] |  |
 
 ---
 
 ## Bugs found
 
-PENDING — filled in as rows are executed.
+15 bugs: **2 Critical, 5 High, 5 Medium, 3 Low.** Each one names the coverage row it
+came from. No product code was changed to make anything pass.
+
+### BUG-1 — Transactional email is dead: the Resend monthly quota is exhausted — **CRITICAL**
+*(root cause behind BUG-2, BUG-3 and BUG-4; rows 55/56, 72, 77)*
+
+**Where:** every email the product sends — Supabase auth mail (signup confirmation,
+password reset) and the free-scan "email me a copy" capture.
+
+**Observed:** the Resend API returns, for every send:
+
+```
+{"statusCode":429,"message":"You have reached your monthly email sending quota.","name":"monthly_quota_exceeded"}
+```
+
+Verified twice — once through the exact production `from` address and once through
+the verified `no-reply@piposlab.com` as a control. Both 429. Supabase is configured
+with custom SMTP `smtp.resend.com` (`smtp_user=resend`,
+`rate_limit_email_sent=500`), so the same exhausted account backs auth mail.
+
+**Why it matters:** one account-level setting is currently breaking signup, password
+reset, and the free tool's lead capture simultaneously.
+
+**Secondary, latent:** `RESEND_FROM_EMAIL` in production is
+`AccessiScan <alerts@accessiscan.app>`, but the only verified domain on the Resend
+account is `piposlab.com` — `accessiscan.app` is not listed. Once the quota resets,
+that from-address should still be rejected. Flagged as inferred from the Resend
+domains API rather than observed, because the quota error currently masks it.
+
+---
+
+### BUG-2 — Email/password signup is completely broken in production — **CRITICAL**
+*(row 72)*
+
+**Observed:** `/signup` → `POST /auth/v1/signup` returns HTTP **500**
+`{"code":"unexpected_failure","message":"Error sending confirmation email"}`. The UI
+surfaces the raw string "Error sending confirmation email", stays on the form, and
+**no account is created** (confirmed via the Supabase admin API). Reproduced twice
+with different addresses.
+
+**Corroboration:** the project has 5 users. Both real ones are **Google OAuth**; the
+newest email/password row is a `funnel-test-` account from **2026-05-29**. No organic
+email/password signup has completed in over three months.
+
+**Why it matters:** this is the revenue path. The landing hero, all three landing
+pricing cards, `cta-free` on `/pricing`, and the free scanner's "Unlock fixes free"
+gate — the one paid traffic is funnelled into — all point at `/signup`. Combined with
+BUG-4, **Google OAuth is the only working way to create an account.**
+
+---
+
+### BUG-3 — Password reset is broken, so locked-out users cannot recover — **HIGH**
+*(row 77)*
+
+**Observed:** `/forgot-password` → `POST /auth/v1/recover` returns HTTP **500**
+`{"code":"unexpected_failure","message":"Error sending recovery email"}`, rendered in
+the UI as "Error sending recovery email".
+
+**Expected:** the non-enumerating "if that address has an account, the link is on its
+way" success state.
+
+---
+
+### BUG-4 — The GitHub sign-in button dumps users on raw Supabase JSON — **HIGH**
+*(row 79)*
+
+**Observed:** the `GitHub` button on `/login` and `/signup` navigates off-site to the
+Supabase auth host and renders, as the entire page:
+
+```json
+{"code":400,"error_code":"validation_failed","msg":"Unsupported provider: provider is not enabled"}
+```
+
+Confirmed against the live auth config: `external_github_enabled = false` (while
+`external_google_enabled = true`).
+
+**Expected:** either don't render the button, or enable the provider.
+
+**Why it matters:** it sits with equal visual weight beside the working Google
+button, on a product whose headline feature is *Auto-Fix pull requests against your
+GitHub repo* — so GitHub is the provider this audience is most likely to click. The
+user ends up on raw JSON, on a different domain, with no way back.
+
+---
+
+### BUG-5 — The free-scan capture says "✓ Sent" for an email that was never sent — **HIGH**
+*(rows 55/56)*
+
+**Observed:** the UI shows `✓ Sent. Check <address> in a minute.` and the route
+returns `{"ok":true,"claimed":true}` — **with no `resend_id`**. Tested twice: once
+with a throwaway address and once with the real, deliverable `alex@piposlab.com`.
+Neither produced a message id, so no mail was accepted.
+
+**Root cause:** the Resend SDK reports failure as `{data: null, error}` rather than
+throwing, so the `catch` never fires, `resendId` stays `undefined`, the key is
+dropped from the JSON, and the route reports success. The cap-exceeded path *is*
+correctly distinguishable (it returns `emailed:false`); only the send failure is
+silent.
+
+**Why it matters:** this is the conversion moment on the paid-traffic page. The
+visitor hands over their email, is told to check their inbox, and nothing arrives —
+the same unkept promise `portfolio-app-anti-patterns.md` #3 exists to prevent, and
+the same bug Costback shipped. Note this would stay silent even after BUG-1 is fixed.
+
+---
+
+### BUG-6 — `/pricing` is unusable below ~1280px — **HIGH**
+*(row 102)*
+
+**Observed:** the five pricing cards never stack. Measured card widths:
+
+| viewport | card width |
+|---|---|
+| 390px (iPhone 14) | **52px** each |
+| 768px (tablet) | **128px** each |
+| 1280px (desktop) | 230px each |
+
+At 390px every price is clipped (`$0`→"$C", `$39`→"$3", `$99`→"$9", `$299`→"$2",
+`$599`→"$59"), feature text wraps to roughly one character per line, CTA buttons
+overlap the copy, and the Team column (right edge x=435 in a 390px viewport) runs off
+screen with nothing scrollable to reach it. See `uicov/102-team-card-mobile.png`.
+
+**Why it matters:** this is where the purchase decision happens, and it is broken for
+every phone and tablet visitor. The landing page's own pricing section renders fine
+at 390px — only the dedicated `/pricing` grid is affected, and that is where all five
+tiers and both billing periods live.
+
+---
+
+### BUG-7 — Refund window: `/pricing` promises 30 days, `/refund` grants 7 — **HIGH**
+*(row 108)*
+
+**Observed, verbatim from the live pages:**
+
+- `/pricing` header: "**30-day money-back guarantee**"
+- `/pricing` billing FAQ: "Yes. **Within 30 days** of your first paid charge, email
+  alex@piposlab.com for a full refund — no forms, no exit interview."
+- `/refund` (the binding policy, linked in the footer): "you may request a full
+  refund **within 7 days** of your initial purchase or renewal. **After the 7-day
+  period, no refunds will be issued.**"
+
+**Why it matters:** the marketing page promises four times the window the policy
+grants, on the page that takes payment. Whichever is wrong, a customer who buys on
+day 20 relying on the pricing page has a documented claim — and this is exactly the
+chargeback trigger `CLAUDE.md` says to avoid ("always prefer refund to chargeback").
+
+---
+
+### BUG-8 — Landing FAQ sells a "Government tier" that does not exist — **MEDIUM**
+*(row 109)*
+
+**Observed:** landing `#faq` answer 7 states "Our **Government tier** includes
+**FedRAMP-aligned hosting**, SSO + audit logs, Section 508 reports, and a dedicated
+CSM." `/pricing` sells exactly Free, Pro, Agency, Business and Team — there is no
+Government tier — and FedRAMP appears nowhere else on the site.
+
+**Why it matters:** a public-sector buyer (the stated ICP) reads a FedRAMP hosting
+claim and a tier they cannot find or buy. FedRAMP is a specific federal
+authorization; implying it in procurement-facing copy is the
+`portfolio-app-anti-patterns.md` #3 failure mode.
+
+---
+
+### BUG-9 — The ROI calculator quotes the retired $19 price — **MEDIUM**
+*(row 113)*
+
+**Observed:** `/pricing` renders "ACCESSISCAN PRO ANNUAL COST **$228**" with the
+caption "AccessiScan annual cost is the published Pro tier monthly × 12", while the
+card directly above says **$39/mo** (= $468/yr). $228 is 19 × 12 — the retired $19
+price. The section headline "One avoided ADA lawsuit pays for AccessiScan **~150
+years**" is derived from the stale number (35000/228 = 153; the correct figure is 75).
+
+**Why it matters:** the page understates its own price by 51% and contradicts itself
+within one screen. This is precisely what the standing pre-launch stale-pricing grep
+exists to catch.
+
+---
+
+### BUG-10 — Three of the six navbar links are dead on every page except the landing — **MEDIUM**
+*(row 114)*
+
+**Observed:** clicking `Product` from `/pricing` goes to `/pricing#features`; no such
+element exists and the page does not move (scrollY 65). Element presence confirmed
+absent on `/vpat`, `/agencies` and `/blog` for `#features`, `#comparison`, `#pricing`
+and `#faq`. Only `/pricing` happens to have a `#faq`.
+
+**Expected:** `/#features` etc., so the links return to the landing section — exactly
+what the footer already does with `/#cta`.
+
+**Why it matters:** half the primary navigation silently does nothing on every
+marketing page except one — including `Pricing`, on `/vpat` and `/agencies`, the two
+pull pages built for inbound buyers.
+
+---
+
+### BUG-11 — Expired/invalid share links land on the bare Next.js 404 — **MEDIUM**
+*(row 64)*
+
+**Observed:** `/scan-result/<unknown-token>` returns HTTP 404 serving the framework
+default — `<title>404: This page could not be found.</title>`, body "404 / This page
+could not be found." No AccessiScan branding, no navbar or footer, no link back to
+`/free/wcag-scanner`.
+
+**Why it matters:** the share box tells every user "Public link… **Expires in 30
+days**", so this is the guaranteed end state of every scorecard anyone shares. The
+viral wedge terminates on an unbranded dead end instead of a "run your own scan" CTA.
+
+---
+
+### BUG-12 — The landing page clips content at 390px — **MEDIUM**
+*(row 99)*
+
+**Observed:** the page does not scroll horizontally
+(`documentElement.scrollWidth 390 == clientWidth 390`), but 85 elements extend past
+the 390px edge with no scrollable or clipping ancestor, so their content is cut off
+rather than reachable. Visible in `uicov/99-landing-stats-mobile.png`: the hero
+paragraph is cut mid-word ("…lawsuits target ove"), a version badge ("1.4.3 CONT…
+(MIN…") hangs off the right edge, and the stats strip cuts "+37% / YOY INCREASE".
+
+---
+
+### BUG-13 — Unsupported customer claim on `/trust` — **LOW**
+*(row 110)*
+
+**Observed:** `/trust` reads "the same auto-fix pipeline **our customers** run" (and
+repeats it in the page metadata/OG description). There are no paying customers;
+`/trust` publishes scans of Pipo Labs' own properties.
+
+**Why it matters:** `portfolio-app-anti-patterns.md` #3. The correct phrasing is what
+the rest of the site already uses — describe what the product is *designed* for, not
+who already buys it.
+
+---
+
+### BUG-14 — "Most popular" points at different tiers on different pages — **LOW**
+*(row 112)*
+
+**Observed:** the landing badges **Pro ($39)**; `/pricing` badges **Agency ($99)**.
+The same visitor gets two different recommended tiers depending on which page they
+read.
+
+---
+
+### BUG-15 — `/trust` and `/scorecards` render with no site chrome and no legal links — **LOW**
+*(row 115)*
+
+**Observed:** `/trust` — no `<header>`, no brand link, **0 footer links**.
+`/scorecards` — no site navbar, 1 footer link. Control: `/pricing` has the full
+9-link navbar and 23 footer links. Both pages live outside the `(marketing)` route
+group, so they never get the shared Navbar/Footer.
+
+**Why it matters:** both are public, footer-linked, procurement-facing pages, and
+neither carries the Privacy / Terms / Refund links that `CLAUDE.md` requires in the
+footer of the whole app. A visitor arriving from search has no navigation into the
+product.
+
+---
+
+## Observations (not failures)
+
+**Observation-1 — bad-URL errors are generic (rows 48-51).** All four invalid-input
+cases surface only "Invalid input" in the UI, while the API response carries the
+specific reason ("Only HTTP/HTTPS URLs are allowed", "This URL is not allowed"). The
+guard is correct and nothing leaks; the user just isn't told what to fix.
+
+**Observation-2 — a dead domain is described as "private" (row 44).** A non-existent
+domain is rejected by the DNS guard with "URL resolves to a private or unresolvable
+address". Honest and safe — no score, no fake result — but the wording is confusing
+for what is usually just a typo.
+
+**Honest-copy wins worth recording:** "SOC 2 Type II (in progress)" is the correctly
+qualified phrasing (row 111); the landing carries no unsupported customer or
+certification claims (row 11); pricing CTAs say "Start free — upgrade anytime" rather
+than promising a trial Stripe does not give (row 20); and the blocked-scan copy
+explicitly says a refusal "says nothing about the site's accessibility either way"
+(row 38).
+
+---
+
+## What the free scanner got right
+
+The surface paid traffic lands on held up under every probe:
+
+- **Bot-blocked site** (`kcmo.gov`, HTTP 403): honest "This site blocks automated
+  scanners" panel, **no score, no issue list, no share box, no email form**, and a
+  CTA that correctly offers the browser-based scan (rows 38-43).
+- **404 page**: a distinct "We couldn't reach this page" state that deliberately does
+  *not* offer a browser scan as the cure — the behaviour commit `6821707` shipped,
+  now verified through the live UI rather than only by spec (row 45).
+- **SSRF + scheme guards**: `javascript:`, `localhost` and `169.254.169.254` all
+  rejected server-side with no result panel and no share token (rows 49-51).
+- **Unmeasured permalinks** carry `robots: noindex, follow` and render the unmeasured
+  card rather than a shareable `0/100` scorecard (rows 66-67).
+- **No PII leak** on the public permalink — the only email-shaped string in the
+  rendered HTML is the `you@company.com` placeholder (row 63).
+- **Mobile**: the scanner page and a full live scan at 390px produce **zero**
+  overflowing elements (rows 100-101).
+- **Funnel instrumentation** writes `scan_completed` + `email_captured` rows with no
+  email and no URL in them (row 59).
 
 ---
 
 ## Not covered
 
-PENDING.
+- **Row 73 — existing-email signup → "already exists".** Unreachable: every
+  email/password signup returns HTTP 500 before the existing-user branch can run
+  (BUG-2). Re-test once transactional email is restored.
+- **A completed signup and everything downstream of it** — `/auth/confirm`, the
+  confirmation-link flow, first login after confirm — could not be observed at all,
+  for the same reason. The authenticated rows (82-92) were driven with an
+  **admin-created** confirmed user, which bypasses that path.
+- **A real payment.** Stripe checkout was driven only as far as the hosted page (rows
+  93, 95, 98); no card was entered and no charge was made. Three Checkout Sessions
+  were created and left to expire on their own.
+- **Rate-limit behaviour as a deliberate test.** Not exercised on purpose — it was
+  observed incidentally when row 51 first returned 429, and that row was re-run after
+  the window cleared rather than being marked PASS on the wrong evidence.
+- **Deep-scan execution, Auto-Fix PR generation, VPAT export, PDF scanning and
+  continuous monitoring.** Paid-tier features; the free test user correctly could not
+  reach them (row 89). Verifying they work needs a paid account and is outside this
+  pass.
+- **Email deliverability end-to-end** (inbox receipt, rendering, spam placement).
+  Blocked by BUG-1; only the send attempt and its result were observed.
 
 ---
 
 ## Test-artifact cleanup
 
-PENDING.
+Every artifact created by this pass was removed and the counts re-read to confirm.
+`public_scan_results` feeds the public `/scorecards` and `/trust` pages, so test
+scans were deleted by exact id rather than by any range.
+
+| Table / store | Before | After | Net |
+|---|---|---|---|
+| `public_scan_results` | 695 | **689** | −6 (all mine) |
+| `free_tool_events` | 9 | **0** | −9 (table was empty before the pass) |
+| `enterprise_leads` | 4 | **1** | −3 (mine; 1 pre-existing genuine lead untouched) |
+| `auth.users` | 6 | **5** | −1 (throwaway login user) |
+
+- `public_scan_results`: 6 rows deleted by exact `id` (`vlksF5gJ116RV7o3`,
+  `WOLVD8FXI_JPXl-Y`, `usTbkSKvhhhj5vmO`, `bBBZi7G4KX1fe9F9`, `SRXZ6rs6wyTbI4-1`,
+  `hbxg07yq-QSzmeZy`) — all scans of `indy.gov` / `kcmo.gov` created by this pass, two
+  of which had already surfaced on the public `/scorecards` list. The 689 pre-existing
+  rows are untouched.
+- `free_tool_events`: all 9 rows were created during this pass (verified by timestamp
+  before deletion) — the table was empty beforehand, so no organic funnel data was
+  affected.
+- `enterprise_leads`: 3 `uicov-ent-*@test.example.com` rows deleted; the single
+  pre-existing lead remains.
+- `auth.users`: the admin-created `uicov-login-*@piposlab.com` user was deleted. The
+  two signup attempts (BUG-2) created no rows to clean up. The 5 surviving users are
+  all pre-existing.
+- **Stripe:** 3 Checkout Sessions were created (audit $149, snapshot $79, Pro
+  subscription) and abandoned at the hosted page. No card entered, no charge made;
+  unpaid sessions expire on their own.
+- **No product code or configuration was modified during this pass.** Every failure is
+  recorded as a FAIL row with observed-vs-expected rather than fixed in place.
