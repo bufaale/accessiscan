@@ -2,7 +2,8 @@
  * Unit tests for the paid-audit fulfilment side effects, focused on the
  * session-independent operator sale alert.
  *
- * Resend, the lite scanner, and the Supabase admin client are all mocked so
+ * Resend, the deep scanner, the baseline store and the Supabase admin client
+ * are all mocked so
  * the test runs offline. We assert that:
  *   1. the operator (alex@piposlab.com) is alerted FIRST, before scanning,
  *   2. the buyer still receives their report,
@@ -21,16 +22,34 @@ vi.mock("resend", () => {
   return { Resend: MockResend };
 });
 
+// Paid audits run the deep engine (axe-core in jsdom), not the free lite
+// scanner. Mocking the lite scanner left the REAL deep scanner running, which
+// offline returned no health_score and made the buyer subject read "0/100".
 const mockScan = vi.fn();
-vi.mock("@/lib/free-scan/lite-scanner", () => ({
-  scanUrlLite: (...args: unknown[]) => mockScan(...args),
+vi.mock("@/lib/audit/deep-scanner", () => ({
+  scanUrlDeep: (...args: unknown[]) => mockScan(...args),
 }));
 
-// Admin client: a chainable stub whose terminal .eq() resolves cleanly.
+// Admin client: a chainable stub. fulfilPaidAudit both updates the paid_audits
+// row and selects it back (to get the id the Evidence Pack is keyed on), so the
+// stub has to answer .update().eq() AND .select().eq().single().
 const updateEq = vi.fn().mockResolvedValue({ error: null });
+const selectSingle = vi.fn().mockResolvedValue({ data: { id: "audit_test_1" }, error: null });
 vi.mock("@/lib/supabase/admin", () => ({
   createAdminClient: () => ({
-    from: () => ({ update: () => ({ eq: updateEq }) }),
+    from: () => ({
+      update: () => ({ eq: updateEq }),
+      select: () => ({ eq: () => ({ single: selectSingle }) }),
+    }),
+  }),
+}));
+
+// The Evidence Pack persists a hash-signed baseline; keep it offline and
+// deterministic so this suite stays about the fulfilment side effects.
+vi.mock("@/lib/audit/baseline-store", () => ({
+  insertBaseline: vi.fn().mockResolvedValue({
+    baselineId: "baseline_test_1",
+    record: { violationsHash: "deadbeef" },
   }),
 }));
 
@@ -47,6 +66,7 @@ beforeEach(() => {
     ],
   });
   updateEq.mockClear().mockResolvedValue({ error: null });
+  selectSingle.mockClear().mockResolvedValue({ data: { id: "audit_test_1" }, error: null });
   process.env.RESEND_API_KEY = "re_test_key";
 });
 
