@@ -16,6 +16,7 @@ describe("analyzeHtml", () => {
 <title>Hi</title>
 </head>
 <body>
+<a href="#main" class="skip-link">Skip to main content</a>
 <h1>Welcome</h1>
 <h2>Section</h2>
 <p>Some text.</p>
