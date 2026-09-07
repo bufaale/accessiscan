@@ -255,7 +255,19 @@ export async function POST(
   const permalink = `https://accessiscan.piposlab.com/scan-result/${token}`;
   const { html, text } = renderClaimEmail({ url: row.url, score, permalink, topIssues });
 
+  // BUG-5 (2026-09-06 UI coverage pass, rows 55/56): the Resend SDK reports a
+  // failed send as a normal return value — `{ data: null, error }` — it does
+  // NOT throw. The old code only read `sendRes.data?.id` and never looked at
+  // `sendRes.error`, so a quota/domain/auth failure left `resendId`
+  // `undefined`, the catch block never ran (nothing threw), and the route
+  // still answered `{ ok: true, claimed: true }`. The UI took that at face
+  // value and told the visitor "✓ Sent" for mail that was never accepted by
+  // Resend. Capturing the email is a genuine success (it's persisted above)
+  // independent of whether the send worked — so `emailed` is reported
+  // separately and explicitly, and is the only field the client may treat as
+  // "the report is on its way".
   let resendId: string | undefined;
+  let sendError: string | undefined;
   try {
     const resend = new Resend(process.env.RESEND_API_KEY);
     const sendRes = await resend.emails.send({
@@ -269,12 +281,25 @@ export async function POST(
       html,
       text,
     });
-    resendId = sendRes.data?.id;
+    if (sendRes.error) {
+      sendError = sendRes.error.message || sendRes.error.name || "resend_error";
+      console.error("[claim] resend returned an error", sendRes.error);
+    } else {
+      resendId = sendRes.data?.id;
+    }
   } catch (e) {
-    // Email send failed but capture is persisted — that's OK; return ok:true
-    // so the visitor's flow doesn't break, log the issue server-side.
+    // Email capture is persisted regardless — that's a real success — but
+    // the send itself failed, so `emailed` below must say so.
+    sendError = e instanceof Error ? e.message : "unknown_send_error";
     console.error("[claim] resend send failed", e);
   }
 
-  return NextResponse.json({ ok: true, claimed: true, resend_id: resendId });
+  const emailed = Boolean(resendId);
+  return NextResponse.json({
+    ok: true,
+    claimed: true,
+    emailed,
+    resend_id: resendId ?? null,
+    ...(emailed ? {} : { send_error: sendError ?? "unknown" }),
+  });
 }

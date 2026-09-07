@@ -40,6 +40,19 @@ export function ScanLeadCapture({ token, url, score }: Props) {
         setStatus("error");
         return;
       }
+      // BUG-5: the capture (persisting the email) and the send are two
+      // different outcomes. `emailed === false` means Resend did not accept
+      // the message — most likely a transient send failure — so don't claim
+      // "Sent" for mail that never went out. `emailed` is undefined on the
+      // idempotent re-claim path (same email submitted twice), which is
+      // treated as sent since the first submission already covers it.
+      if (data?.emailed === false) {
+        setErrorMsg(
+          "We saved your email, but couldn't send the report just now. Please try again in a minute, or email alex@piposlab.com and we'll send it manually.",
+        );
+        setStatus("error");
+        return;
+      }
       setStatus("sent");
     } catch (err) {
       setErrorMsg(err instanceof Error ? err.message : "Network error");
