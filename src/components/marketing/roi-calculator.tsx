@@ -14,6 +14,7 @@
  */
 
 import { useMemo, useState } from "react";
+import { pricingPlans } from "@/lib/stripe/plans";
 
 const NAVY = "#0b1f3a";
 const CYAN_TEXT = "#0e7490";
@@ -97,11 +98,22 @@ function NumberInput({
   );
 }
 
+// BUG-9 (2026-09-06 UI coverage pass, row 113): this used to hardcode
+// `19 * 12`, the RETIRED $19/mo Pro price, while the pricing cards on the
+// same page show $39/mo — the headline "~150 years" and the "$228/yr"
+// caption were both derived from the stale number (real payoff is ~75
+// years). Deriving from src/lib/stripe/plans.ts (the single source of
+// truth Stripe checkout itself reads) means this can't drift again.
+const PRO_PLAN = pricingPlans.find((p) => p.id === "pro");
+const PRO_MONTHLY_PRICE = PRO_PLAN?.monthlyPrice ?? 39;
+const MEDIAN_LAWSUIT_COST = 35000; // Seyfarth Shaw 2024 median settlement
+
 export function RoiCalculator() {
   const [pages, setPages] = useState(50);
-  const [avgLawsuitCost, setAvgLawsuitCost] = useState(35000); // Seyfarth median
+  const [avgLawsuitCost, setAvgLawsuitCost] = useState(MEDIAN_LAWSUIT_COST);
   const [riskPct, setRiskPct] = useState(15);
-  const accessiscanAnnualCost = 19 * 12; // Pro tier
+  const accessiscanAnnualCost = PRO_MONTHLY_PRICE * 12; // published Pro tier monthly x12
+  const payoffYears = Math.max(1, Math.round(MEDIAN_LAWSUIT_COST / accessiscanAnnualCost));
 
   const result = useMemo(() => {
     const expectedAnnualCost = (avgLawsuitCost * riskPct) / 100;
@@ -154,11 +166,11 @@ export function RoiCalculator() {
           }}
         >
           One avoided ADA lawsuit pays for AccessiScan{" "}
-          <span style={{ color: CYAN_TEXT }}>~150 years</span>.
+          <span style={{ color: CYAN_TEXT }}>~{payoffYears} years</span>.
         </h2>
         <p style={{ marginTop: 8, color: SLATE_500, fontSize: 15, maxWidth: 720 }}>
-          Median 2024 ADA Title III demand-letter settlement: $35k (Seyfarth Shaw 2024 report).
-          AccessiScan Pro: $228/yr. Run the math against your own exposure.
+          Median 2024 ADA Title III demand-letter settlement: {fmtUSD(MEDIAN_LAWSUIT_COST)} (Seyfarth Shaw 2024 report).
+          AccessiScan Pro: {fmtUSD(accessiscanAnnualCost)}/yr. Run the math against your own exposure.
         </p>
       </header>
 
