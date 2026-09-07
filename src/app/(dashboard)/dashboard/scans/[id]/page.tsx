@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { GenerateFixPRButton } from "@/components/auto-fix/generate-pr-button";
 import { PRPanel } from "@/components/auto-fix/pr-panel";
 import type { Scan, ScanIssue, ScanPage, ScanVisualIssue } from "@/types/database";
+import { canGenerateVpat } from "@/lib/stripe/plans";
 
 // Same SAFE_RULES as in pr-panel.tsx + generate-pr-button.tsx — used to
 // know which issues can show an inline "Fix in PR" button.
@@ -466,7 +467,7 @@ export default function ScanResultsPage({ params }: { params: Promise<{ id: stri
           <ActionButton href={`/api/scans/${scan.id}/pdf`} download>
             ↓ PDF Report
           </ActionButton>
-          {subscriptionPlan !== "free" ? (
+          {canGenerateVpat(subscriptionPlan) ? (
             <>
               <ActionButton href={`/api/scans/${scan.id}/vpat`} download>
                 📋 VPAT 2.5
@@ -478,11 +479,13 @@ export default function ScanResultsPage({ params }: { params: Promise<{ id: stri
           ) : (
             <ActionButton
               onClick={() => {
-                toast.info("VPAT 2.5 and EN 301 549 exports are on Pro and Agency plans.");
+                toast.info(
+                  "On-demand VPAT 2.5 and EN 301 549 exports are on the Business plan. For a one-time VPAT, see the $149 WCAG Audit + Evidence Pack.",
+                );
                 router.push("/settings/billing");
               }}
             >
-              📋 VPAT / EN 301 549 <span style={{ fontSize: 9.5, fontWeight: 700, padding: "1px 5px", borderRadius: 3, background: SLATE_100, color: SLATE_500, marginLeft: 6 }}>PRO</span>
+              📋 VPAT / EN 301 549 <span style={{ fontSize: 9.5, fontWeight: 700, padding: "1px 5px", borderRadius: 3, background: SLATE_100, color: SLATE_500, marginLeft: 6 }}>BUSINESS</span>
             </ActionButton>
           )}
           {fixableCount > 0 ? (

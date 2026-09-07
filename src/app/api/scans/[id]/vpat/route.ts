@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { renderToBuffer } from "@react-pdf/renderer";
 import { VPATReport, type AccessibilityStandard } from "@/lib/pdf/vpat-report";
 import { computeConformance, summarizeConformance } from "@/lib/vpat/conformance";
+import { canGenerateVpat } from "@/lib/stripe/plans";
 
 export async function GET(
   req: NextRequest,
@@ -28,8 +29,7 @@ export async function GET(
     .eq("id", user.id)
     .single();
 
-  const VPAT_TIERS = ["business", "team"];
-  if (!profile || !VPAT_TIERS.includes(profile.subscription_plan)) {
+  if (!profile || !canGenerateVpat(profile.subscription_plan)) {
     return NextResponse.json(
       {
         error:

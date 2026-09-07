@@ -123,6 +123,25 @@ export const pricingPlans: PricingPlan[] = [
   },
 ];
 
+/**
+ * Tiers entitled to on-demand VPAT 2.5 / EN 301 549 generation via
+ * /api/scans/[id]/vpat.
+ *
+ * Deliberately EXCLUDES Pro and Agency (commit 8e504da): on-demand VPAT is
+ * fenced to Business+ so the one-time $149 audit's moat can't be arbitraged by
+ * subscribing to Pro, exporting a VPAT and cancelling. Business is described
+ * in its feature list as "the only recurring tier with VPAT".
+ *
+ * Both the API route and the scan-results UI must read the entitlement from
+ * here — they drifted apart once already, leaving Pro/Agency customers with
+ * VPAT download buttons that returned 402.
+ */
+export const VPAT_TIERS = ["business", "team"] as const;
+
+export function canGenerateVpat(plan: string | null | undefined): boolean {
+  return (VPAT_TIERS as readonly string[]).includes(plan ?? "");
+}
+
 export function getPlanByPriceId(priceId: string): PricingPlan | undefined {
   return pricingPlans.find(
     (p) => p.stripePriceIdMonthly === priceId || p.stripePriceIdYearly === priceId,
