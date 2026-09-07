@@ -16,7 +16,7 @@ const ITEMS: Array<{ q: string; a: string }> = [
   },
   {
     q: "Do you offer refunds?",
-    a: "Yes. Within 30 days of your first paid charge, email alex@piposlab.com for a full refund — no forms, no exit interview. After 30 days, we pro-rate refunds for annual plans on a case-by-case basis. Government POs are governed by the terms of your contract.",
+    a: "Yes. Within 7 days of your first paid charge or renewal, email alex@piposlab.com for a full refund — no forms, no exit interview. After the 7-day window, no refunds are issued, but you can cancel any time and keep access through the end of your current billing period. Government POs are governed by the terms of your contract.",
   },
   {
     q: "What payment terms do you offer government and education buyers?",
@@ -32,7 +32,7 @@ const ITEMS: Array<{ q: string; a: string }> = [
   },
   {
     q: "Can I try Pro before I pay?",
-    a: "Yes — sign up free, run a real scan, then upgrade when you're ready. The Free tier (2 scans/month, no card required) lets you confirm AccessiScan finds real violations on your site before any payment. Upgrade to Pro from Settings → Billing whenever you want; cancel any time, refund within 30 days, no questions asked.",
+    a: "Yes — sign up free, run a real scan, then upgrade when you're ready. The Free tier (2 scans/month, no card required) lets you confirm AccessiScan finds real violations on your site before any payment. Upgrade to Pro from Settings → Billing whenever you want; cancel any time, refund within 7 days, no questions asked.",
   },
   {
     q: "Will my price increase at renewal?",

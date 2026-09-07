@@ -104,7 +104,7 @@ function Eyebrow({ children, color = "slate" }: { children: ReactNode; color?: "
 function PricingHeader() {
   const trustSignals = [
     "Free tier — no card required",
-    "30-day money-back guarantee",
+    "7-day money-back guarantee",
     "Cancel anytime",
     "Pay by card, ACH, or PO",
   ];
@@ -222,7 +222,7 @@ function VendorComparison() {
         { label: "Starting price", values: ["$39/mo", "$49/mo", "$49/mo", "$15,000/yr", "$45/user/mo"] },
         { label: "Monthly billing", values: ["yes", "yes", "yes", "no", "yes"] },
         { label: "Free tier", values: ["yes", "no", "no", "no", "partial"] },
-        { label: "30-day money back", values: ["yes", "no", "no", "no", "no"] },
+        { label: "7-day money back", values: ["yes", "no", "no", "no", "no"] },
       ],
     },
     {
