@@ -29,7 +29,7 @@ const ITEMS = [
   },
   {
     q: "Is AccessiScan suitable for a public entity under Title II?",
-    a: "Yes. Public entities with populations of 50,000+ must meet WCAG 2.1 AA by April 26, 2027; smaller entities by April 26, 2028. Our Government tier includes FedRAMP-aligned hosting, SSO + audit logs, Section 508 reports, and a dedicated CSM. Designed specifically for state and municipal IT shops navigating the Title II deadline.",
+    a: "Yes. Public entities with populations of 50,000+ must meet WCAG 2.1 AA by April 26, 2027; smaller entities by April 26, 2028. Our Team tier includes SSO (SAML / Okta / Google Workspace), org-wide policy enforcement, an audit log, and a dedicated customer success manager — contact sales for state and municipal procurement. Designed specifically for state and municipal IT shops navigating the Title II deadline.",
   },
   {
     q: "What does AccessiScan not warrant?",
