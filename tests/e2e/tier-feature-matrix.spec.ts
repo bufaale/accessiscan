@@ -154,10 +154,14 @@ test.describe("Pricing card honesty (homepage)", () => {
   test("homepage pricing card features come from plans.ts truth", async ({ page }) => {
     await page.goto("/");
     const html = await page.content();
-    // Pro $19 should advertise these honest claims:
-    expect(html).toMatch(/30 scans\/month/i);
+    // Pro $39 should advertise these honest claims. 8e504da repositioned Pro
+    // as monitoring-only, so the card now leads with the weekly re-scan
+    // entitlement ("Continuous monitoring: weekly automated re-scans" in
+    // plans.ts) instead of the raw 30-scan quota. Verified live 2026-09-07.
+    expect(html).toMatch(/Weekly re-scans/i);
+    expect(html).toMatch(/Regression alerts/i);
     expect(html).toMatch(/GitHub Action for CI\/CD/i);
-    // Agency $49 should advertise these honest claims:
+    // Agency $99 should advertise these honest claims:
     expect(html).toMatch(/Unlimited scans across clients/i);
   });
 

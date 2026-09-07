@@ -35,12 +35,13 @@ test.describe("Landing page — AccessiScan", () => {
     await expect(page.getByText(/GitHub Action/).first()).toBeVisible();
   });
 
-  test("pricing shows $19 Pro and $49 Agency", async ({ page }) => {
+  test("pricing shows $39 Pro and $99 Agency", async ({ page }) => {
     await page.goto("/#pricing");
 
     await expect(page.getByText("Pro", { exact: true }).first()).toBeVisible();
     await expect(page.getByText("Agency", { exact: true }).first()).toBeVisible();
-    await expect(page.getByText("$19").first()).toBeVisible();
-    await expect(page.getByText("$49").first()).toBeVisible();
+    // Repriced in 8e504da ($19->$39, $49->$99). Verified live 2026-09-07.
+    await expect(page.getByText("$39").first()).toBeVisible();
+    await expect(page.getByText("$99").first()).toBeVisible();
   });
 });

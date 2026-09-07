@@ -17,9 +17,12 @@ import {
   loginViaUI,
 } from "../../helpers/test-utils";
 
+// Prices must match monthlyPrice in src/lib/stripe/plans.ts. Pro/Agency were
+// repriced in 8e504da ($19->$39, $49->$99). Verified live on 2026-09-07:
+// /settings/billing renders "Upgrade to Pro ($39/mo)".
 const PAID_TIERS_TO_TEST = [
-  { id: "pro", monthlyPrice: 19 },
-  { id: "agency", monthlyPrice: 49 },
+  { id: "pro", monthlyPrice: 39 },
+  { id: "agency", monthlyPrice: 99 },
   { id: "business", monthlyPrice: 299 },
 ];
 
@@ -35,7 +38,7 @@ test.describe("Stripe tier — upgrade button visibility on /settings/billing", 
         await page.waitForLoadState("networkidle");
 
         // Match the actual button label format from upgrade-buttons.tsx:
-        //   "Upgrade to Pro ($19/mo)"
+        //   "Upgrade to Pro ($39/mo)"
         const tierName = tier.id.charAt(0).toUpperCase() + tier.id.slice(1);
         const upgradeBtn = page.getByRole("button", {
           name: new RegExp(`upgrade.*${tier.id}`, "i"),

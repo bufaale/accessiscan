@@ -45,16 +45,20 @@ test.describe("/pricing — standalone marketing page", () => {
     }
   });
 
-  test("displays the canonical monthly prices ($19, $49, $299, $599)", async ({
+  test("displays the canonical monthly prices ($39, $99, $299, $599)", async ({
     page,
   }) => {
     await page.goto(ROUTE);
 
     // Default state is monthly. Each tier price element renders the price
-    // string (e.g. "$19"). We assert the dollar amounts at minimum.
+    // string (e.g. "$39"). We assert the dollar amounts at minimum.
+    // Pro/Agency were repriced in 8e504da ($19->$39, $49->$99) when VPAT and
+    // report-export moved out of those tiers and they became monitoring-only.
+    // Verified live on 2026-09-07: /pricing renders $0/$39/$99/$299/$599,
+    // matching monthlyPrice in src/lib/stripe/plans.ts.
     const expected: Record<string, string> = {
-      pro: "$19",
-      agency: "$49",
+      pro: "$39",
+      agency: "$99",
       business: "$299",
       team: "$599",
     };
@@ -78,7 +82,7 @@ test.describe("/pricing — standalone marketing page", () => {
     // Sanity: monthly tab is selected by default and shows monthly prices.
     await expect(
       page.locator('[data-testid="tier-price-pro"]'),
-    ).toHaveText("$19");
+    ).toHaveText("$39");
 
     // Click "Annual" tab.
     await page.locator('[data-testid="billing-toggle-annual"]').click();
@@ -86,12 +90,12 @@ test.describe("/pricing — standalone marketing page", () => {
     // Annual prices should now appear (yearly values from plans.ts).
     await expect(
       page.locator('[data-testid="tier-price-pro"]'),
-      "Pro annual price should be $190",
-    ).toHaveText("$190");
+      "Pro annual price should be $390",
+    ).toHaveText("$390");
     await expect(
       page.locator('[data-testid="tier-price-agency"]'),
-      "Agency annual price should be $490",
-    ).toHaveText("$490");
+      "Agency annual price should be $990",
+    ).toHaveText("$990");
     await expect(
       page.locator('[data-testid="tier-price-business"]'),
       "Business annual price should be $2990",
@@ -105,7 +109,7 @@ test.describe("/pricing — standalone marketing page", () => {
     await page.locator('[data-testid="billing-toggle-monthly"]').click();
     await expect(
       page.locator('[data-testid="tier-price-pro"]'),
-    ).toHaveText("$19");
+    ).toHaveText("$39");
   });
 
   test("Free tier CTA links to /signup", async ({ page }) => {

@@ -3,10 +3,14 @@ import { pricingPlans } from "@/lib/stripe/plans";
 
 /**
  * Pricing update 2026-04-26 per .shared/brainstorming/2026-04-25/DIGEST.md:
- *  - Pro stays $19 (acquisition tier)
- *  - Agency stays $49
  *  - Business: $199 -> $299 (Auto-Fix PRs justifies bump)
  *  - Team: NEW tier at $599 with contact-sales CTA
+ *
+ * SUPERSEDED IN PART by 8e504da (2026-06-23, "arbitrage-proof tiers"): Pro and
+ * Agency were repriced $19 -> $39 and $49 -> $99 when VPAT and report-export
+ * moved out of them and they became monitoring-only tiers. Business and Team
+ * were left untouched by that change. Verified live on 2026-09-07: /pricing
+ * renders $0 / $39 / $99 / $299 / $599.
  */
 
 test.describe("Pricing structure (post 2026-04-26 update)", () => {
@@ -16,10 +20,18 @@ test.describe("Pricing structure (post 2026-04-26 update)", () => {
     expect(free!.monthlyPrice).toBe(0);
   });
 
-  test("pro tier is $19 (acquisition)", () => {
+  test("pro tier is $39 (monitoring-only, post-8e504da)", () => {
     const pro = pricingPlans.find((p) => p.id === "pro");
     expect(pro).toBeDefined();
-    expect(pro!.monthlyPrice).toBe(19);
+    expect(pro!.monthlyPrice).toBe(39);
+    expect(pro!.yearlyPrice).toBe(390);
+  });
+
+  test("agency tier is $99 (monitoring-only, post-8e504da)", () => {
+    const agency = pricingPlans.find((p) => p.id === "agency");
+    expect(agency).toBeDefined();
+    expect(agency!.monthlyPrice).toBe(99);
+    expect(agency!.yearlyPrice).toBe(990);
   });
 
   test("business tier bumped to $299", () => {
