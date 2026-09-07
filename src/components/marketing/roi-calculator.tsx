@@ -174,7 +174,17 @@ export function RoiCalculator() {
         </p>
       </header>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1.05fr 1fr", gap: 32 }}>
+      {/* BUG-6 follow-up (2026-09-06 fix pass, /pricing priority-1 sweep):
+          same fixed 2-column pattern as the pricing/landing grids — the
+          inputs column and the result panel were squeezed side by side at
+          390px with no breakpoint. */}
+      <style>{`
+        .roi-grid { display: grid; grid-template-columns: 1.05fr 1fr; gap: 32px; }
+        @media (max-width: 768px) {
+          .roi-grid { grid-template-columns: 1fr; }
+        }
+      `}</style>
+      <div className="roi-grid">
         <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
           <NumberInput
             label="Pages on your site"

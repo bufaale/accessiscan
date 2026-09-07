@@ -84,13 +84,20 @@ export function Faq() {
         borderTop: "1px solid #f1f5f9",
       }}
     >
+      {/* BUG-12 follow-up (2026-09-06 fix pass): a FIXED 340px left column
+          plus a 1fr content column plus 64px gap is wider than the entire
+          390px viewport on its own, before the FAQ items even render. */}
+      <style>{`
+        .faq-grid { display: grid; grid-template-columns: 340px 1fr; gap: 64px; }
+        @media (max-width: 900px) {
+          .faq-grid { grid-template-columns: 1fr; gap: 32px; }
+        }
+      `}</style>
       <div
+        className="faq-grid"
         style={{
           maxWidth: 1080,
           margin: "0 auto",
-          display: "grid",
-          gridTemplateColumns: "340px 1fr",
-          gap: 64,
         }}
       >
         <div>

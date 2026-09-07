@@ -479,13 +479,23 @@ function FeatureTriplet() {
   ];
   return (
     <section id="features" style={{ background: "#fff", padding: "96px 32px", fontFamily: FONT_INTER }}>
+      {/* BUG-12 follow-up (2026-09-06 fix pass, live re-verification): same
+          fixed multi-column pattern as Hero/StatsStrip, found on a second
+          overflow sweep after the first fix — 3 code-mockup cards squeezed
+          to ~1/3 width at 390px with no breakpoint. */}
+      <style>{`
+        .feature-triplet-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
+        @media (max-width: 900px) {
+          .feature-triplet-grid { grid-template-columns: 1fr; }
+        }
+      `}</style>
       <div style={{ maxWidth: 1320, margin: "0 auto" }}>
         <div style={{ maxWidth: 720 }}>
           <Eyebrow color="cyan">What you get</Eyebrow>
           <h2 style={{ marginTop: 12, fontFamily: FONT_DISPLAY, fontWeight: 600, fontSize: 44, lineHeight: 1.1, letterSpacing: "-0.02em", color: "#0b1f3a" }}>Three things every other scanner skips.</h2>
           <p style={{ marginTop: 16, fontSize: 16, lineHeight: 1.55, color: "#475569" }}>Auditors hand you a CSV. Overlays hand you a lawsuit. We hand you fix code, a VPAT, and a green CI light.</p>
         </div>
-        <div style={{ marginTop: 56, display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 18 }}>
+        <div className="feature-triplet-grid" style={{ marginTop: 56 }}>
           {features.map((f) => (
             <article key={f.eyebrow} style={{ border: "1px solid #e2e8f0", borderRadius: 8, background: "#fff", display: "flex", flexDirection: "column", overflow: "hidden" }}>
               <div style={{ padding: 24, borderBottom: "1px solid #f1f5f9", background: "#f8fafc" }}>{f.art}</div>
@@ -562,8 +572,15 @@ function PrMockup() {
 function AutoFixPr() {
   return (
     <section style={{ background: "#0b1f3a", color: "#fff", padding: "96px 32px", fontFamily: FONT_INTER, position: "relative", overflow: "hidden" }}>
+      {/* BUG-12 follow-up: same 2-column pattern as Hero, same fix. */}
+      <style>{`
+        .autofix-pr-grid { display: grid; grid-template-columns: 1fr 1.1fr; gap: 64px; align-items: center; }
+        @media (max-width: 900px) {
+          .autofix-pr-grid { grid-template-columns: 1fr; gap: 40px; }
+        }
+      `}</style>
       <div style={{ position: "absolute", inset: 0, opacity: 0.06, backgroundImage: "linear-gradient(#fff 1px,transparent 1px),linear-gradient(90deg,#fff 1px,transparent 1px)", backgroundSize: "56px 56px" }} />
-      <div style={{ position: "relative", maxWidth: 1320, margin: "0 auto", display: "grid", gridTemplateColumns: "1fr 1.1fr", gap: 64, alignItems: "center" }}>
+      <div className="autofix-pr-grid" style={{ position: "relative", maxWidth: 1320, margin: "0 auto" }}>
         <div>
           <Eyebrow color="cyan-pill">The differentiator</Eyebrow>
           <h2 style={{ marginTop: 20, fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 52, lineHeight: 1.05, letterSpacing: "-0.02em" }}>
@@ -642,12 +659,19 @@ function Pricing() {
   ];
   return (
     <section id="pricing" style={{ background: "#f8fafc", padding: "96px 32px", fontFamily: FONT_INTER }}>
+      {/* BUG-12 follow-up: same fixed-3-column pattern, same fix. */}
+      <style>{`
+        .landing-pricing-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
+        @media (max-width: 768px) {
+          .landing-pricing-grid { grid-template-columns: 1fr; }
+        }
+      `}</style>
       <div style={{ maxWidth: 1320, margin: "0 auto" }}>
         <div style={{ textAlign: "center", maxWidth: 720, margin: "0 auto" }}>
           <Eyebrow color="cyan">Pricing</Eyebrow>
           <h2 style={{ marginTop: 12, fontFamily: FONT_DISPLAY, fontWeight: 600, fontSize: 44, lineHeight: 1.1, letterSpacing: "-0.02em", color: "#0b1f3a" }}>Less than your office coffee budget.</h2>
         </div>
-        <div style={{ marginTop: 56, display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 18 }}>
+        <div className="landing-pricing-grid" style={{ marginTop: 56 }}>
           {tiers.map((t) => (
             <div key={t.name} style={{ background: "#fff", border: "1px solid #e2e8f0", borderRadius: 10, padding: 28, borderTop: t.popular ? "3px solid #06b6d4" : "1px solid #e2e8f0", position: "relative", display: "flex", flexDirection: "column" }}>
               {t.popular && (
@@ -754,8 +778,15 @@ function EvidencePack() {
       id="evidence-pack"
       style={{ background: "#0b1f3a", color: "#fff", padding: "88px 32px", fontFamily: FONT_INTER, position: "relative", overflow: "hidden" }}
     >
+      {/* BUG-12 follow-up: same 2-column pattern, same fix. */}
+      <style>{`
+        .evidence-pack-grid { display: grid; grid-template-columns: 1.05fr 1fr; gap: 64px; align-items: center; }
+        @media (max-width: 900px) {
+          .evidence-pack-grid { grid-template-columns: 1fr; gap: 40px; }
+        }
+      `}</style>
       <div style={{ position: "absolute", inset: 0, opacity: 0.06, backgroundImage: "linear-gradient(#fff 1px,transparent 1px),linear-gradient(90deg,#fff 1px,transparent 1px)", backgroundSize: "56px 56px" }} />
-      <div style={{ position: "relative", maxWidth: 1320, margin: "0 auto", display: "grid", gridTemplateColumns: "1.05fr 1fr", gap: 64, alignItems: "center" }}>
+      <div className="evidence-pack-grid" style={{ position: "relative", maxWidth: 1320, margin: "0 auto" }}>
         <div>
           <Eyebrow color="cyan-pill">Got an ADA demand letter?</Eyebrow>
           <h2 style={{ marginTop: 20, fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 48, lineHeight: 1.06, letterSpacing: "-0.02em" }}>
