@@ -1,4 +1,120 @@
-# Quality Audit Report — AccessiScan
+# Quality Audit Report — AccessiScan (defect-closure pass)
+
+**Run:** 2026-09-07T00:00–00:30 UTC
+**Auditor:** app-quality-auditor agent
+**Source of truth:** `docs/ui-test-coverage-2026-09-06.md` (120-row live coverage
+sheet, 105 PASS / 14 FAIL / 1 NOT COVERED as of the 2026-09-06 day pass)
+**Suite after this pass:** 120 rows / **120 PASS** / 0 FAIL / 0 not covered
+**Browser mechanism used for every live check below:** a plain headless Chromium
+instance launched locally by one-off Node scripts via `chromium.launch()`
+(Playwright, resolved from `app-04-ada-scanner/node_modules`). No CDP attach to
+any operator Chrome profile, no chrome-devtools MCP, at any point in this pass.
+
+---
+
+## Defect table
+
+| # | Defect | Row(s) | What changed | Live evidence |
+|---|---|---|---|---|
+| 1 | `/pricing` unusable below ~1280px (5-tier grid never stacked; 2 more sections + ROI calculator found on re-sweep) | 102 | `client-pricing-cards.tsx` grid moved to a responsive `<style>` block (5→3→2→1 cols); same fix applied to `UniversalFeatures` and `GovernmentCallout` grids in `pricing/page.tsx` and the ROI calculator's 2-col layout | Card width 326px(1col)/344px(2col)/309px(3col)/230px(5col) at 390/768/1024/1280px. Real-offender count (excluding legit scrollable ancestors): 0 at 390/1024/1280px, 2 at 768px (see Finding-C, out of scope) |
+| 2 | Refund window contradiction: `/pricing` said 30 days, `/refund` (binding) said 7 | 108 | `/pricing` badge, comparison-table row, and both pricing-FAQ answers changed 30→7 to match the binding `/refund` page and the already-consistent one-time-purchase pages | curl + Playwright text match: `/pricing` badge "7-day money-back guarantee", FAQ "Within 7 days...", `/refund` "refund within 7 days" / "After the 7-day period" |
+| 3 | `/trust` false "our customers" claim (zero paying customers) | 110 | 3 occurrences reworded to describe what AccessiScan is designed to run on the visitor's own site, not who buys it | `customerClaimMatches: []` in body text + meta description |
+| 4 | GitHub OAuth button dumps users on raw Supabase JSON | 79 | Real live component discovered to be `src/app/login-v2-preview/_shared.tsx` (not `components/auth/oauth-buttons.tsx`, which is dead code). Both LoginForm and SignupForm gated behind `GITHUB_OAUTH_ENABLED=false`; button no longer rendered. Dead-code file fixed defensively too. | `/login` buttons: `["Sign in","Sign up","Google","","Sign in"]`; `/signup`: `[...,"Google","",...]` — no "GitHub" |
+| 5 | Email-capture claims "Sent" even when Resend send failed | 55/56 | `api/free/scan-result/[token]/claim/route.ts` now checks `sendRes.error` explicitly and returns `emailed`/`resend_id`/`send_error`. BOTH real client surfaces fixed: `scanner-form.tsx` (the actual `/free/wcag-scanner` claim form) and `scan-lead-capture.tsx` (the `/scan-result/[token]` permalink claim form) — discovered these are two separate components after the first fix didn't show up on the live scanner page | Real send to alex@piposlab.com from both surfaces: `{"emailed":true,"resend_id":"067147fd-..."}` (scanner page) and `{"emailed":true,"resend_id":"b550bdc3-..."}` (permalink page); UI showed "Sent." on both |
+| 6 | Signup submits silently when ToS is unchecked | — | **Does not reproduce on the live form.** The real `AuthShell.SignupForm` (`login-v2-preview/_shared.tsx`) already validates `agree` and shows "Please accept the terms to continue" with zero requests fired. The described bug (disabled button, zero feedback) only existed in the dead `components/auth/signup-form.tsx`, fixed there anyway as a defensive measure. | Live test: checkbox left unchecked, submit clicked → visible error shown, `signupCallsAfterSubmit: 0` |
+| 7 | Signup / password reset return HTTP 500 (Resend quota) | 72, 77, 73 | No code change — root cause was the Resend account quota (operator-side infra fix, confirmed restored). Re-verified live. | Real signup → HTTP 200, "Check your email"; password reset (nonexistent email) → HTTP 200, non-enumerating success; re-signup with existing email → "User already registered", not a silent login |
+| 8 | Landing FAQ sells a nonexistent "Government tier" (FedRAMP claim) | 109 | FAQ answer rewritten to name the real Team tier and its actual features | `teamMatch` present, `govMatch: null`, `fedrampPresent: false` |
+| 9 | ROI calculator quoted the retired \$19/mo Pro price | 113 | Derives annual cost from `plans.ts` (`$39 × 12`) instead of a hardcoded `19 * 12` | Renders "~75 years" / "\$468/yr" (was "~150 years" / "\$228/yr") |
+| 10 | 3 of 6 navbar anchors dead on every page except landing | 114 | `navbar.tsx` links changed from `#features` etc. to `/#features` etc. | Clicked "Product" from `/pricing` → landed on `/#features`, scrolled to the section |
+| 11 | Expired/invalid share links hit the bare Next.js 404 | 64 | Added `src/app/scan-result/[token]/not-found.tsx` — branded, with CTAs back to the scanner and home | HTTP 404, title "Scan not found · AccessiScan", branded body + working CTAs |
+| 12 | Landing page clips content at 390px (hero, stats strip, + 4 more sections found on re-sweep) | 99 | Hero/StatsStrip/Comparison fixed first pass; a stricter re-sweep (excluding legitimately-scrollable elements) found FeatureTriplet, AutoFixPr, the landing's own 3-tier pricing preview, EvidencePack, and the FAQ's fixed-340px sidebar — all given responsive breakpoints | Real-offender count at 390px: 0 (was 85, then 102 on the second sweep, now 0) |
+| 13 | `/trust` unsupported customer claim | 110 | Same as #3 above | Same evidence as #3 |
+| 14 | "Most popular" badge on different tiers on landing vs `/pricing` | 112 | Landing's hardcoded `popular:true` moved from Pro to Agency, matching `plans.ts recommended:true` | Landing badge card = Agency; `/pricing` badge card = `pricing-card-agency` |
+| 15 | `/trust` and `/scorecards` render with no navbar/footer | 115 | Both moved into the `(marketing)` route group (URL unchanged — route groups don't add a path segment) | `/trust`: `hasHeader:true, footerLinks:23`; `/scorecards`: `hasHeader:true, footerLinks:24` |
+
+All 15 originally-cataloged bugs (BUG-1 through BUG-15) are closed. Row 73
+("not covered", blocked by BUG-2) is now exercised and passes.
+
+---
+
+## Gaps generated (code commits)
+
+15 commits on `master`, each independently revertable:
+
+| Commit | What |
+|---|---|
+| `75f164a` | Pricing 5-tier grid responsive |
+| `6681506` | Landing hero/stats-strip/comparison mobile clipping |
+| `b3834f5` | "Most popular" badge consistency |
+| `0bde938` | Landing FAQ Government-tier → Team-tier |
+| `819e9cf` | ROI calculator stale price |
+| `6d3ca08` | Navbar anchor fix |
+| `26c7f05` | Refund window 30→7 days |
+| `0b44d09` | `/scorecards` under shared layout |
+| `7289afd` | `/trust` false claim + shared layout |
+| `4c1de28` | Branded scan-result 404 |
+| `6d193c1` | GitHub OAuth fix (dead component, fixed defensively) |
+| `7698790` | Email-capture false-success fix (API + `scan-lead-capture.tsx`) |
+| `420df36` | Signup ToS guard (dead component, fixed defensively) |
+| `9bcefef` | 2 more `/pricing` sections responsive (UniversalFeatures, GovernmentCallout) |
+| `dab00a6` | GitHub OAuth fix on the REAL live `AuthShell` component |
+| `6f945ae` | 4 more landing sections responsive (FeatureTriplet, AutoFixPr, landing Pricing, EvidencePack, FAQ, ROI calculator) |
+| `4a84027` | Email-capture false-success fix on the REAL live `scanner-form.tsx` |
+
+All pushed to `origin/master`; Vercel auto-deployed each one (confirmed via
+`gh api repos/bufaale/accessiscan/deployments` — every deployment listed
+`state: success`).
+
+## Gaps flagged (need a product decision)
+
+- **Enable real GitHub OAuth.** Requires the operator to register a GitHub
+  OAuth App and add its client id/secret to the Supabase Auth config — a new
+  external integration, not a code fix. Until then `GITHUB_OAUTH_ENABLED`
+  stays `false` in both `oauth-buttons.tsx` and `login-v2-preview/_shared.tsx`.
+  - Option A: enable it (unlocks the feature this audience is most likely to
+    want, given the product's headline "Auto-Fix PRs against your repo").
+  - Option B: leave it off indefinitely and remove the dead code entirely to
+    reduce confusion.
+
+## Document only (out of scope this pass)
+
+- **Duplicate/dead auth + claim-form components** (Finding-A in the coverage
+  sheet). `components/auth/{login-form,signup-form,oauth-buttons}.tsx` and
+  the fixes applied to them are inert — nothing imports them. Recommend
+  deleting them or wiring them up; leaving two implementations of the same
+  surface, one dead, is what caused two of this pass's fixes to initially
+  land on the wrong file.
+- **Navbar overflow at exactly 768px** (Finding-C). Site-wide, not
+  `/pricing`-specific, not one of the 14 FAIL rows. ~29px overflow on the
+  desktop nav actions at the Tailwind `md:` breakpoint boundary.
+- **Untracked duplicate test scans of indy.gov** in `public_scan_results` /
+  `free_tool_events` from this session's live email-capture verification —
+  could not enumerate or delete them (Supabase Management API token access
+  was blocked by this session's permission settings; see "Fix-pass
+  test-artifact cleanup" in the coverage sheet). One test `auth.users` row
+  WAS fully cleaned up via the app's own self-service account-deletion API.
+
+## Pre-launch checklist
+
+- [x] All Critical bugs fixed (BUG-1, BUG-2 both resolved — BUG-1 was
+      operator-side Resend quota, confirmed restored and re-verified live)
+- [x] All High bugs fixed (BUG-3, BUG-4, BUG-5, BUG-6, BUG-7)
+- [x] All Medium/Low bugs fixed (BUG-8 through BUG-15)
+- [x] Every fix verified against the LIVE deployment (not localhost, not
+      curl-only, not "the build passed")
+- [x] `/pricing` responsive at 390/768/1024/1280px with evidence at each
+- [x] No "TODO"/"FIXME"/placeholder introduced by this pass
+- [x] Brand name correct in the surfaces touched this pass
+- [ ] `npx playwright test` — this pass used one-off verification scripts, not
+      the repo's own Playwright spec suite (out of scope for a bug-closure
+      pass; recommend a follow-up to encode the newly-fixed behaviors — the
+      `emailed` field, the responsive breakpoints, the GitHub-button absence
+      — as permanent specs in `tests/e2e/`)
+
+---
+---
+
+# Archive — 2026-04-26/27 audit (first app-quality-auditor run)
 
 **Initial run:** 2026-04-26 night → 71/76 passing
 **Resolution run:** 2026-04-27 morning → **76/76 passing ✅**
@@ -64,12 +180,12 @@ On `claude-design-landing` branch:
 - `9125a64` — fix(e2e/exhaustive): refine forms spec for good UX
 - `63f4a9a` — docs(audit): BUG_REPORT.md initial findings
 - `e28d05e` — fix(billing): Team tier + spec refinements
-- `[NEXT]` — docs(audit): BUG_REPORT.md updated to 76/76 (pending after this commit)
+- `398a98f` — docs(audit): BUG_REPORT.md updated to 76/76
 
 On `master`:
 - `62945ff` — fix(billing): Team tier renders as Contact sales link (cherry-pick of upgrade-buttons.tsx only)
 
-## Next: v2 design swap
+## Next: v2 design swap (as of 2026-04-27 — see 2026-09-06 section above for what actually happened)
 
 With the audit suite now at 76/76 green and the discovered real bug shipped to prod, the next phase is the Claude Design v2 swap:
 

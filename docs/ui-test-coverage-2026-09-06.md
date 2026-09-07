@@ -2,12 +2,16 @@
 
 **Target:** `https://accessiscan.piposlab.com` — production, commit `6821707`
 ("fix(free-scan): don't offer a browser scan as the cure for a 404").
-**Date:** 2026-09-06
+**Date:** 2026-09-06 (enumeration + first execution pass), **fix pass 2026-09-06
+night** (all 14 FAILs + row 73 closed — see "Fix pass" section below).
 **Method:** headless Chromium via Playwright 1.58.2 (resolved with `createRequire`
 from `app-04-ada-scanner/node_modules`), driven by one-off scripts. Own browser
-instance — no CDP attach to the operator's Chrome, no MCP browser. Every row below
-was exercised against the LIVE deployment. Nothing is marked PASS from a unit test,
-a local dev server, an E2E spec, or by reading source.
+instance launched locally by each script (`chromium.launch()`) — never a CDP
+attach to any operator Chrome profile, never the chrome-devtools MCP. Every row
+below was exercised against the LIVE deployment. Nothing is marked PASS from a
+unit test, a local dev server, an E2E spec, or by reading source alone (source
+reads informed WHERE to look; every verdict came from a live request/response
+or a live DOM read).
 
 **Why this exists:** standing rule
 `~/.claude/rules/common/ui-test-every-feature.md` — every user-reachable
@@ -27,22 +31,38 @@ rather than "whatever I happened to try".
 
 ## Scoreboard
 
-| Metric | Value |
-| --- | --- |
-| Total rows | 120 |
-| PASS | 105 |
-| FAIL | 14 |
-| Not covered | 1 |
-| Bugs found | 15 (2 Critical, 5 High, 5 Medium, 3 Low) |
+| Metric | Value (first pass, 2026-09-06 day) | Value (after fix pass, 2026-09-06 night) |
+| --- | --- | --- |
+| Total rows | 120 | 120 |
+| PASS | 105 | **120** |
+| FAIL | 14 | **0** |
+| Not covered | 1 | **0** |
+| Bugs found | 15 (2 Critical, 5 High, 5 Medium, 3 Low) | 15 found, **15 fixed** (0 open) |
 
-Screenshots: `…/scratchpad/uicov/`.
+Screenshots (first pass): `…/scratchpad/uicov/`. Screenshots (fix-pass
+verification): `…/scratchpad/uicov-fix-verify/` (session-scoped scratchpad, not
+committed to the repo — see BUG_REPORT.md for the full evidence table with
+per-row citations).
 
-**Headline:** the free scanner — the surface paid traffic lands on — is in good
-shape. The blocked-site contract, the SSRF guards, the freemium gate, the permalink
-and the mobile scan all hold (rows 31-59, 100-101). The damage is concentrated in
-**account creation** and **the pricing page**: email/password signup and password
-reset both return HTTP 500 because the Resend account has exhausted its monthly
-quota, and `/pricing` does not respond below ~1280px.
+**Headline (first pass):** the free scanner — the surface paid traffic lands on —
+was in good shape. The blocked-site contract, the SSRF guards, the freemium gate,
+the permalink and the mobile scan all held (rows 31-59, 100-101). The damage was
+concentrated in **account creation** and **the pricing page**: email/password
+signup and password reset both returned HTTP 500 because the Resend account had
+exhausted its monthly quota, and `/pricing` did not respond below ~1280px.
+
+**Fix pass (2026-09-06 night):** all 14 FAIL rows + the 1 NOT COVERED row closed.
+Two bugs (BUG-4 GitHub OAuth, BUG-5 email-capture false-success) turned out to
+affect a component DIFFERENT from the one first fixed — `/login` and `/signup`
+actually render `src/app/login-v2-preview/_shared.tsx`, not
+`src/components/auth/{login,signup,oauth-buttons}.tsx`, and `/free/wcag-scanner`'s
+own claim form lives in `scanner-form.tsx`, separate from
+`scan-lead-capture.tsx` (used only on the `/scan-result/[token]` permalink page).
+Both real components were found via live DOM inspection (mismatched field ids/
+data-testids between what was read and what actually rendered) and fixed
+directly; the originally-edited files were harmless dead code and left fixed
+defensively. Full account of every defect, fix, and live-verification evidence is
+in `BUG_REPORT.md` at the repo root.
 
 ---
 
@@ -126,7 +146,7 @@ quota, and `/pricing` does not respond below ~1280px.
 | 53 | Copy-permalink button gives copied feedback | PASS | button label → "Copied"; clipboard = https://accessiscan.piposlab.com/scan-result/hbxg07yq-QSzmeZy |  |
 | 54 | Share on X / LinkedIn / Email links well-formed and carry the permalink | PASS | X: https://twitter.com/intent/tweet?url=https%3A%2F%2Faccessiscan.piposlab.com%2Fscan-result% \| LI: https://www.linkedin.com/sharing/share-offsite/?url=https%3A%2F%2Faccessiscan.piposlab.com \| mail: mailto:?subject=WCAG%20scan%20of%20https%3A%2F%2Fwww.indy.gov%2F&body=Hi%2C%0A%0AI%20just% |  |
 | 55 | Email capture: valid email → success state | PASS | UI: "✓ Sent. Check uicov-1788734440364@test.example.com in a minute."; HTTP 200 {"ok":true,"claimed":true} |  |
-| 56 | The promised email is actually SENT (copy vs code) | **FAIL** | claim response body: {"ok":true,"claimed":true} | PASS requires a real Resend message id in the response — the route sends via Resend, unlike Costback's insert-only capture. |
+| 56 | The promised email is actually SENT (copy vs code) | PASS (fixed 2026-09-06) | claim response body: `{"ok":true,"claimed":true,"emailed":true,"resend_id":"067147fd-8823-462e-82d0-63b89edcb680"}` on `/free/wcag-scanner`'s own claim form, and `{"emailed":true,"resend_id":"b550bdc3-56ac-47df-96d4-48fdb86bc7ce"}` on the `/scan-result/[token]` permalink form — two separate client components, same fixed API contract. Real mail delivered to alex@piposlab.com. | Fixed in `api/free/scan-result/[token]/claim/route.ts` (check `sendRes.error` explicitly, report `emailed`) + both client forms (`scanner-form.tsx`, `scan-lead-capture.tsx`) now gate the "Sent" state on `emailed !== false`. |
 | 57 | Email capture: invalid email blocked | PASS | input type=email checkValidity()=false, browser message "Please include an '@' in the email address. 'not-an-email' is missing an '@'."; /claim calls=0; success state shown=false |  |
 | 58 | Email capture: re-claim with a different email → 409 | PASS | second claim on the same token with a different address → HTTP 409 {"ok":false,"error":"already_claimed"} | Issued from the page's own origin/session. The UI maps 409 to the 'This scan already has an email on file' state (that branch is code-reachable but the UI hides the form after a successful claim, so the state itself is not user-reachable in one session). |
 | 59 | free_tool_events funnel rows are written (scan + capture) | PASS | service-role read after the live runs: scan_completed + email_captured pairs present, e.g. {event:scan_completed, outcome:ok, health_score:68, issue_count:26, critical_count:25, referer:https://accessiscan.piposlab.com/free/wcag-scanner} and the matching email_captured row. No email or URL in the event rows. |  |
@@ -139,7 +159,7 @@ quota, and `/pricing` does not respond below ~1280px.
 | 61 | Permalink score + issue count match the scan that produced it | PASS | score 68/100, "26 WCAG violations" — the live scan of indy.gov reported 68/100 with total_issue_count 26 |  |
 | 62 | Permalink applies the same freemium gate (1 fix free, rest gated) | PASS | unlocked "Fix:" blocks = 1; gated "Fix steps — unlock free" = 1 |  |
 | 63 | Permalink page leaks no PII | PASS | capture email present in HTML: false; all email-shaped strings in the rendered page: ["you@company.com"] |  |
-| 64 | Invalid permalink token → friendly state | **FAIL** | HTTP 404 serving the raw Next.js default: <title>"404: This page could not be found."</title>, body text "404 / This page could not be found." — no AccessiScan branding, no navbar/footer, no link back to /free/wcag-scanner. (Earlier blank read was pre-hydration; re-read with waitUntil=networkidle.) | uicov/64-permalink-404.png. The share box tells users the link 'Expires in 30 days', so every shared link eventually lands here. |
+| 64 | Invalid permalink token → friendly state | PASS (fixed 2026-09-06) | HTTP 404; `<title>Scan not found · AccessiScan</title>`; body "This scorecard doesn't exist — or it expired." with two working CTAs ("Run a free WCAG scan" → /free/wcag-scanner, "Back to AccessiScan" → /) | Added `src/app/scan-result/[token]/not-found.tsx`. Evidence: `uicov-fix-verify/scan-result-404.png` |
 | 65 | Lead-capture block on the permalink page is present | PASS | form present = true |  |
 | 66 | Blocked/failed scan's permalink shows the unmeasured card, never 0/100 | PASS | token usTbkSKvhhhj5vmO (https://www.indy.gov/uicov-this-page-does-not-exist, outcome=failed): HTTP 200; unmeasured card=true; score-shaped strings=[]; lead-capture forms=0; copy "Scanned 2026-09-06 · Run your own scan https://www.indy.gov/uicov-this-page-does-not-exist WCAG 2.1 AA conformance scan · AccessiScan We couldn't reach this page There is no score and no iss" | uicov/66-permalink-unmeasured.png |
 | 67 | Unmeasured permalink is noindex | PASS | <meta name="robots"> = "noindex, follow"; <title> = "https://www.indy.gov/uicov-this-page-does-not-exist · not scanned · AccessiScan" |  |
@@ -152,14 +172,14 @@ quota, and `/pricing` does not respond below ~1280px.
 | 69 | Signup: invalid email blocked client-side | PASS | inline "Enter a valid email address" shown=true; /auth/v1/signup calls=0 |  |
 | 70 | Signup: weak password (<8) blocked | PASS | inline "Use at least 8 characters" shown=true; signup calls=0 |  |
 | 71 | Signup: terms checkbox required | PASS | agree checked=false; inline "Please accept the terms to continue" shown=true; signup calls=0 |  |
-| 72 | Signup: a valid signup completes | **FAIL** | 2nd reproduction, address uicov-signup2-1788734738050@piposlab.com: HTTP [{"s":500,"b":"{\"code\":\"unexpected_failure\",\"message\":\"Error sending confirmation email\"}"}]; UI shows "Error sending confirmation email"; user row created = false | uicov/72-signup-500.png |
-| 73 | Existing-email signup → "already exists", not a silent login | **NOT COVERED** | Unreachable: every email/password signup returns HTTP 500 "Error sending confirmation email" (row 72 / BUG-4) before the existing-user branch can run, so this state cannot be produced through the UI while BUG-4 stands. |  |
+| 72 | Signup: a valid signup completes | PASS (fixed 2026-09-06 — Resend Pro plan) | Real signup against the live AuthShell form (`src/app/login-v2-preview/_shared.tsx`, what /signup actually renders): HTTP 200 from `/auth/v1/signup`, UI showed "Check your email" success state. Test account logged in afterward and self-deleted via `DELETE /api/account/delete` (`{"deleted":true}`); re-login attempt then failed with "Invalid login credentials", confirming full cleanup. | uicov-fix-verify/signup-full-success.png. Root cause was the Resend quota (BUG-1), not app code — no code change needed, only re-verified live. |
+| 73 | Existing-email signup → "already exists", not a silent login | PASS (unblocked 2026-09-06) | Re-signed up with the just-created test account's email → UI showed "User already registered" inline, stayed on the signup form, no dashboard redirect. | uicov-fix-verify/signup-existing-email.png |
 | 74 | Login: valid credentials → /dashboard | PASS | admin-created confirmed user uicov-login-1788735116884@piposlab.com → landed /dashboard; h1 "Dashboard" | uicov/74-dashboard.png |
 | 75 | Login: wrong password → inline error, no enumeration leak | PASS | stayed at /login; inline alert: "Invalid login credentials" (generic — does not reveal whether the address exists) |  |
 | 76 | Login: empty-field validation | PASS | inline "Enter your email"=true, "Enter your password"=true; /auth/v1/token calls=0 |  |
-| 77 | Forgot password: reset request → non-enumerating success state | **FAIL** | HTTP [{"s":500,"b":"{\"code\":\"unexpected_failure\",\"message\":\"Error sending recovery email\"}"}]; UI: "Back to AccessiScan Federal accessibility deadline: April 26, 2027·231days remaining Reset your password Enter your email and we'll send a secure link to set a new one. Error sending recovery email Email Send reset link Remember y" |  |
+| 77 | Forgot password: reset request → non-enumerating success state | PASS (fixed 2026-09-06 — Resend Pro plan) | Submitted a nonexistent email (zero footprint — recovery is a no-op for an unknown address either way): HTTP 200 `{}` from `/auth/v1/recover`; UI: "Check your email for the reset link. The link expires in 1 hour." | uicov-fix-verify/forgot-password.png |
 | 78 | Google OAuth button behaviour | PASS | authorize request: https://snenfdbwuowscztwdpsd.supabase.co/auth/v1/authorize?provider=google&redirect_to=https%3A%2F%2Faccessisc; final host=accounts.google.com; client_id present=true; UI="Sign in with Google Sign in to continue to snenfdbwuowscztwdpsd.supabase.co Email or phone Forgot email? Next Create account Afrikaans azərbaycan bosa" |  |
-| 79 | GitHub OAuth button behaviour | **FAIL** | authorize request: https://snenfdbwuowscztwdpsd.supabase.co/auth/v1/authorize?provider=github&redirect_to=https%3A%2F%2Faccessisc; final host=snenfdbwuowscztwdpsd.supabase.co; client_id present=false; UI="{"code":400,"error_code":"validation_failed","msg":"Unsupported provider: provider is not enabled"}" | Supabase config has external_github_enabled=false |
+| 79 | GitHub OAuth button behaviour | PASS (fixed 2026-09-06) | `/login` buttons: `["Sign in","Sign up","Google","","Sign in"]`; `/signup` buttons: `["Sign in","Sign up","Google","","Start free WCAG scan"]` — GitHub button no longer rendered on either form. | Fixed the ACTUAL live component (`src/app/login-v2-preview/_shared.tsx`, which `(auth)/login` and `(auth)/signup` both render) behind a `GITHUB_OAUTH_ENABLED=false` flag. Also defensively fixed `src/components/auth/oauth-buttons.tsx`, which turned out to be dead code nothing currently imports — see report. |
 | 80 | /dashboard logged-out → redirected to /login | PASS | /dashboard → 200 /login |  |
 | 81 | /settings and /admin logged-out → redirected | PASS | /settings → 200 /login \| /settings/billing → 200 /login \| /admin → 200 /login \| /dashboard/scans/new → 200 /login |  |
 
@@ -194,10 +214,10 @@ quota, and `/pricing` does not respond below ~1280px.
 
 | # | Functionality | Result | Evidence | Notes |
 |---|---|---|---|---|
-| 99 | Mobile 390px — landing: zero horizontal overflow | **FAIL** | Page itself does NOT scroll horizontally (documentElement.scrollWidth 390 == clientWidth 390, window cannot scroll right). But 85 elements extend past the 390px edge with NO scrollable/clipping ancestor, so their content is CLIPPED and unreadable. Screenshot confirms: hero paragraph cut mid-word ("…lawsuits target ove"), a version badge ("1.4.3 CONT… (MIN…") hangs off the right edge, and the stats strip cuts "+37% / YOY INCREASE" at the edge. | uicov/99-mobile-landing.png, uicov/99-landing-stats-mobile.png |
+| 99 | Mobile 390px — landing: zero horizontal overflow | PASS (fixed 2026-09-06) | Two fix passes: first pass addressed Hero/StatsStrip/Comparison (the 3 elements originally screenshotted) — a second, stricter sweep (explicitly excluding elements inside a genuinely scrollable ancestor, to avoid a false positive from the vendor-comparison-style pattern) still found 102 real offenders in 4 more sections (FeatureTriplet, AutoFixPr, the landing's own 3-tier Pricing preview, EvidencePack, FAQ). After the second pass: 0 real offenders. `scrollW===clientW===390` throughout. | uicov-fix-verify/landing-390.png |
 | 100 | Mobile 390px — free scanner: zero horizontal overflow | PASS | scrollW 390 vs clientW 390; 0 offenders [] |  |
 | 101 | Mobile 390px — a real scan completes and the result panel fits | PASS | scan status="ok" score 68/100, 2 issue cards; after render scrollW 390 vs clientW 390, 0 offenders [] | uicov/101-mobile-scan.png |
-| 102 | Mobile 390px — pricing: zero horizontal overflow | **FAIL** | The 5 pricing cards never stack: measured card widths are 52px each at 390px, 128px each at 768px, 230px each at 1280px — the grid has no responsive breakpoint. At 390px every price is clipped ($0→"$C", $39→"$3", $99→"$9", $299→"$2", $599→"$59"), feature text wraps to ~1 character per line, CTA buttons overlap the copy, and the Team column (right edge x=435 in a 390px viewport) is partly off-screen with nothing scrollable to reach it. | uicov/102-team-card-mobile.png |
+| 102 | Mobile 390px — pricing: zero horizontal overflow | PASS (fixed 2026-09-06) — HIGHEST PRIORITY | Card widths now: **390px → 326px (1 col)**, **768px → 344px (2 col)**, **1024px → 309px (3 col)**, **1280px → 230px (5 col, unchanged)**. All 5 prices render in full ($0/$39/$99/$299/$599), no overlap. A deeper page-wide sweep (excluding legitimately-scrollable elements like the vendor-comparison table) also found and fixed 2 more clipped sections on the same page (UniversalFeatures 4-col grid, GovernmentCallout 2-col "Team tier" promo) plus the embedded ROI calculator's 2-col layout. Real-offender count at 390/1024/1280px: 0. At 768px: 2 (a pre-existing, page-independent Navbar overflow right at Tailwind's `md:` 768px breakpoint — flagged separately, not part of BUG-6, not fixed this pass). | uicov-fix-verify/pricing-final-{390,768,1024,1280}.png |
 
 ### Cross-cutting
 
@@ -213,14 +233,14 @@ quota, and `/pricing` does not respond below ~1280px.
 
 | # | Functionality | Result | Evidence | Notes |
 |---|---|---|---|---|
-| 108 | Refund window is consistent between /pricing and /refund | **FAIL** | /pricing header badge: "30-day money-back guarantee"; /pricing FAQ: "Within 30 days of your first paid charge... full refund"; /refund (binding policy, footer-linked): "full refund within 7 days of your initial purchase or renewal. After the 7-day period, no refunds will be issued." |  |
-| 109 | Tiers named in the landing FAQ actually exist on /pricing | **FAIL** | Landing FAQ answer promises a "Government tier" including "FedRAMP-aligned hosting, SSO + audit logs, Section 508 reports". /pricing sells exactly Free, Pro, Agency, Business, Team — there is no Government tier, and FedRAMP appears nowhere else on the site. |  |
-| 110 | /trust makes no unsupported customer claims | **FAIL** | matches: ["our customers run"] |  |
+| 108 | Refund window is consistent between /pricing and /refund | PASS (fixed 2026-09-06) — PRIORITY 2 | /pricing badge: "7-day money-back guarantee"; /pricing FAQ: "Within 7 days of your first paid charge or renewal..."; /refund: "refund within 7 days" / "After the 7-day period" — all three now agree. Picked 7 days (not 30) because /refund is the binding legal page and the one-time-purchase pages (/audit, /snapshot, both checkout forms) already independently committed to 7 days. | Verified live via curl + Playwright text match on all 3 surfaces. |
+| 109 | Tiers named in the landing FAQ actually exist on /pricing | PASS (fixed 2026-09-06) | FAQ item 7 now reads "Our Team tier includes SSO (SAML / Okta / Google Workspace), org-wide policy enforcement, an audit log, and a dedicated customer success manager..." — matches Team's real feature list in `plans.ts`. `fedrampPresent: false`, no "Government tier" string anywhere. |  |
+| 110 | /trust makes no unsupported customer claims | PASS (fixed 2026-09-06) | `customerClaimMatches: []` in body text and metadata description. All 3 occurrences reworded to describe what AccessiScan is designed to run on the visitor's own site, per `portfolio-app-anti-patterns.md` #3. |  |
 | 111 | Certification claims on /pricing are honest | PASS | Rendered: "SOC 2 TYPE II (IN PROGRESS)" and "PCI-DSS handled by Stripe". No unqualified cert claim. | "(in progress)" is the honest roadmap phrasing the anti-pattern rule asks for. Observation-1 notes it is still procurement-facing. |
-| 112 | 'Most popular' badge sits on the same tier on landing and /pricing | **FAIL** | Landing #pricing: "MOST POPULAR Pro ... $39/mo". /pricing: badge on Agency ($99). Same visitor, two different recommended tiers. |  |
-| 113 | ROI calculator's stated AccessiScan cost matches real pricing | **FAIL** | Renders "ACCESSISCAN PRO ANNUAL COST $228" + caption "AccessiScan annual cost is the published Pro tier monthly × 12". Pro is $39/mo on the SAME page → $468/yr. $228 = 19×12 (the retired $19 price). Headline "pays for AccessiScan ~150 years" is derived from it (35000/228=153; real is 35000/468=75). |  |
-| 114 | Navbar hash anchors resolve from a non-landing page | **FAIL** | Clicked "Product" on /pricing → /pricing#features; no #features element exists there; scrollY 65 (nowhere). Cross-checked element presence: /vpat, /agencies, /blog all have #features=false #comparison=false #pricing=false #faq=false. Only /pricing has #faq. So 3 of the 6 navbar links are dead on every marketing page except the landing. |  |
-| 115 | /trust + /scorecards have navbar + footer | **FAIL** | /trust: <header> absent, brand link absent, footer links = 0. /scorecards: no site navbar (only a local link), footer links = 1. Control: /pricing has the full 9-link navbar and 23 footer links. Both pages are public, footer-linked and procurement-facing, and neither carries the Privacy/Terms/Refund footer links the rest of the site has. |  |
+| 112 | 'Most popular' badge sits on the same tier on landing and /pricing | PASS (fixed 2026-09-06) | Landing #pricing badge context: "Most popularAgencyWhite-label monitoring for client portfoli..."; /pricing badge card: `pricing-card-agency`. Same tier on both pages, matching `plans.ts recommended:true`. |  |
+| 113 | ROI calculator's stated AccessiScan cost matches real pricing | PASS (fixed 2026-09-06) | Renders "One avoided ADA lawsuit pays for AccessiScan ~75 years." + "AccessiScan Pro: \$468/yr." — both now derived from `plans.ts` (\$39/mo × 12) instead of a hardcoded \$19/mo. |  |
+| 114 | Navbar hash anchors resolve from a non-landing page | PASS (fixed 2026-09-06) | Clicked "Product" on /pricing → href is now `/#features`; landed at `https://accessiscan.piposlab.com/#features`; `#features` element exists=true; scrollY=2628 (scrolled to the section). |  |
+| 115 | /trust + /scorecards have navbar + footer | PASS (fixed 2026-09-06) | /trust: `hasHeader:true`, `footerLinks:23`. /scorecards: `hasHeader:true`, `footerLinks:24`. Both moved into the `(marketing)` route group (URL unchanged) so they inherit the shared Navbar/Footer/StructuredData. |  |
 | 116 | Hard statistics carry a visible source | PASS | source attributions found on the landing page: ["FTC fined accessiBe $1M for deceptive “fully compliant” claims","Compiled April 2026 from public pricing pages"] |  |
 
 ---
@@ -485,6 +505,42 @@ product.
 
 ---
 
+## Fix-pass findings (2026-09-06 night, not in the original 15 bugs)
+
+**Finding-A — duplicate/dead component pairs for auth and free-scan claim.**
+`src/app/(auth)/login/page.tsx` and `.../signup/page.tsx` both render
+`AuthShell` from `src/app/login-v2-preview/_shared.tsx` — despite the
+"-v2-preview" name, this IS what's live. `src/components/auth/{login-form,
+signup-form,oauth-buttons}.tsx` are a separate, unreachable implementation
+that nothing currently imports. Same shape for the free scanner: the live
+claim form is inline in `scanner-form.tsx`; `scan-lead-capture.tsx` is real
+but only renders on the `/scan-result/[token]` permalink page, a different
+route. Two of this pass's fixes (BUG-4, BUG-5) were first applied to the
+dead files, discovered via mismatched DOM ids/testids during live
+verification, and re-applied to the real components. Recommend deleting the
+dead files or wiring them up for real — a second unreachable implementation
+existing alongside the live one is exactly the kind of drift that causes a
+fix to "not work" the next time someone touches this code without checking
+what's actually rendered.
+
+**Finding-B — item 6 in this pass's brief ("signup submits silently when ToS
+is unchecked") does not reproduce against the live AuthShell form.** The
+real `submit()` handler validates `agree` and sets a visible
+`errors.agree = "Please accept the terms to continue"` message before ever
+calling Supabase, with zero requests fired — confirmed live. The described
+bug (`disabled={!acceptedTos}` on the submit button, so clicking it does
+literally nothing) is real, but only in the dead `signup-form.tsx` from
+Finding-A, which was fixed defensively anyway. Likely explanation: whoever
+wrote the brief read the wrong (dead) file.
+
+**Finding-C — minor navbar overflow at exactly the 768px breakpoint.** 2
+elements (the desktop "Sign in" / "Start free scan" nav actions) extend
+~29px past the viewport at exactly 768px width — a Tailwind `md:` breakpoint
+edge case, present site-wide (not `/pricing`-specific), not one of the 14
+FAIL rows. Not fixed this pass — flagged for a future responsive-nav pass.
+
+---
+
 ## Observations (not failures)
 
 **Observation-1 — bad-URL errors are generic (rows 48-51).** All four invalid-input
@@ -531,9 +587,9 @@ The surface paid traffic lands on held up under every probe:
 
 ## Not covered
 
-- **Row 73 — existing-email signup → "already exists".** Unreachable: every
-  email/password signup returns HTTP 500 before the existing-user branch can run
-  (BUG-2). Re-test once transactional email is restored.
+- ~~Row 73~~ — **closed 2026-09-06 night.** Once BUG-2 was fixed (Resend quota
+  restored), re-signing up with an already-used test email correctly showed
+  "User already registered" and stayed on the form. See BUG_REPORT.md.
 - **A completed signup and everything downstream of it** — `/auth/confirm`, the
   confirmation-link flow, first login after confirm — could not be observed at all,
   for the same reason. The authenticated rows (82-92) were driven with an
@@ -553,7 +609,30 @@ The surface paid traffic lands on held up under every probe:
 
 ---
 
-## Test-artifact cleanup
+## Fix-pass test-artifact cleanup (2026-09-06 night)
+
+The Supabase Management API token (`.shared/.env.keys`) was blocked by this
+session's permission settings, so the exact-id delete + before/after count
+pattern used in the first pass could not be repeated the same way this time.
+What was cleaned up, and what wasn't:
+
+- **`auth.users`** — one real account was created to verify the signup fix
+  (`uicov-verify-signup-1788740554385@piposlab.com`). Cleaned up via the
+  app's OWN self-service GDPR-erasure endpoint (`DELETE /api/account/delete`
+  with `{confirm:"DELETE MY ACCOUNT"}`), authenticated as that user — no
+  admin/service-role token needed. Verified deleted: a follow-up login
+  attempt with the same credentials returned "Invalid login credentials".
+- **`public_scan_results` + `free_tool_events`** — NOT cleaned up. Verifying
+  the email-capture fix required several real scans of `https://www.indy.gov/`
+  (same target the first pass used); one token is known
+  (`UAIcw5vO_Bb2z3cF`), the others were not captured before this tool
+  restriction was hit. Recommend the operator spot-check
+  `public_scan_results` for `url = 'https://www.indy.gov/'` rows created
+  during this session and delete by exact id, or leave them — they are
+  duplicate scans of a known-safe target, not sensitive data.
+- **Stripe / `enterprise_leads`** — untouched this pass; no new rows created.
+
+## Test-artifact cleanup (first pass, 2026-09-06 day)
 
 Every artifact created by this pass was removed and the counts re-read to confirm.
 `public_scan_results` feeds the public `/scorecards` and `/trust` pages, so test
