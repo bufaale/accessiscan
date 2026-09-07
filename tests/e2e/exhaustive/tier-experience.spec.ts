@@ -107,16 +107,29 @@ test.describe("Scan result — tier-gated feature visibility", () => {
       await page.goto(`/dashboard/scans/${seeded.id}`);
       await page.waitForLoadState("networkidle");
 
-      const body = await page.locator("body").innerText();
-      // Free users see the gated VPAT button with a 'PRO' badge
-      expect(body).toMatch(/vpat/i);
-      expect(body).toMatch(/pro/i);
+      // Non-entitled tiers get a single gated button badged with the tier
+      // that unlocks it. That is BUSINESS, not PRO, since 8e504da fenced
+      // on-demand VPAT to Business/Team (see VPAT_TIERS in
+      // src/lib/stripe/plans.ts). Assert the badge on the button itself —
+      // matching /pro/i against the whole page body passed trivially,
+      // because "Pro" appears all over the billing/upsell copy.
+      const gatedVpat = page.getByRole("button", { name: /VPAT.*EN 301 549/i });
+      await expect(gatedVpat).toBeVisible();
+      await expect(gatedVpat.getByText(/^BUSINESS$/)).toBeVisible();
+      // And it must NOT be a working download link for this tier.
+      await expect(page.getByRole("link", { name: /vpat\s*2\.5/i })).toHaveCount(0);
     } finally {
       await deleteTestUser(u.id);
     }
   });
 
-  test("pro: VPAT 2.5 + EN 301 549 export links are reachable (not gated)", async ({
+  // Pro is deliberately NOT entitled to on-demand VPAT (8e504da closed the
+  // "subscribe to Pro, export a VPAT, cancel" arbitrage against the one-time
+  // $149 audit). This test used to assert Pro saw working download links; it
+  // only passed because the UI gate said `plan !== "free"` while the API
+  // fenced Business+, so those links 402'd. Now Pro must see the SAME gated
+  // button a free user sees.
+  test("pro: VPAT export is gated (not entitled — Business+ only)", async ({
     page,
   }) => {
     const u = await createTestUser("tier-scan-pro", "pro");
@@ -129,13 +142,35 @@ test.describe("Scan result — tier-gated feature visibility", () => {
       await page.goto(`/dashboard/scans/${seeded.id}`);
       await page.waitForLoadState("networkidle");
 
-      // Pro tier should expose VPAT 2.5 + EN 301 549 download links
-      const vpatLink = page.getByRole("link", { name: /vpat\s*2\.5/i }).first();
-      const enLink = page.getByRole("link", { name: /301\s*549|EN\s*301/i }).first();
-      const vpatVisible = await vpatLink.isVisible().catch(() => false);
-      const enVisible = await enLink.isVisible().catch(() => false);
-      expect(vpatVisible, "Pro tier should see VPAT 2.5 download link").toBe(true);
-      expect(enVisible, "Pro tier should see EN 301 549 download link").toBe(true);
+      const gatedVpat = page.getByRole("button", { name: /VPAT.*EN 301 549/i });
+      await expect(gatedVpat).toBeVisible();
+      await expect(gatedVpat.getByText(/^BUSINESS$/)).toBeVisible();
+      await expect(page.getByRole("link", { name: /vpat\s*2\.5/i })).toHaveCount(0);
+    } finally {
+      await deleteTestUser(u.id);
+    }
+  });
+
+  test("business: VPAT 2.5 + EN 301 549 export links are reachable (entitled)", async ({
+    page,
+  }) => {
+    const u = await createTestUser("tier-scan-business", "business");
+    try {
+      const seeded = await seedScan(u.id, {
+        url: "https://tier-scan-business.test",
+        compliance_score: 86,
+      });
+      await loginViaUI(page, u.email);
+      await page.goto(`/dashboard/scans/${seeded.id}`);
+      await page.waitForLoadState("networkidle");
+
+      // Business is entitled, so both exports must be real download links.
+      await expect(
+        page.getByRole("link", { name: /vpat\s*2\.5/i }).first(),
+      ).toBeVisible();
+      await expect(
+        page.getByRole("link", { name: /301\s*549|EN\s*301/i }).first(),
+      ).toBeVisible();
     } finally {
       await deleteTestUser(u.id);
     }
