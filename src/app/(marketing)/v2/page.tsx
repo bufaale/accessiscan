@@ -247,11 +247,27 @@ function WcagSchematic() {
 function Hero() {
   return (
     <section style={{ position: "relative", background: "#0b1f3a", color: "#fff", overflow: "hidden", fontFamily: FONT_INTER }}>
+      {/* BUG-12 (2026-09-06 UI coverage pass, row 99): this two-column grid
+          had no breakpoint, so at 390px both columns were forced into ~half
+          the viewport each — the hero paragraph wrapped mid-word and the
+          decorative Chip badges (positioned at e.g. right:"-6%" of the now
+          tiny schematic box) bled past the viewport edge with nothing to
+          scroll them into view. Fix: stack to one column and hide the
+          decorative schematic (illustrative only, not content) on phones. */}
+      <style>{`
+        .hero-grid { display: grid; grid-template-columns: 1.15fr 1fr; gap: 60px; align-items: center; }
+        @media (max-width: 900px) {
+          .hero-grid { grid-template-columns: 1fr; gap: 32px; }
+        }
+        @media (max-width: 640px) {
+          .hero-art { display: none; }
+        }
+      `}</style>
       <div style={{ position: "absolute", inset: 0, opacity: 0.07, backgroundImage: "linear-gradient(#fff 1px,transparent 1px),linear-gradient(90deg,#fff 1px,transparent 1px)", backgroundSize: "56px 56px", pointerEvents: "none" }} />
-      <div style={{ position: "relative", maxWidth: 1320, margin: "0 auto", padding: "80px 32px", display: "grid", gridTemplateColumns: "1.15fr 1fr", gap: 60, alignItems: "center" }}>
+      <div className="hero-grid" style={{ position: "relative", maxWidth: 1320, margin: "0 auto", padding: "80px 32px" }}>
         <div>
           <Eyebrow color="cyan-pill">ADA Title II · WCAG 2.1 AA · VPAT 2.5</Eyebrow>
-          <h1 style={{ marginTop: 24, fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 64, lineHeight: 1.02, letterSpacing: "-0.02em" }}>
+          <h1 style={{ marginTop: 24, fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: "clamp(32px, 9vw, 64px)", lineHeight: 1.05, letterSpacing: "-0.02em" }}>
             Real WCAG 2.1 AA compliance — not an overlay band-aid.
           </h1>
           <p style={{ marginTop: 20, maxWidth: 560, fontSize: 18, lineHeight: 1.55, color: "rgba(255,255,255,0.7)" }}>
@@ -282,7 +298,9 @@ function Hero() {
             ))}
           </div>
         </div>
-        <WcagSchematic />
+        <div className="hero-art">
+          <WcagSchematic />
+        </div>
       </div>
     </section>
   );
@@ -299,10 +317,24 @@ function StatsStrip() {
   ];
   return (
     <section style={{ background: "#fff", padding: "48px 32px", fontFamily: FONT_INTER }}>
-      <div style={{ maxWidth: 1320, margin: "0 auto", display: "grid", gridTemplateColumns: "repeat(4,1fr)", borderTop: "1px solid #e2e8f0", borderBottom: "1px solid #e2e8f0", padding: "32px 0" }}>
+      {/* BUG-12 (row 99): fixed repeat(4,1fr) clipped "+37% / YOY INCREASE" at
+          390px (no breakpoint existed at all). 2 columns down to tablet, then
+          a single column + smaller stat digits on phones. */}
+      <style>{`
+        .stats-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); }
+        .stats-value { font-size: 56px; }
+        @media (max-width: 768px) {
+          .stats-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: 24px; }
+        }
+        @media (max-width: 480px) {
+          .stats-grid { grid-template-columns: 1fr; }
+          .stats-value { font-size: 36px; }
+        }
+      `}</style>
+      <div className="stats-grid" style={{ maxWidth: 1320, margin: "0 auto", borderTop: "1px solid #e2e8f0", borderBottom: "1px solid #e2e8f0", padding: "32px 0" }}>
         {stats.map(([v, l, c], i) => (
           <div key={l} style={{ padding: "0 28px", borderLeft: i === 0 ? 0 : "1px solid #e2e8f0", display: "flex", flexDirection: "column", gap: 12 }}>
-            <span style={{ fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 56, lineHeight: 1, letterSpacing: "-0.02em", color: c === "cy" ? "#0e7490" : "#0b1f3a" }}>{v}</span>
+            <span className="stats-value" style={{ fontFamily: FONT_DISPLAY, fontWeight: 700, lineHeight: 1, letterSpacing: "-0.02em", color: c === "cy" ? "#0e7490" : "#0b1f3a" }}>{v}</span>
             <Eyebrow>{l}</Eyebrow>
           </div>
         ))}
@@ -336,8 +368,8 @@ function Comparison() {
           <h2 style={{ marginTop: 12, fontFamily: FONT_DISPLAY, fontWeight: 600, fontSize: 44, lineHeight: 1.1, letterSpacing: "-0.02em", color: "#0b1f3a" }}>How AccessiScan compares.</h2>
           <p style={{ marginTop: 20, fontSize: 16, lineHeight: 1.55, color: "#475569" }}>Compiled April 2026 from public pricing pages.</p>
         </div>
-        <div style={{ marginTop: 48, borderRadius: 8, border: "1px solid #e2e8f0", overflow: "hidden" }}>
-          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 14 }}>
+        <div style={{ marginTop: 48, borderRadius: 8, border: "1px solid #e2e8f0", overflowX: "auto", overflowY: "hidden" }}>
+          <table style={{ width: "100%", minWidth: 640, borderCollapse: "collapse", fontSize: 14 }}>
             <thead>
               <tr style={{ background: "#f8fafc", borderBottom: "1px solid #e2e8f0" }}>
                 {["Tool", "Starting price", "AI fix code", "VPAT 2.5 export", "CI/CD action"].map((h) => (
