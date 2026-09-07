@@ -250,6 +250,23 @@ export function PricingCards() {
       }}
       data-testid="pricing-cards-section"
     >
+      <style>{`
+        .pricing-cards-grid {
+          display: grid;
+          grid-template-columns: repeat(5, minmax(0, 1fr));
+          gap: 16px;
+        }
+        /* >=1280px: 5 tiers side by side (unchanged desktop layout). */
+        @media (max-width: 1279px) {
+          .pricing-cards-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+        }
+        @media (max-width: 1023px) {
+          .pricing-cards-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        }
+        @media (max-width: 639px) {
+          .pricing-cards-grid { grid-template-columns: 1fr; }
+        }
+      `}</style>
       <div style={{ maxWidth: 1320, margin: "0 auto" }}>
         {/* Billing toggle */}
         <div
@@ -337,15 +354,15 @@ export function PricingCards() {
           </p>
         )}
 
-        {/* Tier cards: 5 tiers, responsive grid */}
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(5, minmax(0, 1fr))",
-            gap: 16,
-            alignItems: "stretch",
-          }}
-        >
+        {/* Tier cards: 5 tiers, responsive grid.
+            BUG-6 (2026-09-06 UI coverage pass, row 102): this grid was fixed
+            at `repeat(5, minmax(0, 1fr))` with no breakpoint, so every price
+            and CTA was clipped below ~1280px (measured 52px-wide cards at
+            390px). The grid-template-columns below is intentionally NOT set
+            inline (inline styles beat a plain class rule) — the responsive
+            values live entirely in the <style> block so the media queries
+            can actually take effect. */}
+        <div className="pricing-cards-grid" style={{ alignItems: "stretch" }}>
           {pricingPlans.map((plan) => {
             const display = TIER_DISPLAY[plan.id] ?? { tagline: plan.description };
             const popular = plan.recommended;
