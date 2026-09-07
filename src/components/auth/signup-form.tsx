@@ -30,6 +30,21 @@ export function SignupForm() {
     setLoading(true);
     setError(null);
 
+    // Item 6 (2026-09-06 fix pass): the submit button used to be
+    // `disabled={!acceptedTos}`, which is functionally a dead end — a
+    // disabled <button> fires no click event at all (not a React handler
+    // call that gets short-circuited), so unchecking the box produced no
+    // request, no error, and no visible feedback. The only guard clause
+    // users could ever see was the password-length one below. The button is
+    // now always clickable while not loading; this is the first check, and
+    // it's the one hard rule that matters here: a guard that blocks
+    // submission must tell the user why.
+    if (!acceptedTos) {
+      setError("Please accept the Terms of Service and Privacy Policy to continue.");
+      setLoading(false);
+      return;
+    }
+
     if (password.length < 6) {
       setError("Password must be at least 6 characters.");
       setLoading(false);
@@ -158,7 +173,7 @@ export function SignupForm() {
                   <a href="/privacy" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Privacy Policy</a>
                 </label>
               </div>
-              <Button type="submit" className="w-full" disabled={!acceptedTos || loading}>
+              <Button type="submit" className="w-full" disabled={loading}>
                 {loading ? "Creating account..." : "Sign up"}
               </Button>
             </form>
