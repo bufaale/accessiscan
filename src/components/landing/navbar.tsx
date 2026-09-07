@@ -16,13 +16,20 @@ import {
 // Anchors must match the IDs rendered by the v2 landing page (Hero/Comparison/
 // CTA/Pricing/Faq sections). #product → #features, #government → #cta.
 // Otherwise users land on a page where the navbar links scroll to nothing.
+//
+// BUG-10 (2026-09-06 UI coverage pass, row 114): these MUST be root-relative
+// (`/#features`, not `#features`). A bare `#features` href is resolved
+// against the CURRENT path, so clicking "Product" from /pricing landed on
+// /pricing#features — an element that only exists on the landing page — and
+// silently did nothing on every marketing page except "/". The footer's
+// `/#cta` link already used the correct root-relative form.
 const navLinks = [
-  { href: "#features", label: "Product" },
-  { href: "#comparison", label: "Comparison" },
+  { href: "/#features", label: "Product" },
+  { href: "/#comparison", label: "Comparison" },
   { href: "/enterprise", label: "Enterprise" },
   { href: "/overlay-detector", label: "Overlay detector" },
-  { href: "#pricing", label: "Pricing" },
-  { href: "#faq", label: "FAQ" },
+  { href: "/#pricing", label: "Pricing" },
+  { href: "/#faq", label: "FAQ" },
 ];
 
 export function Navbar() {
