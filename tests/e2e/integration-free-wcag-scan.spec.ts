@@ -18,11 +18,11 @@
  * artifact, not a security regression: every payload below genuinely returns
  * 400 in production when the requests are spaced out (verified by hand).
  *
- * So the file runs serially and every request goes through postFreeScan(),
- * which retries with exponential backoff while the response is 429. Backoff
- * rather than a fixed sleep on purpose: a hardcoded delay rots the moment the
- * 6/60 config changes (cf. pilotdeck's bulk-scan-feed, which self-throttled
- * for weeks on DELAY_BETWEEN_SCANS_MS = 2000). If the limiter never releases,
+ * So every request goes through the shared postFreeScan() helper, which
+ * retries with exponential backoff while the response is 429. Backoff rather
+ * than a fixed sleep on purpose: a hardcoded delay rots the moment the 6/60
+ * config changes (cf. pilotdeck's bulk-scan-feed, which self-throttled for
+ * weeks on DELAY_BETWEEN_SCANS_MS = 2000). If the limiter never releases,
  * postFreeScan throws — a hung limiter must surface as a red test, never as a
  * silent pass.
  *
@@ -32,50 +32,20 @@
  * regression guard.
  */
 import { test, expect } from "@playwright/test";
+import { postFreeScan } from "../helpers/test-utils";
 
-const BASE_URL =
-  process.env.TEST_BASE_URL ||
-  process.env.NEXT_PUBLIC_SITE_URL ||
-  "https://accessiscan.piposlab.com";
-
-const ENDPOINT = `${BASE_URL}/api/free/wcag-scan`;
-
-/** Give up (loudly) if the limiter has not released within this long. */
-const RATE_LIMIT_MAX_WAIT_MS = 90_000;
-
-/**
- * POST to the free-scan endpoint, transparently waiting out the public
- * endpoint's own rate limiter. Returns the first non-429 response.
- *
- * `body` omitted sends no request body at all (distinct from sending "{}").
- */
-async function postFreeScan(body?: unknown): Promise<Response> {
-  const deadline = Date.now() + RATE_LIMIT_MAX_WAIT_MS;
-  let delay = 3_000;
-
-  for (;;) {
-    const res = await fetch(ENDPOINT, {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      ...(body === undefined ? {} : { body: JSON.stringify(body) }),
-    });
-    if (res.status !== 429) return res;
-
-    if (Date.now() + delay > deadline) {
-      throw new Error(
-        `${ENDPOINT} still returned 429 after ${RATE_LIMIT_MAX_WAIT_MS}ms of ` +
-          `backoff, so the 400 validation contract could not be verified. ` +
-          `Either the rate limiter is stuck or its budget shrank below what ` +
-          `this file needs — investigate, do not relax the assertions.`,
-      );
-    }
-    await new Promise((resolve) => setTimeout(resolve, delay));
-    delay = Math.min(delay * 2, 20_000);
-  }
-}
-
-// One shared 6/60 IP budget across every test here, so they must not race.
-test.describe.configure({ mode: "serial", timeout: 180_000 });
+// Requests go through the shared postFreeScan() helper in tests/helpers,
+// which waits out this endpoint's 6-req/60s-per-IP limiter. Five spec files
+// POST here, so the budget is shared across the whole run — the backoff, not
+// serialisation, is what makes these tests reliable.
+//
+// Deliberately NOT test.describe.configure({ mode: "serial" }): the config
+// already sets fullyParallel: false, so tests in this file run sequentially
+// anyway, and serial mode would additionally SKIP the remaining tests after
+// the first failure — which could hide an SSRF regression behind a grey
+// "did not run" instead of a red one. Each payload must be able to fail on
+// its own. Only the timeout is raised, to accommodate the deliberate waiting.
+test.describe.configure({ timeout: 180_000 });
 
 test.describe("Free WCAG scanner — input validation", () => {
   test("POST without body → 400", async () => {

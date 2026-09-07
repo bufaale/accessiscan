@@ -16,6 +16,7 @@
  */
 
 import { test, expect, request } from "@playwright/test";
+import { postFreeScan } from "../helpers/test-utils";
 
 const BASE = process.env.TEST_BASE_URL ?? "https://accessiscan.piposlab.com";
 
@@ -47,14 +48,22 @@ test.describe("AccessiScan post-result email claim — shipped 2026-05-13", () =
     let token = "";
 
     test.beforeAll(async () => {
-      // Seed a scan we can claim
-      const ctx = await request.newContext();
-      const r = await ctx.post(`${BASE}/api/free/wcag-scan`, {
-        data: { url: "https://example.com" },
-        timeout: 30_000,
-      });
+      // Seed a scan we can claim. Go through postFreeScan() so the free-scan
+      // endpoint's 6-req/60s-per-IP limiter is waited out rather than
+      // mistaken for a real answer: on a 429 the body has no share_token and
+      // every test in this block then failed with a bare
+      // "expect(undefined).toBeTruthy()", which reads like a broken claim
+      // endpoint rather than a throttled seed request.
+      const r = await postFreeScan({ url: "https://example.com" });
       const body = await r.json();
-      expect(body.share_token).toBeTruthy();
+      expect(
+        r.status,
+        `seed scan failed (HTTP ${r.status}): ${JSON.stringify(body).slice(0, 300)}`,
+      ).toBe(200);
+      expect(
+        body.share_token,
+        `seed scan returned no share_token: ${JSON.stringify(body).slice(0, 300)}`,
+      ).toBeTruthy();
       token = body.share_token as string;
     });
 

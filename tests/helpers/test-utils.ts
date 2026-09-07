@@ -381,3 +381,60 @@ export async function acceptTos(page: Page) {
   await box.click();
   await expect(page.locator("#agree")).toBeChecked();
 }
+
+// ------- Free-scan endpoint helper -------
+/**
+ * Base URL for direct (non-`page`) requests against the deployed app.
+ * Mirrors playwright.config.ts's BASE_URL resolution.
+ */
+export const APP_BASE_URL =
+  process.env.TEST_BASE_URL ||
+  process.env.NEXT_PUBLIC_SITE_URL ||
+  "https://accessiscan.piposlab.com";
+
+/** Give up (loudly) if the free-scan limiter has not released within this long. */
+export const FREE_SCAN_MAX_WAIT_MS = 120_000;
+
+/**
+ * POST to /api/free/wcag-scan, transparently waiting out the endpoint's own
+ * rate limiter, and return the first non-429 response.
+ *
+ * The route's FIRST guard is rlAllowed(clientIpKey(req, "freescan"), 6, 60) —
+ * 6 requests per 60s per IP, evaluated BEFORE the body is parsed. Five spec
+ * files POST here, so in a parallel run they share one budget and any of them
+ * can be the one that gets throttled. Every caller must therefore be prepared
+ * to wait rather than treat a 429 as a real answer.
+ *
+ * Backoff rather than a fixed sleep on purpose: a hardcoded delay rots the
+ * moment the 6/60 config changes (cf. pilotdeck's bulk-scan-feed, which
+ * self-throttled for weeks on DELAY_BETWEEN_SCANS_MS = 2000).
+ *
+ * Throws if the limiter never releases — a stuck limiter must surface as a red
+ * test, never as a silent pass or a confusing `undefined` further downstream.
+ *
+ * `body` omitted sends no request body at all (distinct from sending "{}").
+ */
+export async function postFreeScan(body?: unknown): Promise<Response> {
+  const endpoint = `${APP_BASE_URL}/api/free/wcag-scan`;
+  const deadline = Date.now() + FREE_SCAN_MAX_WAIT_MS;
+  let delay = 3_000;
+
+  for (;;) {
+    const res = await fetch(endpoint, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      ...(body === undefined ? {} : { body: JSON.stringify(body) }),
+    });
+    if (res.status !== 429) return res;
+
+    if (Date.now() + delay > deadline) {
+      throw new Error(
+        `${endpoint} still returned 429 after ${FREE_SCAN_MAX_WAIT_MS}ms of ` +
+          `backoff. Either the rate limiter is stuck or its budget shrank ` +
+          `below what the suite needs — investigate, do not relax assertions.`,
+      );
+    }
+    await new Promise((resolve) => setTimeout(resolve, delay));
+    delay = Math.min(delay * 2, 20_000);
+  }
+}
