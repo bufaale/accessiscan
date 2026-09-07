@@ -13,6 +13,23 @@ import {
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
+// BUG-4 (2026-09-06 UI coverage pass, row 79): supabase.auth.signInWithOAuth()
+// builds the /authorize URL and redirects the browser client-side with no
+// network round trip, so a disabled provider only fails AFTER navigation,
+// rendering raw Supabase JSON
+// ({"code":400,...,"msg":"Unsupported provider: provider is not enabled"})
+// on the auth host with no way back — there is no client-side error to catch
+// for this case. Confirmed external_github_enabled=false in the live
+// Supabase auth config, while Google is enabled. Enabling it for real
+// requires the operator to register a GitHub OAuth App and add its client
+// id/secret to Supabase (a new external integration, not a code fix — see
+// BUG_REPORT.md "Gaps flagged"). Until then, don't render a button that
+// leads to a dead end. This is THE component /login and /signup actually
+// render (src/app/(auth)/{login,signup}/page.tsx both import AuthShell from
+// here) — src/components/auth/oauth-buttons.tsx is a separate, unreachable
+// component and was fixed defensively but is not what's live.
+const GITHUB_OAUTH_ENABLED = false;
+
 // ============================================================
 //  Tokens
 // ============================================================
@@ -831,13 +848,15 @@ function LoginForm({ onSwitch }: { onSwitch: () => void }) {
 
   return (
     <form onSubmit={submit} noValidate style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+      <div style={{ display: "grid", gridTemplateColumns: GITHUB_OAUTH_ENABLED ? "1fr 1fr" : "1fr", gap: 10 }}>
         <SsoButton icon={<GoogleG size={18} />} onClick={() => handleOAuth("google")} disabled={!!oauthLoading || submitting}>
           {oauthLoading === "google" ? "Connecting..." : "Google"}
         </SsoButton>
-        <SsoButton icon={<GithubMark size={18} />} onClick={() => handleOAuth("github")} disabled={!!oauthLoading || submitting}>
-          {oauthLoading === "github" ? "Connecting..." : "GitHub"}
-        </SsoButton>
+        {GITHUB_OAUTH_ENABLED && (
+          <SsoButton icon={<GithubMark size={18} />} onClick={() => handleOAuth("github")} disabled={!!oauthLoading || submitting}>
+            {oauthLoading === "github" ? "Connecting..." : "GitHub"}
+          </SsoButton>
+        )}
       </div>
 
       <Divider>or sign in with email</Divider>
@@ -1009,13 +1028,15 @@ function SignupForm({ onSwitch }: { onSwitch: () => void }) {
 
   return (
     <form onSubmit={submit} noValidate style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+      <div style={{ display: "grid", gridTemplateColumns: GITHUB_OAUTH_ENABLED ? "1fr 1fr" : "1fr", gap: 10 }}>
         <SsoButton icon={<GoogleG size={18} />} onClick={() => handleOAuth("google")} disabled={!!oauthLoading || submitting}>
           {oauthLoading === "google" ? "Connecting..." : "Google"}
         </SsoButton>
-        <SsoButton icon={<GithubMark size={18} />} onClick={() => handleOAuth("github")} disabled={!!oauthLoading || submitting}>
-          {oauthLoading === "github" ? "Connecting..." : "GitHub"}
-        </SsoButton>
+        {GITHUB_OAUTH_ENABLED && (
+          <SsoButton icon={<GithubMark size={18} />} onClick={() => handleOAuth("github")} disabled={!!oauthLoading || submitting}>
+            {oauthLoading === "github" ? "Connecting..." : "GitHub"}
+          </SsoButton>
+        )}
       </div>
 
       <Divider>or sign up with email</Divider>
