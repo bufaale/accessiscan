@@ -14,6 +14,7 @@
  */
 import { test, expect } from "@playwright/test";
 import {
+  acceptTos,
   createTestUser,
   deleteTestUser,
   loginViaUI,
@@ -54,9 +55,10 @@ test.describe("Critical user journey — automated", () => {
       await page.locator("#signup-name").fill("E2E Journey User");
       await page.locator("#signup-email").fill(email);
       await page.locator("#signup-password").fill(TEST_PASSWORD);
-      await page.locator("#agree").check({ force: true }).catch(async () => {
-        await page.locator("label[for='agree']").click();
-      });
+      // See acceptTos(): #agree is 0x0 / pointer-events:none so .check()
+      // cannot reach it, and clicking the label hits the embedded Terms
+      // links and navigates off /signup.
+      await acceptTos(page);
 
       // Submit button text in current form is "Sign up" / "Creating account…"
       await page

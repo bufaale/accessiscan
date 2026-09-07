@@ -16,7 +16,7 @@
  * That's covered by auth.spec.ts in the existing suite.
  */
 import { test, expect } from "@playwright/test";
-import { TEST_PASSWORD, deleteTestUser } from "../../helpers/test-utils";
+import { TEST_PASSWORD, acceptTos, deleteTestUser } from "../../helpers/test-utils";
 
 const SUPABASE_URL = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -24,17 +24,26 @@ const SUPABASE_ANON_KEY =
   process.env.SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
 async function findUserByEmail(email: string): Promise<{ id: string } | null> {
-  // List users filtered by email.
+  // GoTrue's admin list endpoint takes `filter`, NOT `email`. With `?email=`
+  // the param is silently ignored and we get page 1 of *every* user, so the
+  // lookup only succeeded when the brand-new user happened to land in that
+  // page — the source of this test's intermittent "no auth.users row".
   const res = await fetch(
-    `${SUPABASE_URL}/auth/v1/admin/users?email=${encodeURIComponent(email)}`,
+    `${SUPABASE_URL}/auth/v1/admin/users?filter=${encodeURIComponent(email)}`,
     {
       headers: {
         Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
-        apikey: SUPABASE_ANON_KEY!,
+        apikey: SUPABASE_SERVICE_ROLE_KEY!,
       },
     },
   );
-  if (!res.ok) return null;
+  // Do not swallow a failed query as "user was not created" — that turns an
+  // infrastructure problem into a false signup-broken verdict.
+  if (!res.ok) {
+    throw new Error(
+      `admin/users lookup failed: ${res.status} ${await res.text().catch(() => "")}`,
+    );
+  }
   const json = await res.json();
   // GoTrue admin returns {users: [...], aud, ...}
   const users = json.users ?? json;
@@ -79,16 +88,10 @@ test.describe("Signup form — real Supabase roundtrip", () => {
       await page.locator("#signup-email, input[type='email']").first().fill(email);
       await page.locator("#signup-password, input[type='password']").first().fill(TEST_PASSWORD);
 
-      // The ToS checkbox is required — submit button stays disabled until
-      // it's checked. Custom-styled checkbox: input is a 0x0 hidden dot
-      // and the user actually clicks <label for="agree">. Click the label.
-      const tosLabel = page.locator("label[for='agree']").first();
-      if (await tosLabel.count()) {
-        await tosLabel.click();
-      } else {
-        const tos = page.locator("#agree, input[type='checkbox']").first();
-        if (await tos.count()) await tos.check({ force: true });
-      }
+      // The ToS checkbox is required — the submit handler rejects the form
+      // without it. See acceptTos(): clicking the label itself hits the
+      // embedded Terms/Privacy links and navigates off /signup.
+      await acceptTos(page);
 
       // Submit — match the submit button by text. The signup CTA reads
       // "Start free WCAG scan" on AccessiScan (consistent with the
@@ -137,17 +140,7 @@ test.describe("Signup form — real Supabase roundtrip", () => {
     await page.locator("#signup-password, input[type='password']").first().fill(TEST_PASSWORD);
     // Same ToS gate — without it the submit is a no-op and the URL stays
     // on /signup whether or not the email is malformed, defeating the test.
-    // Custom-styled checkbox needs force:true (see the happy-path test).
-    // Custom-styled checkbox: input is a 0x0 hidden dot, the visible
-    // affordance is the <label for="agree"> wrapper containing "I agree
-    // to the Terms of Service...". Clicking the label toggles the input.
-    const tosLabel = page.locator("label[for='agree']").first();
-    if (await tosLabel.count()) {
-      await tosLabel.click();
-    } else {
-      const tos = page.locator("#agree, input[type='checkbox']").first();
-      if (await tos.count()) await tos.check({ force: true });
-    }
+    await acceptTos(page);
     const submit = page
       .locator("button[type='submit']")
       .filter({ hasText: /sign\s*up|create\s*account|get\s*started|start\s*free/i })

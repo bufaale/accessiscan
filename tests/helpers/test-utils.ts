@@ -352,3 +352,32 @@ export async function seedScan(
   const row = Array.isArray(rows) ? rows[0] : rows;
   return { id: row.id, url: row.url };
 }
+
+// ------- Signup form helpers -------
+/**
+ * Accept the "I agree to the Terms of Service / Privacy Policy" checkbox on
+ * /signup.
+ *
+ * Do NOT click `label[for='agree']` directly. The Checkbox component in
+ * `src/app/login-v2-preview/_shared.tsx` renders the label as:
+ *
+ *     <label for="agree">
+ *       <span/>                     <- the visible 18x18 box
+ *       <input id="agree" .../>     <- opacity:0, 0x0, pointer-events:none
+ *       <span>I agree to the <a href="/terms">Terms</a> ...</span>
+ *     </label>
+ *
+ * Clicking the label's centre lands on the Terms/Privacy anchors and
+ * NAVIGATES AWAY from /signup, after which the submit button no longer
+ * exists and the test hangs until timeout. And `.check()` cannot touch the
+ * real input because it is 0x0 with pointer-events:none.
+ *
+ * So click the visible box (the label's first span) and then assert the
+ * checkbox actually latched — a silent no-op here would let a signup test
+ * "pass" without ever accepting the terms.
+ */
+export async function acceptTos(page: Page) {
+  const box = page.locator("label[for='agree'] > span").first();
+  await box.click();
+  await expect(page.locator("#agree")).toBeChecked();
+}
