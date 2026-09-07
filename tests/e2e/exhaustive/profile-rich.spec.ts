@@ -98,12 +98,27 @@ test.describe("Settings — Profile (rich, A7)", () => {
 
       const nameInput = page.locator("#fullName");
       await expect(nameInput).toBeVisible({ timeout: 10_000 });
+      // The form mounts before the profile fetch resolves, then populates
+      // #fullName from the response. Filling during that window loses the
+      // typed value — the fetch lands and overwrites it, and the save then
+      // persists the OLD name, so the reload assertion sees the seeded value
+      // and the failure looks like "profile edits do not persist".
+      // Wait for the seeded name to appear (proof hydration finished) before
+      // typing. createTestUser seeds user_metadata.full_name = `E2E <prefix>`.
+      await expect(nameInput).toHaveValue("E2E profile-rich-name", { timeout: 10_000 });
       await nameInput.fill(newName);
 
       await page.getByTestId("save-details").click();
 
-      // Toast OR DB persistence — wait for either signal.
-      await expect(page.getByText(/saved|updated/i).first()).toBeVisible({ timeout: 10_000 });
+      // Wait for the ACTUAL success signal. /saved|updated/i was a trap: the
+      // status line under the form has three states and two of them match it
+      // before any save happens — "Unsaved changes." (shown the instant you
+      // type) and "Last updated <date>." (the idle state). So the old
+      // assertion passed immediately, the reload below raced the in-flight
+      // server action, and the test failed as though profile edits do not
+      // persist. "Profile updated" is the toast.success() text, which only
+      // renders after updateProfileDetails() returns ok.
+      await expect(page.getByText("Profile updated")).toBeVisible({ timeout: 10_000 });
 
       // Reload to confirm round-trip — domcontentloaded is more reliable than
       // networkidle on the dashboard which has live polling.

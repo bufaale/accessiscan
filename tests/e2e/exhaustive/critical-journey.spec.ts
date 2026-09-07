@@ -218,10 +218,13 @@ test.describe("Critical user journey — automated", () => {
         .first();
       await saveBtn.click();
 
-      // Sonner toast appears with success message
+      // Sonner toast appears with success message. Match it exactly: the
+      // form's status line renders "Unsaved changes." while dirty and
+      // "Last updated <date>." when idle, so /updated|saved/i matched before
+      // the save had run and the DB assertion below could race it.
       await expect(
-        page.getByText(/updated|saved/i).first(),
-      ).toBeVisible({ timeout: 5_000 });
+        page.getByText("Profile updated"),
+      ).toBeVisible({ timeout: 10_000 });
 
       // Verify it persisted via the DB
       const supabaseUrl = process.env.SUPABASE_URL || "";
