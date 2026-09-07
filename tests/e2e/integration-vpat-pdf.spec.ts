@@ -3,10 +3,17 @@
  *
  * Verifies:
  *   - Anonymous GET → 401
- *   - Free user → 403 (tier-gated to pro+)
- *   - Pro user with own scan → 200 with application/pdf body, valid PDF magic
+ *   - Free user → 402 (tier-gated)
+ *   - Business user with own scan → 200 with application/pdf body, valid PDF magic
  *   - Cross-user scan → 404 (RLS)
  *   - VPAT computed for "Section 508", "EN 301 549", "WCAG 2.1 AA" each works
+ *
+ * On-demand VPAT is fenced to Business/Team, NOT Pro/Agency — see commit
+ * 8e504da, which closed the "subscribe to Pro, generate a VPAT, cancel"
+ * arbitrage against the one-time $149 audit. plans.ts lists VPAT only under
+ * Business ("the only recurring tier with VPAT"). So the happy-path users
+ * here must be `business`; the Pro/Agency *denial* is asserted in
+ * tier-feature-matrix.spec.ts.
  */
 import { test, expect } from "@playwright/test";
 import {
@@ -28,7 +35,7 @@ test.describe("VPAT PDF — auth + tier gating", () => {
     expect(r.status()).toBe(401);
   });
 
-  test("free user → 402 (or 403) — tier-gated to pro+", async ({ page }) => {
+  test("free user → 402 (or 403) — tier-gated to Business+", async ({ page }) => {
     const u = await createTestUser("vpat-free", "free");
     let scanId: string | null = null;
     try {
@@ -43,8 +50,11 @@ test.describe("VPAT PDF — auth + tier gating", () => {
   });
 
   test("cross-user scan → 404", async ({ page }) => {
-    const userA = await createTestUser("vpat-A", "pro");
-    const userB = await createTestUser("vpat-B", "pro");
+    // Both users need a VPAT-entitled tier: otherwise the 402 tier gate
+    // fires before the scan lookup and this test never reaches the RLS
+    // behaviour it is meant to cover.
+    const userA = await createTestUser("vpat-A", "business");
+    const userB = await createTestUser("vpat-B", "business");
     let scanA: string | null = null;
     try {
       const scan = await seedScan(userA.id, { url: "https://A.test" });
@@ -60,11 +70,11 @@ test.describe("VPAT PDF — auth + tier gating", () => {
 });
 
 test.describe("VPAT PDF — happy path returns valid PDF buffer", () => {
-  test("pro user → 200 application/pdf with %PDF magic header", async ({
+  test("business user → 200 application/pdf with %PDF magic header", async ({
     page,
   }) => {
     test.setTimeout(60_000);
-    const u = await createTestUser("vpat-pro", "pro");
+    const u = await createTestUser("vpat-business", "business");
     let scanId: string | null = null;
     try {
       const scan = await seedScan(u.id, {
@@ -101,7 +111,7 @@ test.describe("VPAT PDF — happy path returns valid PDF buffer", () => {
     page,
   }) => {
     test.setTimeout(60_000);
-    const u = await createTestUser("vpat-standards", "pro");
+    const u = await createTestUser("vpat-standards", "business");
     let scanId: string | null = null;
     try {
       const scan = await seedScan(u.id, {

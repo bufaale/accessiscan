@@ -6,21 +6,25 @@ import {
   setUserPlan,
 } from "../helpers/test-utils";
 
+// On-demand VPAT is fenced to Business/Team (commit 8e504da) — see
+// VPAT_TIERS in src/lib/stripe/plans.ts. Pro is NOT entitled, so the
+// download path is exercised with a business user; the Pro/Agency denial
+// is asserted in tier-feature-matrix.spec.ts.
 let freeUser: { id: string; email: string };
-let proUser: { id: string; email: string };
+let businessUser: { id: string; email: string };
 
 test.beforeAll(async () => {
-  [freeUser, proUser] = await Promise.all([
+  [freeUser, businessUser] = await Promise.all([
     createTestUser("vpat-free"),
-    createTestUser("vpat-pro"),
+    createTestUser("vpat-business"),
   ]);
-  await setUserPlan(proUser.id, "pro");
+  await setUserPlan(businessUser.id, "business");
 });
 
 test.afterAll(async () => {
   await Promise.all([
     freeUser?.id ? deleteTestUser(freeUser.id) : Promise.resolve(),
-    proUser?.id ? deleteTestUser(proUser.id) : Promise.resolve(),
+    businessUser?.id ? deleteTestUser(businessUser.id) : Promise.resolve(),
   ]);
 });
 
@@ -36,28 +40,29 @@ async function runQuickScanAndGetId(page: import("@playwright/test").Page) {
 }
 
 test.describe.serial("VPAT 2.5 export", () => {
-  test("free users see VPAT gated with Pro badge and are redirected to billing", async ({ page }) => {
+  test("free users see VPAT gated with Business badge and are redirected to billing", async ({ page }) => {
     test.setTimeout(150_000);
 
     await loginViaUI(page, freeUser.email);
     await runQuickScanAndGetId(page);
 
-    // Free tier shows a single combined button "VPAT / EN 301 549" with a Pro badge.
+    // Non-entitled tiers show a single combined button "VPAT / EN 301 549"
+    // badged with the tier that actually unlocks it.
     const vpatButton = page.getByRole("button", { name: /VPAT.*EN 301 549/i });
     await expect(vpatButton).toBeVisible();
-    await expect(vpatButton.getByText(/^Pro$/)).toBeVisible();
+    await expect(vpatButton.getByText(/^BUSINESS$/)).toBeVisible();
 
     await vpatButton.click();
     await page.waitForURL("**/settings/billing", { timeout: 10_000 });
   });
 
-  test("pro users download a valid VPAT PDF", async ({ page }) => {
+  test("business users download a valid VPAT PDF", async ({ page }) => {
     test.setTimeout(150_000);
 
-    await loginViaUI(page, proUser.email);
+    await loginViaUI(page, businessUser.email);
     const scanId = await runQuickScanAndGetId(page);
 
-    // The Pro/Agency VPAT button is an <a> wrapped in <Button asChild>.
+    // The entitled-tier VPAT button is an <a> wrapped in <Button asChild>.
     const vpatLink = page.getByRole("link", { name: /VPAT 2\.5/i });
     await expect(vpatLink).toBeVisible();
     await expect(vpatLink).toHaveAttribute("href", `/api/scans/${scanId}/vpat`);

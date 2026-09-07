@@ -43,28 +43,35 @@ test.afterAll(async () => {
 });
 
 // =============================================================================
-// VPAT 2.5 export — promised on Pro+ ("VPAT 2.5 + EN 301 549 export")
+// VPAT 2.5 export — fenced to Business/Team, NOT Pro/Agency.
+//
+// Commit 8e504da deliberately narrowed this gate to close the "subscribe to
+// Pro, generate a VPAT, cancel" hole that undercut the one-time $149 audit,
+// and stripped VPAT from the Pro/Agency feature lists in plans.ts (Business
+// is described there as "the only recurring tier with VPAT"). So Pro and
+// Agency MUST be denied here — that denial is the revenue guard, and a test
+// asserting they pass would re-open the arbitrage.
 // =============================================================================
-test.describe("Tier: VPAT export gate (Pro+ promised)", () => {
-  test("free user: VPAT route returns 402", async ({ page }) => {
-    await loginViaUI(page, users.free.email);
-    // /api/scans/[id]/vpat needs a real scan id — but the gate fires before
-    // scan lookup, so a fake UUID still triggers 402 for free users.
-    const FAKE = "00000000-0000-0000-0000-000000000000";
-    const res = await page.request.get(`/api/scans/${FAKE}/vpat`);
-    expect(res.status()).toBe(402);
-  });
+test.describe("Tier: VPAT export gate (Business+ only)", () => {
+  // The tier gate fires before the scan lookup, so a fake UUID is enough to
+  // exercise it: denied tiers 402 without ever touching the scans table.
+  const FAKE = "00000000-0000-0000-0000-000000000000";
 
-  for (const tier of ["pro", "agency", "business"] as const) {
-    test(`${tier} user: VPAT route does NOT 402 (passes tier gate)`, async ({ page }) => {
+  for (const tier of ["free", "pro", "agency"] as const) {
+    test(`${tier} user: VPAT route returns 402 (fenced)`, async ({ page }) => {
       await loginViaUI(page, users[tier].email);
-      const FAKE = "00000000-0000-0000-0000-000000000000";
       const res = await page.request.get(`/api/scans/${FAKE}/vpat`);
-      // Paid tiers pass the tier gate. They'll still 404 on the fake scan id —
-      // we just need to confirm it's NOT 402.
-      expect(res.status()).not.toBe(402);
+      expect(res.status()).toBe(402);
     });
   }
+
+  test("business user: VPAT route does NOT 402 (passes tier gate)", async ({ page }) => {
+    await loginViaUI(page, users.business.email);
+    const res = await page.request.get(`/api/scans/${FAKE}/vpat`);
+    // Business clears the gate. It still 404s on the fake scan id — we only
+    // need to confirm it is NOT the 402 tier rejection.
+    expect(res.status()).not.toBe(402);
+  });
 });
 
 // =============================================================================
