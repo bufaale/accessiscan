@@ -31,17 +31,32 @@ test.describe.serial("Monitored sites — business-tier full flow", () => {
     await page.locator("#monitored-url").fill("https://example.com");
     await page.locator("#monitored-label").fill("E2E test site");
     await page.getByLabel(/alert email/i).fill(user.email);
-    // Form submit button text is "Add to monitoring" inside the dialog.
-    await page.getByRole("button", { name: /Add to monitoring/i }).click();
+    // Dialog submit button reads "Start monitoring" ("Adding…" while in
+    // flight) — see the Add Site Modal in
+    // src/app/(dashboard)/dashboard/monitored/page.tsx.
+    await page.getByRole("button", { name: /Start monitoring/i }).click();
 
-    // Wait for the row to appear in the list (toast is too transient to assert).
-    await expect(page.getByText("example.com").first()).toBeVisible({ timeout: 15_000 });
+    // The dialog closing is the first proof the POST succeeded rather than
+    // erroring in place.
+    await expect(page.getByRole("dialog")).toBeHidden({ timeout: 15_000 });
+
+    // Wait for the row to appear in the list (toast is too transient to
+    // assert). The card's display name is `site.label ?? site.url`, so a site
+    // created WITH a label renders the label and never the raw URL — asserting
+    // on "example.com" could not match. Identify the row by its label, and
+    // confirm the row's own controls are wired to that same site.
+    await expect(page.getByText("E2E test site").first()).toBeVisible({ timeout: 15_000 });
+    await expect(
+      page.getByRole("button", { name: "Pause monitoring E2E test site" }),
+    ).toBeVisible();
   });
 
   test("monitored site appears in the list", async ({ page }) => {
     await loginViaUI(page, user.email);
     await page.goto("/dashboard/monitored");
-    await expect(page.getByText("example.com").first()).toBeVisible();
+    // Same `label ?? url` display rule as above — this asserts the row
+    // persisted across a fresh page load.
+    await expect(page.getByText("E2E test site").first()).toBeVisible();
   });
 
   test("monitored list shows the cadence + label", async ({ page }) => {

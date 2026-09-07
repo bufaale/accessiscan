@@ -287,7 +287,14 @@ test.describe("/enterprise — contact form submission", () => {
       .getByRole("button", { name: /Schedule a procurement review/i })
       .click();
 
-    await expect(page.getByRole("alert")).toBeVisible({ timeout: 5000 });
+    // Next.js renders its own <div role="alert" id="__next-route-announcer__">
+    // on every page, so a bare getByRole("alert") is a strict-mode violation.
+    // Filter to the form's alert AND assert it surfaces the API's message —
+    // "an alert exists" would have passed even if the error text never
+    // reached the user.
+    await expect(
+      page.getByRole("alert").filter({ hasText: "Invalid submission" }),
+    ).toBeVisible({ timeout: 5000 });
   });
 
   test("shows error state if work email field is empty (client guard)", async ({

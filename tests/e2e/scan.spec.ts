@@ -26,7 +26,13 @@ test.describe.serial("Scanning - Free user", () => {
 
     const deepScanBtn = page.getByRole("button", { name: /Deep Scan/i });
     await expect(deepScanBtn).toBeDisabled();
-    await expect(page.getByText("Upgrade to unlock")).toBeVisible();
+    // The locked affordance is now a "Pro" badge plus a "Pro tier" subtitle
+    // on the option card itself (ScanTypeOption in
+    // src/app/(dashboard)/dashboard/scans/new/page.tsx), not the old
+    // "Upgrade to unlock" string. Assert both halves so a free user is still
+    // told which tier unlocks it.
+    await expect(deepScanBtn.getByText(/^Pro$/)).toBeVisible();
+    await expect(deepScanBtn.getByText(/Pro tier/i)).toBeVisible();
   });
 
   test("quick scan completes and shows results", async ({ page }) => {
