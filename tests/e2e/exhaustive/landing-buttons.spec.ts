@@ -68,17 +68,24 @@ test.describe("Landing — every button + link", () => {
       expectAllPointTo(hrefs, "/signup", "Free scan / Start free scan");
     });
 
-    test("Product → #features (every copy)", async ({ page }) => {
+    // The marketing-layout navbar is shared by /pricing, /enterprise, /blog
+    // etc., so its section links are ROOT-ABSOLUTE ("/#features") rather than
+    // bare fragments. A bare "#features" would be a dead anchor on every page
+    // except the landing page. In-page CTAs inside the landing body still use
+    // bare fragments, which is correct there. Verified live 2026-09-07: the
+    // navbar emits /#features, /#comparison, /#faq, /#pricing and all four
+    // target ids exist on / (id="features", "comparison", "faq", "pricing").
+    test("Product → /#features (every copy)", async ({ page }) => {
       const hrefs = await allHrefsForName(page, /^product$/i);
-      expectAllPointTo(hrefs, "#features", "Product");
+      expectAllPointTo(hrefs, "/#features", "Product");
     });
 
-    test("Compare / Comparison → #comparison (every copy)", async ({ page }) => {
+    test("Compare / Comparison → /#comparison (every copy)", async ({ page }) => {
       const hrefs = [
         ...(await allHrefsForName(page, /^compare$/i)),
         ...(await allHrefsForName(page, /^comparison$/i)),
       ];
-      expectAllPointTo(hrefs, "#comparison", "Compare / Comparison");
+      expectAllPointTo(hrefs, "/#comparison", "Compare / Comparison");
     });
 
     test("Pricing nav link → #pricing (every copy in nav)", async ({ page }) => {
@@ -86,20 +93,20 @@ test.describe("Landing — every button + link", () => {
       // and intentional (the standalone page). We only assert against navbar
       // anchors here. Filter to hrefs that start with "#" (anchor links).
       const all = await allHrefsForName(page, /^pricing$/i);
-      const anchors = all.filter((h) => h.startsWith("#"));
+      const anchors = all.filter((h) => h.includes("#"));
       const standalone = all.filter((h) => h === "/pricing");
       expect(all.length, "expected at least one Pricing link").toBeGreaterThanOrEqual(1);
       // Every navbar anchor must be live; standalone /pricing link is OK if present.
       for (const h of anchors) {
-        expect(h).toBe("#pricing");
+        expect(h).toBe("/#pricing");
       }
       // Footer link to /pricing acceptable but not required
       expect(standalone.length).toBeGreaterThanOrEqual(0);
     });
 
-    test("FAQ → #faq", async ({ page }) => {
+    test("FAQ → /#faq", async ({ page }) => {
       const hrefs = await allHrefsForName(page, /^faq$/i);
-      expectAllPointTo(hrefs, "#faq", "FAQ");
+      expectAllPointTo(hrefs, "/#faq", "FAQ");
     });
 
     test("Enterprise nav link → /enterprise", async ({ page }) => {
@@ -111,16 +118,20 @@ test.describe("Landing — every button + link", () => {
   });
 
   test.describe("Hero CTAs", () => {
-    test("'Start free Title II scan' navigates to /signup", async ({ page }) => {
+    // "Start free Title II scan" is the lead-magnet CTA and points at the
+    // no-signup scanner at /free/wcag-scanner (verified live 2026-09-07,
+    // returns 200). The navbar's "Start free scan" is the account CTA and
+    // still goes to /signup — asserted above, and both must stay distinct.
+    test("'Start free Title II scan' navigates to /free/wcag-scanner", async ({ page }) => {
       const link = page
         .getByRole("link", { name: /start free.*title.*scan/i })
         .first();
       await expect(link).toBeVisible({ timeout: 10_000 });
       const href = await link.getAttribute("href");
-      expect(href).toBe("/signup");
+      expect(href).toBe("/free/wcag-scanner");
       await link.click();
-      await page.waitForURL(/\/signup/, { timeout: 10_000 });
-      expect(new URL(page.url()).pathname).toBe("/signup");
+      await page.waitForURL(/\/free\/wcag-scanner/, { timeout: 10_000 });
+      expect(new URL(page.url()).pathname).toBe("/free/wcag-scanner");
     });
 
     test("'See how we compare' is a hash link to #comparison", async ({ page }) => {
@@ -131,9 +142,10 @@ test.describe("Landing — every button + link", () => {
   });
 
   test.describe("Anchor navigation actually scrolls", () => {
-    test("clicking #pricing in nav lands the URL hash", async ({ page }) => {
+    test("clicking the Pricing nav anchor lands the URL hash", async ({ page }) => {
+      // Root-absolute href (see the navbar note above), so select on /#pricing.
       const pricingNavLink = page
-        .locator("nav a[href='#pricing']")
+        .locator("nav a[href='/#pricing']")
         .first();
       await pricingNavLink.click();
       await page.waitForFunction(() => location.hash === "#pricing", { timeout: 5_000 });
@@ -180,13 +192,13 @@ test.describe("Landing — every button + link", () => {
   });
 
   test.describe("Final CTA section", () => {
-    test("primary CTA navigates to /signup", async ({ page }) => {
+    test("primary CTA navigates to /free/wcag-scanner", async ({ page }) => {
       // Multiple "Start free Title II scan" links exist (hero + final).
-      // Every copy must go to /signup.
+      // Every copy must go to the free scanner, not a mix of destinations.
       const hrefs = await allHrefsForName(page, /start free.*title.*scan/i);
       expect(hrefs.length).toBeGreaterThanOrEqual(1);
       for (const href of hrefs) {
-        expect(href).toBe("/signup");
+        expect(href).toBe("/free/wcag-scanner");
       }
     });
 
