@@ -24,9 +24,11 @@ const bodySchema = z.object({
  * Public endpoint for the /free/wcag-scanner tool. Single fetch, regex-based
  * checks. Optional `email` lets us send the upgrade nurture sequence later.
  *
- * Rate limit (defense in depth): the security middleware should clamp this
- * route to ~5 req/min/IP via Upstash. This route does NOT manage its own
- * rate limit — relies on the global middleware.
+ * Rate limit: this route owns its own limit via `rlAllowed()` — a
+ * Postgres-backed, cross-instance limiter (6 req/60s/IP), enforced BEFORE
+ * the body is parsed. It does not rely on the Upstash middleware limiter,
+ * which is unconfigured (and therefore a no-op) in prod. See
+ * `src/lib/security/supabase-rate-limit.ts`.
  *
  * RESPONSE CONTRACT — `scan_status` is the field to branch on:
  *
