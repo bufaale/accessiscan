@@ -132,6 +132,21 @@ export function FreeScannerForm() {
         setClaimStatus("error");
         return;
       }
+      // BUG-5 (2026-09-06 UI coverage pass, rows 55/56): this is a SEPARATE
+      // inline claim form from components/free-scan/scan-lead-capture.tsx
+      // (that one only renders on the /scan-result/[token] permalink page —
+      // THIS one is what actually renders on /free/wcag-scanner itself,
+      // confirmed via data-testid on the live DOM). Same bug, same fix: the
+      // route can return ok:true with emailed:false (Resend accepted the
+      // capture but the send itself failed), and this code used to treat
+      // any ok:true as "sent".
+      if (data?.emailed === false) {
+        setClaimError(
+          "We saved your email, but couldn't send the report just now. Please try again in a minute, or email alex@piposlab.com and we'll send it manually.",
+        );
+        setClaimStatus("error");
+        return;
+      }
       setClaimStatus("sent");
     } catch (err) {
       setClaimError(err instanceof Error ? err.message : "Network error");
