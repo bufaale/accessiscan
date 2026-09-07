@@ -6,11 +6,11 @@ import { displayHealthScore } from "@/lib/free-scan/outcome";
 export const metadata: Metadata = {
   title: "Trust Center · AccessiScan",
   description:
-    "We scan our own portfolio every day with AccessiScan and publish the results. The scores below are live — pulled from the same engine our customers run.",
+    "We scan our own portfolio every day with AccessiScan and publish the results. The scores below are live — pulled from the same engine we built for you to run on your own site.",
   openGraph: {
     title: "AccessiScan Trust Center — we eat our own dog food",
     description:
-      "Live WCAG 2.1 AA scores across every Pipo Labs app, scanned daily. Same engine our customers run on themselves.",
+      "Live WCAG 2.1 AA scores across every Pipo Labs app, scanned daily. The same engine AccessiScan runs on your site.",
     type: "website",
   },
 };
@@ -106,8 +106,8 @@ export default async function TrustCenterPage() {
       <p className="text-lg text-slate-600 max-w-2xl">
         We scan every Pipo Labs property with AccessiScan and publish the
         results here. Same engine, same WCAG 2.1 AA ruleset, same auto-fix
-        pipeline our customers run. If something fails, you see it before we
-        do.
+        pipeline AccessiScan is designed to run on your site. If something
+        fails, you see it before we do.
       </p>
 
       <section className="mt-10 grid grid-cols-1 md:grid-cols-3 gap-4">
