@@ -464,11 +464,27 @@ function UniversalFeatures() {
             foundational to a credible WCAG audit, it ships on Free.
           </p>
         </div>
+        {/* Priority-1 pricing-responsive follow-up (2026-09-06 fix pass):
+            this 4-column grid had no breakpoint either, and its outer
+            overflow:"hidden" meant the overflow wasn't just off-screen —
+            it was invisibly clipped, with no way to scroll to it. Found via
+            live re-verification after the pricing-card grid fix (BUG-6): at
+            390px several of these cards (e.g. "Encrypted at rest & in
+            transit") still extended past the viewport with no scrollable
+            ancestor. */}
+        <style>{`
+          .universal-features-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); }
+          @media (max-width: 900px) {
+            .universal-features-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+          }
+          @media (max-width: 480px) {
+            .universal-features-grid { grid-template-columns: 1fr; }
+          }
+        `}</style>
         <div
+          className="universal-features-grid"
           style={{
             marginTop: 48,
-            display: "grid",
-            gridTemplateColumns: "repeat(4,1fr)",
             gap: 1,
             background: "#e2e8f0",
             border: "1px solid #e2e8f0",
@@ -547,15 +563,22 @@ function GovernmentCallout() {
           backgroundSize: "56px 56px",
         }}
       />
+      {/* Priority-1 pricing-responsive follow-up (2026-09-06 fix pass): same
+          fixed 2-column grid pattern as the landing Hero (BUG-12) — no
+          breakpoint, and the section's own overflow:"hidden" clipped the
+          "Team tier" aside instead of letting it reflow. */}
+      <style>{`
+        .gov-callout-grid { display: grid; grid-template-columns: 1.2fr 1fr; gap: 56px; align-items: center; }
+        @media (max-width: 900px) {
+          .gov-callout-grid { grid-template-columns: 1fr; gap: 32px; }
+        }
+      `}</style>
       <div
+        className="gov-callout-grid"
         style={{
           position: "relative",
           maxWidth: 1320,
           margin: "0 auto",
-          display: "grid",
-          gridTemplateColumns: "1.2fr 1fr",
-          gap: 56,
-          alignItems: "center",
         }}
       >
         <div>
