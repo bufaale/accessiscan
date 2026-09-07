@@ -624,7 +624,7 @@ function Pricing() {
       desc: "Ongoing monitoring for developers and contractors.",
       features: ["Weekly re-scans · multi-site", "WCAG 2.1 + 2.2 A/AA + deep scan", "Regression alerts + score history", "AI-powered fix suggestions", "GitHub Action for CI/CD"],
       cta: "Start free — upgrade anytime",
-      popular: true,
+      popular: false,
     },
     {
       name: "Agency",
@@ -633,7 +633,11 @@ function Pricing() {
       desc: "White-label monitoring for client portfolios.",
       features: ["Unlimited scans across clients", "White-label PDF reports", "API access + team collaboration", "Custom branding", "SLA guarantee"],
       cta: "Start free — upgrade anytime",
-      popular: false,
+      // BUG-14 (2026-09-06 UI coverage pass, row 112): this used to be
+      // hardcoded true on Pro while /pricing (src/lib/stripe/plans.ts,
+      // single source of truth) recommends Agency — same visitor, two
+      // different "most popular" tiers depending on which page they read.
+      popular: true,
     },
   ];
   return (
