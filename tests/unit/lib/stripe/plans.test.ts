@@ -222,14 +222,14 @@ describe("pricingPlans — PRO tier (exact assertions)", () => {
 
   it("description matches exactly", () => {
     expect(planById("pro").description).toBe(
-      "For professionals who need detailed compliance insights",
+      "Ongoing monitoring so your site doesn't drift back out of conformance",
     );
   });
 
-  it("monthlyPrice === 19 and yearlyPrice === 190 (the $19 entry price)", () => {
+  it("monthlyPrice === 39 and yearlyPrice === 390 (the arbitrage-proof entry price)", () => {
     const pro = planById("pro");
-    expect(pro.monthlyPrice).toBe(19);
-    expect(pro.yearlyPrice).toBe(190);
+    expect(pro.monthlyPrice).toBe(39);
+    expect(pro.yearlyPrice).toBe(390);
   });
 
   it("limits === { scansPerMonth: 30, canDeepScan: true }", () => {
@@ -264,19 +264,16 @@ describe("pricingPlans — PRO tier (exact assertions)", () => {
   it("features array matches exactly (kills StringLiteral mutants on each feature)", () => {
     const pro = planById("pro");
     expect(pro.features).toEqual([
-      "30 scans per month",
-      "Quick + deep scan",
+      "Continuous monitoring: weekly automated re-scans (up to 3 sites)",
+      "Regression alerts by email when your score drops",
+      "Score history over time",
+      "Quick + deep scan in the dashboard",
       "WCAG 2.1 & 2.2 A/AA checks",
       "AI-powered fix suggestions",
-      "Detailed compliance reports",
-      "PDF report export",
-      "VPAT 2.5 generation",
-      "EN 301 549 (EU) report export",
       "GitHub Action for CI/CD",
-      "Multi-site tracking",
       "Priority support",
     ]);
-    expect(pro.features).toHaveLength(11);
+    expect(pro.features).toHaveLength(8);
   });
 });
 
@@ -299,14 +296,14 @@ describe("pricingPlans — AGENCY tier (exact assertions)", () => {
 
   it("description matches exactly", () => {
     expect(planById("agency").description).toBe(
-      "Unlimited scans for agencies and teams",
+      "Monitor your whole client portfolio under your own brand",
     );
   });
 
-  it("monthlyPrice === 49 and yearlyPrice === 490", () => {
+  it("monthlyPrice === 99 and yearlyPrice === 990", () => {
     const agency = planById("agency");
-    expect(agency.monthlyPrice).toBe(49);
-    expect(agency.yearlyPrice).toBe(490);
+    expect(agency.monthlyPrice).toBe(99);
+    expect(agency.yearlyPrice).toBe(990);
   });
 
   it("limits === { scansPerMonth: -1, canDeepScan: true } — -1 is the unlimited sentinel", () => {
@@ -339,16 +336,14 @@ describe("pricingPlans — AGENCY tier (exact assertions)", () => {
   it("features array matches exactly", () => {
     const agency = planById("agency");
     expect(agency.features).toEqual([
-      "Unlimited scans",
       "Everything in Pro",
-      "White-label PDF + VPAT reports",
+      "Up to 25 monitored client sites",
+      "White-label monitoring reports (your brand)",
       "API access",
       "Team collaboration",
-      "Custom branding",
       "Dedicated support",
-      "SLA guarantee",
     ]);
-    expect(agency.features).toHaveLength(8);
+    expect(agency.features).toHaveLength(6);
   });
 });
 
@@ -417,11 +412,12 @@ describe("pricingPlans — BUSINESS tier (exact assertions)", () => {
       "Regression alerts via email + Slack",
       "Up to 10 monitored properties",
       "Jira / Linear / GitHub Issue push",
+      "On-demand VPAT 2.5 generation (the only recurring tier with VPAT)",
       "EN 301 549 + EAA procurement pack",
       "WCAG 2.2 expanded manual review guidance",
       "Priority SLA (next-business-day response)",
     ]);
-    expect(biz.features).toHaveLength(9);
+    expect(biz.features).toHaveLength(10);
   });
 });
 
@@ -529,7 +525,7 @@ describe("pricingPlans — pricing ladder invariants", () => {
   });
 
   it("yearly price === 10 × monthly price for every paid tier (2-month discount baked in)", () => {
-    // The plan ladder uses a 10x ratio: $19/mo → $190/yr, $49 → $490, $299 → $2990, $599 → $5990.
+    // The plan ladder uses a 10x ratio: $39/mo → $390/yr, $99 → $990, $299 → $2990, $599 → $5990.
     for (const id of ["pro", "agency", "business", "team"] as const) {
       const p = planById(id);
       expect(p.yearlyPrice).toBe(p.monthlyPrice * 10);
@@ -743,7 +739,7 @@ describe("getPlanByPriceId — env-driven Stripe price IDs", () => {
     expect(result).toBeDefined();
     expect(result?.id).toBe("pro");
     expect(result?.name).toBe("Pro");
-    expect(result?.monthlyPrice).toBe(19);
+    expect(result?.monthlyPrice).toBe(39);
     expect(result?.limits.scansPerMonth).toBe(30);
   });
 
