@@ -84,3 +84,52 @@ export function unmeasuredHeadline(outcome: ScanOutcome): string {
     ? "This site blocks automated scanners"
     : "We couldn't reach this page";
 }
+
+/**
+ * A 200 response whose body is NOT the whole page.
+ *
+ * WHY THIS EXISTS: on 2026-09-08, scanning two large Shopify storefronts
+ * produced confident, wrong reports — Allbirds 33/100 with 66 issues, when the
+ * complete page has 2 images, none missing alt, one h1 and lang set. The cause
+ * was not bot protection. Fetching the same URL minutes apart returned
+ * **6,924 bytes once and 671,217 after**, and Gymshark 920 against 1,694,931.
+ * The host cut the response short and we analysed the fragment as the document.
+ *
+ * `isBlockingHttpStatus` cannot catch this: the status is 200 and the bytes
+ * received are real HTML. A truncated page reads as a catastrophically broken
+ * one — every element that never arrived becomes a missing element — so the
+ * failure mode is a plausible score built on a fragment.
+ *
+ * It matters beyond a wrong number. These reports are meant to reach merchants
+ * in active accessibility litigation. A fabricated score handed to a defendant
+ * and contradicted by their own expert would end our credibility in that market.
+ *
+ * The test is completeness, not size. A 1 KB page that closes its own html tag
+ * is a real small site; a 700 KB fragment that stops mid-element is not a
+ * measurement. A byte threshold was the first attempt and it wrongly condemned
+ * legitimately small pages — the unit suite caught it.
+ */
+
+/** Interstitials that are complete documents but still not the page requested. */
+const CHALLENGE_MARKERS: readonly RegExp[] = [
+  /just a moment/i,
+  /checking your browser/i,
+  /cf[-_]?(challenge|chl_|browser_verification)/i,
+  /enable javascript and cookies to continue/i,
+  /px-captcha|perimeterx|_Incapsula_|incap_ses/i,
+  /captcha-delivery|datadome/i,
+];
+
+/**
+ * True when a 200 body must be treated as "we measured nothing".
+ *
+ * Two independent, fatal reasons:
+ *   1. The document never finished arriving — it opened <html> and never closed it.
+ *   2. It arrived complete, but it is a bot interstitial rather than the page.
+ */
+export function isUnusableHtml(html: string): boolean {
+  const trimmed = html.trimEnd();
+  if (/<html[\s>]/i.test(trimmed) && !/<\/html\s*>$/i.test(trimmed)) return true;
+  if (!/<body[\s>]/i.test(trimmed)) return true;
+  return CHALLENGE_MARKERS.some((re) => re.test(trimmed));
+}

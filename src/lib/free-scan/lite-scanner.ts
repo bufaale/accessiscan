@@ -17,7 +17,11 @@
  */
 
 import { validateResolvedIP } from "@/lib/security/url-validator";
-import { isBlockingHttpStatus, type ScanOutcome } from "./outcome";
+import {
+  isBlockingHttpStatus,
+  isUnusableHtml,
+  type ScanOutcome,
+} from "./outcome";
 
 const FETCH_TIMEOUT_MS = 8_000;
 const MAX_REDIRECTS = 5;
@@ -167,6 +171,18 @@ export async function scanUrlLite(url: string): Promise<WcagFreeReport> {
     }
   } catch (err) {
     return unmeasured("failed", err instanceof Error ? err.message : "fetch failed");
+  }
+
+  // A 200 is not proof we received the whole page. Allbirds returned 6,924
+  // bytes once and 671,217 minutes later; a truncated document reads as a
+  // catastrophically broken one, which is how we produced 33/100 for a site
+  // whose complete HTML has no missing alt text at all. Measuring nothing and
+  // saying so beats publishing a score built on a fragment.
+  if (isUnusableHtml(html)) {
+    return unmeasured(
+      "blocked",
+      "We did not receive the complete page, so nothing was measured",
+    );
   }
 
   out.outcome = "ok";

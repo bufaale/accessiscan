@@ -4,6 +4,7 @@ import {
   deriveScanOutcome,
   displayHealthScore,
   isBlockingHttpStatus,
+  isUnusableHtml,
   unmeasuredHeadline,
 } from "@/lib/free-scan/outcome";
 
@@ -100,5 +101,51 @@ describe("unmeasuredHeadline", () => {
     for (const outcome of ["blocked", "failed"] as const) {
       expect(unmeasuredHeadline(outcome)).not.toMatch(/\d+\s*\/\s*100|0 issues|no violations/i);
     }
+  });
+});
+
+/**
+ * Regression for the 2026-09-08 defect: two large Shopify storefronts returned
+ * HTTP 200 and we published scores derived from a TRUNCATED body — Allbirds
+ * 33/100 with 66 issues, when the complete page has 2 images, none missing alt.
+ * The same URL returned 6,924 bytes once and 671,217 minutes later. A cut-off
+ * document reads as a catastrophically broken one, so the bad number looks
+ * entirely plausible. A 403 announces itself; this does not.
+ */
+describe("isUnusableHtml", () => {
+  it("accepts a complete document, however small", () => {
+    // Size is not the test. This page is tiny and entirely legitimate.
+    expect(
+      isUnusableHtml("<html lang='en'><body><h1>Hi</h1></body></html>"),
+    ).toBe(false);
+  });
+
+  it("rejects a document that opened <html> and never closed it", () => {
+    const truncated =
+      "<!doctype html><html lang='en'><head><title>Shop</title></head><body>" +
+      "<img src='a.png'>".repeat(200);
+    expect(truncated.length).toBeGreaterThan(3000);
+    expect(isUnusableHtml(truncated)).toBe(true);
+  });
+
+  it("rejects a body-less fragment", () => {
+    expect(isUnusableHtml("<html><head><title>x</title></head>")).toBe(true);
+  });
+
+  it.each([
+    "Just a moment...",
+    "Checking your browser before accessing",
+    "Please enable JavaScript and cookies to continue",
+    "captcha-delivery.com",
+  ])("rejects a complete but interstitial page carrying %j", (marker) => {
+    expect(isUnusableHtml(`<html><body>${marker}</body></html>`)).toBe(true);
+  });
+
+  it("does not reject a real page that merely mentions javascript", () => {
+    expect(
+      isUnusableHtml(
+        "<html lang='en'><body><h1>Docs</h1><p>Our javascript SDK is here.</p></body></html>",
+      ),
+    ).toBe(false);
   });
 });
