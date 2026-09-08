@@ -256,3 +256,53 @@ describe("scanUrlLite — what happens when we never get the page", () => {
     expect(report.issues.length).toBeGreaterThan(0);
   });
 });
+
+/**
+ * WCAG 2.2 REMOVED success criterion 4.1.1 Parsing — the first criterion W3C
+ * has ever deleted — and marked its failure technique F77 obsolete. We used to
+ * report every duplicate id as a "serious" 4.1.1 failure. On one sued
+ * merchant's store that was 103 of 134 reported issues, so the 8/100 we
+ * published was dominated by something that is not a violation.
+ */
+describe("duplicate ids are only a failure when they break a reference", () => {
+  it("ignores duplicate ids that nothing points at", () => {
+    const html =
+      "<html lang='en'><body>" +
+      "<div id='group-block'></div>".repeat(30) +
+      "<h1>Shop</h1></body></html>";
+    const issues = analyzeHtml(html);
+    expect(issues.some((i) => /duplicate id/i.test(i.rule))).toBe(false);
+  });
+
+  it("flags a duplicate id that a label points at", () => {
+    const html =
+      "<html lang='en'><body><h1>x</h1>" +
+      "<label for='email'>Email</label><input id='email' type='text'>" +
+      "<label for='email'>Email</label><input id='email' type='text'>" +
+      "</body></html>";
+    const found = analyzeHtml(html).find((i) => /duplicate id/i.test(i.rule));
+    expect(found).toBeDefined();
+    expect(found?.count).toBe(1);
+  });
+
+  it("flags a duplicate id referenced by aria-labelledby", () => {
+    const html =
+      "<html lang='en'><body><h1>x</h1>" +
+      "<span id='lbl'>Name</span><span id='lbl'>Other</span>" +
+      "<div role='button' aria-labelledby='lbl'></div>" +
+      "</body></html>";
+    expect(
+      analyzeHtml(html).some((i) => /duplicate id/i.test(i.rule)),
+    ).toBe(true);
+  });
+
+  it("never cites the removed 4.1.1 Parsing criterion", () => {
+    const html =
+      "<html lang='en'><body><h1>x</h1>" +
+      "<label for='a'>A</label><input id='a'><label for='a'>A</label><input id='a'>" +
+      "</body></html>";
+    for (const issue of analyzeHtml(html)) {
+      expect(issue.wcag_ref).not.toMatch(/4\.1\.1/);
+    }
+  });
+});

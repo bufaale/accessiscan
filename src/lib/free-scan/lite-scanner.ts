@@ -384,19 +384,54 @@ export function analyzeHtml(html: string): WcagFreeIssue[] {
     });
   }
 
-  // 10. Duplicate id attributes (breaks aria-labelledby + label/for)
+  // 10. Duplicate ids — ONLY where one actually breaks a reference.
+  //
+  // This used to report every duplicate id as a "serious" failure citing
+  // "WCAG 4.1.1 Parsing (A)". That criterion was REMOVED in WCAG 2.2 — the
+  // first success criterion W3C has ever deleted — and its failure technique
+  // F77 is marked obsolete, because browsers and assistive tech no longer
+  // parse markup themselves. A bare duplicate id is not a violation.
+  //
+  // It mattered enormously here: on one sued merchant's store, 103 of the 134
+  // issues we reported were duplicate ids, so the 8/100 we published was
+  // dominated by something that is not a failure at all. These reports are
+  // meant to reach merchants in active litigation, where an expert would
+  // dismiss an obsolete criterion on sight and take the rest of the report
+  // with it.
+  //
+  // A duplicate id IS a real failure when something points at it: an
+  // aria-labelledby / describedby / controls / owns reference, or a label's
+  // `for`, resolves to the first match, so the second control silently gets
+  // the wrong accessible name. That is 1.3.1 and 4.1.2, and it holds under
+  // both WCAG 2.1 and 2.2.
   const idMatches = Array.from(html.matchAll(/\bid\s*=\s*["']([^"']+)["']/gi)).map((m) => m[1]);
   const idCounts = new Map<string, number>();
   for (const id of idMatches) idCounts.set(id, (idCounts.get(id) || 0) + 1);
-  const dupes = Array.from(idCounts.entries()).filter(([, n]) => n > 1);
-  if (dupes.length > 0) {
+
+  const referencedIds = new Set<string>();
+  for (const m of html.matchAll(
+    /\b(?:aria-labelledby|aria-describedby|aria-controls|aria-owns)\s*=\s*["']([^"']+)["']/gi,
+  )) {
+    // These attributes take a space-separated ID list.
+    for (const token of m[1].trim().split(/\s+/)) referencedIds.add(token);
+  }
+  for (const m of html.matchAll(/<label\b[^>]*\bfor\s*=\s*["']([^"']+)["']/gi)) {
+    referencedIds.add(m[1]);
+  }
+
+  const breakingDupes = Array.from(idCounts.entries()).filter(
+    ([id, n]) => n > 1 && referencedIds.has(id),
+  );
+  if (breakingDupes.length > 0) {
     issues.push({
-      rule: "Duplicate id attributes",
+      rule: "Duplicate id breaks a label or ARIA reference",
       severity: "serious",
-      count: dupes.reduce((s, [, n]) => s + (n - 1), 0),
-      example: `id="${dupes[0][0]}" appears ${dupes[0][1]} times`,
-      wcag_ref: "WCAG 4.1.1 Parsing (A)",
-      fix_hint: "Every id in the document must be unique. Use class for repeated styling.",
+      count: breakingDupes.reduce((s, [, n]) => s + (n - 1), 0),
+      example: `id="${breakingDupes[0][0]}" appears ${breakingDupes[0][1]} times and is referenced by a label or aria-* attribute`,
+      wcag_ref:
+        "WCAG 1.3.1 Info and Relationships (A) + 4.1.2 Name, Role, Value (A)",
+      fix_hint:
+        "Make each referenced id unique and point every label / aria-labelledby at the right one. Duplicate ids that nothing references are not a WCAG 2.2 failure.",
     });
   }
 
